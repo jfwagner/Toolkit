@@ -11,10 +11,10 @@ from matplotlib import rc
 from matplotlib import rcParams
 
 DPI = 300
-textwidth = 7
-rc('font',**{'family':'serif','serif':['Computer Modern Roman'], 'size':15, 'weight':'bold'})
+textwidth = 4
+rc('font',**{'family':'serif','serif':['Computer Modern Roman'], 'size':10})
 rc('text', usetex=True)
-rcParams['figure.figsize']=textwidth, textwidth/1.4
+rcParams['figure.figsize']=textwidth, textwidth/1.618
 
 def file_len(fname):
     with open(fname) as d:
@@ -25,9 +25,11 @@ def file_len(fname):
 def plot_losses(collimators, aperture):
 
     fig = plt.figure()
-    ax1 = fig.add_subplot(211)
-    ax2 = fig.add_subplot(212)
-    # fig.subplots_adjust(hspace=.7)
+    # ax1 = fig.add_subplot(211)
+    # ax2 = fig.add_subplot(212)
+    ax2 = fig.add_subplot(111)
+
+    fig.subplots_adjust(hspace=.5)
 
 
     (name_c, turn_c, s_c) = np.loadtxt(collimators, unpack = True)
@@ -71,10 +73,10 @@ def plot_losses(collimators, aperture):
     turn_values = turn_count.values()
     turn_keys = turn_count.keys()
 
-    ax1.bar(turn_keys/960000, turn_values, log = True, width = 0.08, align = 'center')
-    ax1.set_xlim([0, max(turn_keys)])
-    ax1.set_xlabel( r'\textbf{Turn number}')
-    ax1.grid(b=None, which='major')
+    # ax1.bar(turn_keys, turn_values, log = True, width = 0.08, align = 'center')
+    # ax1.set_xlim([0,51])
+    # ax1.set_xlabel( r'\textbf{Turn number}')
+    # ax1.grid(b=None, which='major')
 
     # Second Plot
     # -----------
@@ -92,7 +94,24 @@ def plot_losses(collimators, aperture):
     s_values_coll = s_count_coll.values()
     s_keys_coll = s_count_coll.keys()
 
-    ax2.bar(s_keys_coll, s_values_coll, color = 'r', label = 'Collimators', log = True, width = 20, align = 'center', edgecolor = 'r')
+    normalized_coll = []
+    for e1, e2 in zip(s_keys_coll, s_values_coll):
+        normalized_coll.append(float(e2)/3840000)
+    print max(normalized_coll)
+
+    ax2.bar(s_keys_coll, normalized_coll, color = 'r', label = 'Collimators', log = True, width = 10, align = 'center', edgecolor = 'r')
+    ax2.set_xlabel( r'\textbf{s[m]}')
+    ax2.set_xlim([0, 27000])
+    fig.text(0.05, 0.5, r'\textbf{Fraction of the beam lost}', ha='center', va='center', rotation='vertical', size=8)
+    ax2.annotate('IP1', xy=(1, 10**-4), xytext=(800, 10**-4), weight='bold', va='bottom', ha='center', size=8)
+    ax2.annotate('IP2', xy=(1, 10**-4), xytext=(3332.4, 10**-4), weight='bold', va='bottom', ha='center', size=8)
+    ax2.annotate('IR3', xy=(1, 10**-4), xytext=(6664.721, 10**-4), weight='bold', va='bottom', ha='center', size=8)
+    ax2.annotate('IR4', xy=(1, 10**-4), xytext=(9997, 10**-4), weight='bold', va='bottom', ha='center', size=8)
+    ax2.annotate('IP5', xy=(1, 10**-4), xytext=(13329.28, 10**-4), weight='bold', va='bottom', ha='center', size=8)
+    ax2.annotate('IR6', xy=(1, 10**-4), xytext=(16661.7, 10**-4), weight='bold', va='bottom', ha='center', size=8)
+    ax2.annotate('IR7', xy=(1, 10**-4), xytext=(20000, 10**-4), weight='bold', va='bottom', ha='center', size=8)
+    ax2.annotate('IP8', xy=(1, 10**-4), xytext=(23315.4, 10**-4), weight='bold', va='bottom', ha='center', size=8)
+    ax2.grid(b=None, which='major')
 
     if flag == True:
         pairs_ap = []
@@ -108,26 +127,22 @@ def plot_losses(collimators, aperture):
         s_values_ap = s_count_ap.values()
         s_keys_ap = s_count_ap.keys()
 
+        normalized_ap = []
+        for e1, e2 in zip(s_keys_ap, s_values_ap):
+            normalized_ap.append(float(e2)/3840000)
+        print max(normalized_ap)
+
         print  >> f, 'Particles lost in the aperture = %i' % len(s_a)
 
         f.close()
 
-        ax2.bar(s_keys_ap, s_values_ap, color = 'g', label = 'Aperture', log = True, width = 20, align = 'center', edgecolor = 'g')
+        ax2.bar(s_keys_ap, normalized_ap, color = 'g', label = 'Aperture', log = True, width = 10, align = 'center', edgecolor = 'g')
+    ax2.legend(loc = 'upper left',fontsize=10 )
 
-    ax2.set_xlabel( r'\textbf{s[m]}')
-    ax2.set_xlim([0, 27000])
-    ax2.legend(loc = 'lower left',fontsize=8 )
-    fig.text(0.04, 0.5, r'\textbf{Lost particles in the simulation}', ha='center', va='center', rotation='vertical')
-    ax2.annotate('IP1', xy=(1, 150), xytext=(800, 150), weight='bold', va='bottom', ha='center', size=15)
-    ax2.annotate('IP2', xy=(1, 150), xytext=(3332.4, 150), weight='bold', va='bottom', ha='center', size=15)
-    ax2.annotate('IR3', xy=(1, 150), xytext=(6664.721, 150), weight='bold', va='bottom', ha='center', size=15)
-    ax2.annotate('IR4', xy=(1, 150), xytext=(9997, 150), weight='bold', va='bottom', ha='center', size=15)
-    ax2.annotate('IP5', xy=(1, 150), xytext=(13329.28, 150), weight='bold', va='bottom', ha='center', size=15)
-    ax2.annotate('IR6', xy=(1, 150), xytext=(16661.7, 150), weight='bold', va='bottom', ha='center', size=15)
-    ax2.annotate('IR7', xy=(1, 150), xytext=(20000, 150), weight='bold', va='bottom', ha='center', size=15)
-    ax2.annotate('IP8', xy=(1, 150), xytext=(23315.4, 150), weight='bold', va='bottom', ha='center', size=15)
-    ax2.grid(b=None, which='major')
 
-    plt.subplots_adjust(left=0.14, bottom=0.12, right=0.95, top=0.93, hspace=0.57)
     # plt.show()
-    plt.savefig('losses.png', dpi=DPI)
+    plt.subplots_adjust(left=0.18, bottom=0.18, right=0.95, top=0.93)
+    pp = PdfPages('losses.pdf')
+    pp.savefig()
+    pp.close()
+    plt.savefig('losses.png')

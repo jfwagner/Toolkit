@@ -1,7 +1,7 @@
 from numpy import *
 from util import *
 
-xf, yf = get_columns("init_dist.txt", 0, 2)
+xf, yf = get_columns("init_dist_1.txt", 0, 2, "float")
 
 x = asarray(xf)
 y = asarray(yf)
@@ -23,6 +23,7 @@ else:
     print "Array size is", x.size
 print "Geometrical emittance [m]: ",  std(x)**2/beta
 print "Normalized emittance [m]: ", (std(x)**2/beta)*beta_rel*gamma_rel
+print "Sigma x:", std(x)
 print " "
 
 print "----------------------------------------- "
@@ -34,4 +35,5 @@ else:
     print "Array size is", y.size
 print "Geometrical emittance [m]: ",  std(y)**2/beta
 print "Normalized emittance [m]: ", (std(y)**2/beta)*beta_rel*gamma_rel
+print "Sigma y:", std(y)
 print " "

@@ -2,6 +2,7 @@
 # Series of useful functions to help plotting
 # --------------------------------------------
 import re
+from numpy import *
 
 def get_lines(infile):
     """Extracts the lines of a data file. Used in the get_columns function."""
@@ -18,20 +19,27 @@ def get_columns(infile, x, y, type):
     - File
     - Number of the column corresponding to coordinate x
     - Number of the column corresponding to coordinate y
+    - Indicate if the data to return are strings or floats
 
     Example:
-    var_x, var_y = get_columns('LHCAperture_old.dat', 0, 2)
+    var_x, var_y = get_columns('LHCAperture_old.dat', 0, 2, "float")
     """
-    var_x = []
-    var_y = []
+    a = []
+    b = []
     my_data = get_lines(infile)
     for column in my_data:
         if type == "string":
-            var_x.append(column[x])
-            var_y.append(column[y])
+            a.append(column[x])
+            b.append(column[y])
         elif type == "float":
-            var_x.append(float(column[x]))
-            var_y.append(float(column[y]))
+            a.append(float(column[x]))
+            b.append(float(column[y]))
+    if type == "float":
+        var_x = asarray(a)
+        var_y = asarray(b)
+    elif type == "string":
+        var_x = a
+        var_y = b
     return var_x, var_y
 
 def get_dump(infile, x, y, turn):
@@ -117,3 +125,29 @@ def get_element(infile, column_name, column_position, regex, text_height):
                 new_position.append(e2)
     return new_name, new_position, text_height
 
+def get_ellipse_coords(a=0.0, b=0.0, x=0.0, y=0.0, angle=0.0, k=2):
+    """ Draws an ellipse using (360*k + 1) discrete points; based on pseudo code
+    given at http://en.wikipedia.org/wiki/Ellipse
+    k = 1 means 361 points (degree by degree)
+    a = major axis distance,
+    b = minor axis distance,
+    x = offset along the x-axis
+    y = offset along the y-axis
+    angle = clockwise rotation [in degrees] of the ellipse;
+        * angle=0  : the ellipse is aligned with the positive x-axis
+        * angle=30 : rotated 30 degrees clockwise from positive x-axis
+    """
+    pts = zeros((360*k+1, 2))
+
+    beta = -angle * pi/180.0
+    sin_beta = sin(beta)
+    cos_beta = cos(beta)
+    alpha = radians(r_[0.:360.:1j*(360*k+1)])
+ 
+    sin_alpha = sin(alpha)
+    cos_alpha = cos(alpha)
+    
+    pts[:, 0] = x + (a * cos_alpha * cos_beta - b * sin_alpha * sin_beta)
+    pts[:, 1] = y + (a * cos_alpha * sin_beta + b * sin_alpha * cos_beta)
+
+    return pts

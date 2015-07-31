@@ -1,0 +1,2 @@
+circle1=plt.Circle((0,0),r,color='g', fill=False)
+plt.gcf().gca().add_artist(circle1)

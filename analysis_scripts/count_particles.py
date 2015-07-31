@@ -20,5 +20,5 @@ f = open('particle_count.txt', 'w')
 lost = initial_particles - remaining_particles
 print  >> f,'%i particles from %i lost in %i turns' %(lost, initial_particles, int(last_turn))
 percentage_lost = (lost * 100) / initial_particles
-print  >> f, 'Percentage of particles lost = %s' % percentage_lost 
+print  >> f, 'Percentage of particles lost = %s' % float(percentage_lost) 
 f.close()
