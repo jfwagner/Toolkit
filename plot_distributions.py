@@ -31,7 +31,7 @@ def plot(dump_file, coordinate_1, coordinate_2, bins, turn):
         a = 5
         d = 0
         xlabel = "y [mm]"
-        xlimit = [-7e-2, 7e-2]
+        # xlimit = [-7e-2, 7e-2]
         # xlimit = [-14, 14]
     elif coord_1 == "yp":
         a = 6
@@ -70,7 +70,7 @@ def plot(dump_file, coordinate_1, coordinate_2, bins, turn):
         b = 6
         d = 0.3
         ylabel = "$y'$ [mrad]"
-        ylimit = [0, 6e-1]
+        # ylimit = [-2e-1, 6e-1]
     elif coord_2 == "z":
         b = 7
         d = 0
@@ -109,6 +109,12 @@ def plot(dump_file, coordinate_1, coordinate_2, bins, turn):
     pts3 = get_ellipse_coords(a=3*std(x_2), b=3*std(y_2), x=0, y=d,k=1)
     plt.plot(pts3[:,0], pts3[:,1], color="black", linewidth=0.3)
 
+    pts4 = get_ellipse_coords(a=4*std(x_2), b=4*std(y_2), x=0, y=d,k=1)
+    plt.plot(pts4[:,0], pts4[:,1], color="black", linewidth=0.3)
+
+    pts5 = get_ellipse_coords(a=5*std(x_2), b=5*std(y_2), x=0, y=d,k=1)
+    plt.plot(pts5[:,0], pts5[:,1], color="black", linewidth=0.3)
+
     # ---------------------
     # Info for the bucket
     # ---------------------
@@ -144,8 +150,8 @@ def plot(dump_file, coordinate_1, coordinate_2, bins, turn):
     plt.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.xlim(xlimit)
-    plt.ylim(ylimit)
+    # plt.xlim(xlimit)
+    # plt.ylim(ylimit)
 
     plt.subplots_adjust(left=0.16, bottom=0.21, right=1,top=0.88)
 
