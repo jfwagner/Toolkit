@@ -42,15 +42,17 @@ def get_columns(infile, x, y, type):
         var_y = b
     return var_x, var_y
 
-def get_dump(infile, x, y, turn):
+def get_dump(infile, col_number_a, col_number_b, turn):
     turn_i = '%i'%turn
-    var_x = []
-    var_y = []
+    a = []
+    b = []
     my_data = get_lines(infile)
     for column in my_data:
         if column[1] == turn_i:
-            var_x.append(float(column[x]))
-            var_y.append(float(column[y]))
+            a.append(float(column[col_number_a]))
+            b.append(float(column[col_number_b]))
+    var_x = asarray(a)
+    var_y = asarray(b)
     return var_x, var_y
 
 def get_ip1(x,y):
