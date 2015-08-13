@@ -42,18 +42,48 @@ def get_columns(infile, x, y, type):
         var_y = b
     return var_x, var_y
 
-def get_dump(infile, col_number_a, col_number_b, turn):
-    turn_i = '%i'%turn
-    a = []
-    b = []
+def get_column(infile, column_number, data_type):
+    """Extracts a column of a data file using the get_lines function. 
+
+    The function arguments' are (in order): 
+    - File
+    - Number of the desired column
+    - Indicate if the data structure to return should be an array or a list
+
+    Example:
+    var_x = get_columns('LHCAperture_old.dat', 2, "array")
+    """
+    my_column = []
     my_data = get_lines(infile)
-    for column in my_data:
-        if column[1] == turn_i:
-            a.append(float(column[col_number_a]))
-            b.append(float(column[col_number_b]))
-    var_x = asarray(a)
-    var_y = asarray(b)
-    return var_x, var_y
+    for columns in my_data:
+        my_column.append(columns[column_number])
+    if data_type == "array":
+        my_final_column = asarray(my_column)
+    elif data_type == "list":
+        my_final_column = my_column
+    return my_final_column
+
+def get_dump(infile, turn_number, column_number):
+    my_column = []
+    my_data = get_lines(infile)
+    for columns in my_data:
+        if columns[1] == turn_number:
+            my_column.append(float(columns[column_number])*(10**(-3)))
+    my_final_column = asarray(my_column)
+    return my_final_column
+
+# def get_dump(infile, col_number_a, col_number_b, turn):
+#     turn_i = '%i'%turn
+#     a = []
+#     b = []
+#     my_data = get_lines(infile)
+#     for column in my_data:
+#         if column[1] == turn_i:
+#             a.append(float(column[col_number_a]))
+#             b.append(float(column[col_number_b]))
+#     var_x = asarray(a)
+#     var_y = asarray(b)
+#     return var_x, var_y
 
 def get_ip1(x,y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
