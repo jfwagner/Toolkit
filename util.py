@@ -42,7 +42,7 @@ def get_columns(infile, x, y, type):
         var_y = b
     return var_x, var_y
 
-def get_column(infile, column_number, data_type):
+def get_column(infile, column_number, data_structure, data_type):
     """Extracts a column of a data file using the get_lines function. 
 
     The function arguments' are (in order): 
@@ -55,11 +55,15 @@ def get_column(infile, column_number, data_type):
     """
     my_column = []
     my_data = get_lines(infile)
-    for columns in my_data:
-        my_column.append(columns[column_number])
-    if data_type == "array":
+    if data_type == "string":
+        for columns in my_data:
+            my_column.append(columns[column_number])
+    elif data_type == "float":
+        for columns in my_data:
+            my_column.append(float(columns[column_number]))
+    if data_structure == "array":
         my_final_column = asarray(my_column)
-    elif data_type == "list":
+    elif data_structure == "list":
         my_final_column = my_column
     return my_final_column
 
