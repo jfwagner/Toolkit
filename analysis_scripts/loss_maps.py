@@ -9,14 +9,17 @@ from util import *
 # Specify the total number of particles simulated
 # ------------------------------------------------------------------------------
 total_particles = 3200000
-
 # ------------------------------------------------------------------------------
 # ################################## APERTURE ##################################
 # ------------------------------------------------------------------------------   
 # ------------------------------------------------------------------------------
 # Extract losses in the aperture
 # ------------------------------------------------------------------------------
-positions_LPI = get_column("LPI.s", 2, "list", "float")
+aperture_data = loadtxt("aperture.dat")
+positions_LPI = []
+
+for line in aperture_data:
+    positions_LPI.append(line[2])
 
 # ------------------------------------------------------------------------------
 # Extract the unique values of the position
@@ -58,19 +61,36 @@ y_aperture = asarray(occurrences_LPI)/total_particles
 # ------------------------------------------------------------------------------
 # Extract ID from impacts_real.dat
 # ------------------------------------------------------------------------------
-id_impreal = get_column("impacts_real.dat", 0, "list", "float")
+collimation_data = loadtxt("imp_real.dat")
+
+id_impreal = []
+
+for line in collimation_data:
+    id_impreal.append(line[0])
 
 # ------------------------------------------------------------------------------
 # Extract ID and name from coll_summary.dat
 # ------------------------------------------------------------------------------
-name_collsum = get_column("coll_summary.dat", 1, "list", "string")
-id_collsum = get_column("coll_summary.dat", 0, "list", "float")
+collsum_data = loadtxt("coll_sum.dat", str)
+
+name_collsum = []
+id_collsum = []
+
+for line in collsum_data:
+    name_collsum.append(line[1])
+    id_collsum.append(float(line[0]))
 
 # ------------------------------------------------------------------------------
 # Extract name and position from CollPositions
 # ------------------------------------------------------------------------------
-name_collpos = get_column("CollPositions.b1.dat", 1, "list", "string")
-position_collpos = get_column("CollPositions.b1.dat", 2, "list", "float")
+collpos_data = loadtxt("CollPositions.b1.dat", str, "%Ind")
+
+name_collpos = []
+position_collpos = []
+
+for line in collpos_data:
+    name_collpos.append(line[1])
+    position_collpos.append(float(line[2]))
 
 # ------------------------------------------------------------------------------
 # Extract from the list how many times the collimator ID appears
@@ -126,8 +146,8 @@ rcParams['figure.figsize']=textwidth, textwidth/1.618
 # Plot bars
 # ------------------------------------------------------------------------------
 plt.bar(x_aperture, y_aperture, color='g', label='Aperture', log=True, width=10, align='center', edgecolor='g')
-plt.bar(x_coll, y_coll, color='r', label='Collimators', log=True, width=10, align='center', edgecolor='r')
-
+# plt.bar(x_coll, y_coll, color='r', label='Collimators', log=True, width=10, align='center', edgecolor='r')
+print y_coll.size
 # ------------------------------------------------------------------------------
 # Annotate the IP names
 # ------------------------------------------------------------------------------
