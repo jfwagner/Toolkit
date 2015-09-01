@@ -145,9 +145,9 @@ rcParams['figure.figsize']=textwidth, textwidth/1.618
 # ------------------------------------------------------------------------------
 # Plot bars
 # ------------------------------------------------------------------------------
-plt.bar(x_aperture, y_aperture, color='g', label='Aperture', log=True, width=10, align='center', edgecolor='g')
-# plt.bar(x_coll, y_coll, color='r', label='Collimators', log=True, width=10, align='center', edgecolor='r')
-print y_coll.size
+plt.bar(x_aperture, y_aperture, color='g', label='Aperture', log=True, width=1, align='center', edgecolor='g')
+plt.bar(x_coll, y_coll, color='r', label='Collimators', log=True, width=1, align='center', edgecolor='r')
+
 # ------------------------------------------------------------------------------
 # Annotate the IP names
 # ------------------------------------------------------------------------------
