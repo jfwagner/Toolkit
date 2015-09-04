@@ -2,13 +2,15 @@
 # Series of useful functions to help plotting
 # --------------------------------------------
 import re
+import pylab as P
+from matplotlib import pyplot as plt
 from numpy import *
 
 def get_lines(infile):
     """Extracts the lines of a data file. Used in the get_columns function."""
     for character in open(infile):
         columns = character.strip('\n').split()
-        if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s':
+        if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind':
             continue
         yield columns
 
@@ -54,7 +56,7 @@ def get_column(infile, column_number, data_structure, data_type):
     var_x = get_columns('LHCAperture_old.dat', 2, "array")
     """
     my_column = []
-    my_data = get_lines(infile)
+    my_data = list(get_lines(infile))
     if data_type == "string":
         for columns in my_data:
             my_column.append(columns[column_number])
@@ -67,7 +69,7 @@ def get_column(infile, column_number, data_structure, data_type):
         my_final_column = my_column
     return my_final_column
 
-def get_dump(infile, turn_number, column_number):
+def get_dump_plot(infile, turn_number, column_number):
     my_column = []
     my_data = get_lines(infile)
     for columns in my_data:
@@ -76,18 +78,18 @@ def get_dump(infile, turn_number, column_number):
     my_final_column = asarray(my_column)
     return my_final_column
 
-# def get_dump(infile, col_number_a, col_number_b, turn):
-#     turn_i = '%i'%turn
-#     a = []
-#     b = []
-#     my_data = get_lines(infile)
-#     for column in my_data:
-#         if column[1] == turn_i:
-#             a.append(float(column[col_number_a]))
-#             b.append(float(column[col_number_b]))
-#     var_x = asarray(a)
-#     var_y = asarray(b)
-#     return var_x, var_y
+def get_dump(infile, col_number_a, col_number_b, turn):
+    turn_i = '%i'%turn
+    a = []
+    b = []
+    my_data = get_lines(infile)
+    for column in my_data:
+        if column[1] == turn_i:
+            a.append(float(column[col_number_a]))
+            b.append(float(column[col_number_b]))
+    var_x = asarray(a)
+    var_y = asarray(b)
+    return var_x, var_y
 
 def get_ip1(x,y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
@@ -187,3 +189,25 @@ def get_ellipse_coords(a=0.0, b=0.0, x=0.0, y=0.0, angle=0.0, k=2):
     pts[:, 1] = y + (a * cos_alpha * sin_beta + b * sin_alpha * cos_beta)
 
     return pts
+
+def histogram_coll(x, bins, flag, name, halfgap, halfgap_minus, title):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    tile = '%s'%title
+    n, bins, patches = P.hist(x, bins=bins, normed=False, histtype='bar', cumulative=False)
+    ax.set_xlim([0, 1])
+    ax.grid(b=None, which='major')
+    ax.set_title(name + ' (Number of hits = ' + str(len(x)) + ')')
+    ax.set_xlabel(title + '(mm)')
+    
+    if flag==True:
+        ax.bar(halfgap, max(n), color='g', log=False, width=0.0005, align='center', edgecolor='g')
+        ax.bar(halfgap_minus, max(n), color='g', log=False, width=0.001, align='center', edgecolor='g')
+        x_halfgap = linspace(halfgap_minus, halfgap)
+        ax.fill_between(x_halfgap, max(n), facecolor='green', alpha=0.2, label='Gap')
+        ax.legend(loc='upper right', prop={'size':6})
+
+    else:
+        print 'No halfgaps in plot'
+    plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+    plt.savefig('histogram_' + title + '_' + name + '.png', dpi=300)
