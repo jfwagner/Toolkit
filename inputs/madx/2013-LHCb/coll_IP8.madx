@@ -1,0 +1,375 @@
+//*************************************
+//IP8 AT COLLISION WITH NOMINAL VALUES
+//*************************************
+
+option, warn,info; 
+
+//-----------------------------------------
+//Shortcut creation for needed directories
+//-----------------------------------------
+system,"ln -fns /afs/cern.ch/eng/lhc/optics/V6.503 db5"; !Nominal
+system,"ln -fns /afs/cern.ch/eng/lhc/optics/HLLHCV1.0 hl"; !High Luminosity
+system,"ln -fns /afs/cern.ch/user/a/ansantam/public/toolkit tkit"; !Beam parameters
+
+//-----------------------------------
+//Verbose off
+//-----------------------------------
+option, -echo,-warn,-info; 
+
+real const l.tanal    = 0.0;
+real const l.tanar    = 0.0;
+real const l.tanc     = 0.0;
+real const l.tcdqa    = 0.0;
+real const l.tcp      = 0.0;
+real const l.mbas2    = 0.0; ! atlas solenoid length
+real const l.mbcs2    = 0.0; ! cms solenoid length
+real const l.mbls2    = 0.0; ! alice solenoid length
+real const l.tasb     = 0.0;
+real const l.btvss075 = 0.0;
+real const l.tctvb    = 0.0;
+real const l.x5zdc002 = 0.0;
+real const l.tcddm    = 0.0;
+real const l.acnca    = 0.0;
+real const l.lejl     = 0.0;
+real const l.mbaw     = 0.0;
+real const l.mblw     = 0.0;
+real const l.tcsm     = 0.0;
+
+
+//--------------------------------------------
+//Load nominal sequence (position of elements)
+//--------------------------------------------
+call,file="db5/V6.5.seq";
+
+//---------------------------------------
+//Load and define the aperture (nominal)
+//---------------------------------------
+
+call,   file="db5/aperture/aperture.b1.madx";
+call,   file="db5/aperture/aperture.b2.madx";
+call,   file="db5/aperture/aper_tol.b1.madx";
+call,   file="db5/aperture/aper_tol.b2.madx";
+CALL, FILE="/afs/cern.ch/eng/lhc/optics/V6.503/aperture/layoutapertures.madx";
+CALL, FILE="/afs/cern.ch/eng/lhc/optics/V6.503/aperture/exp_pipe_model.madx";   ! Apertures around IPs
+CALL, FILE="/afs/cern.ch/eng/lhc/optics/V6.503/aperture/exp_pipe_install.madx"; ! Apertures around IPs
+
+
+
+
+//-----------------------------------------------------------
+//ALWAYS ACTIVE
+//------------------------------------------------------------
+CALL,FILE="/afs/cern.ch/eng/lhc/optics/V6.503/V6.5.inj_special.str";   
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//ACTIVATE FOR COLLISION
+//All these folders were created for operation, they are the reference files for the squeeze process in the machine. 
+//Various constraints were to be taken into account at different stages. The last version makes the strength of the triplet to be changed at the same time as we squeeze
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CALL,FILE="/afs/cern.ch/eng/lhc/optics/V6.503/IR1/new_ip1_b2_squeeze/IP1_beta_0.60m.str";
+CALL,FILE="/afs/cern.ch/eng/lhc/optics/V6.503/IR2/3.5TeV/special/ip2_0.00889_beta3.00m.str";
+CALL,FILE="/afs/cern.ch/eng/lhc/optics/V6.503/IR5/new_ip5_b2_squeeze/IP5_beta_0.60m.str";
+CALL,FILE="/afs/cern.ch/eng/lhc/optics/V6.503/IR8/3.5TeV/special/ip8_0.00875_beta3.00m.str";
+
+
+
+//--------------------------------
+//Define the beam for the machine
+//--------------------------------
+beam, particle = proton, sequence=lhcb1, energy = 7000, bv =  1;
+beam, particle = proton, sequence=lhcb2, energy = 7000, bv = -1;
+ 
+//-------------------------------------
+//Load the beam parameters (sigmas etc)
+//-------------------------------------
+call,file="tkit/Beam_7_TeV.madx";  !Important to call these files first, if not Beam.madx doesnt work
+!call,file="tkit/Beam_450_GeV.madx";
+call,file="tkit/Beam.madx";   
+
+//*********************************************************
+//IMPORTANT!! PUT THE SWITCHES BEFORE THE MATCHING VALUES!
+//*********************************************************
+
+//-----------------------------------------------------------------------------------------------------
+//Spectrometer magnets at normal field using beam energy (VALUE DEPEND ON ENERGY: RE-SCALE IF 6.50 TeV)
+//-----------------------------------------------------------------------------------------------------
+ON_LHCB=-1;
+ 
+//------------------------------------------------------------------------------------------------------------
+//LHC horizontal crossing angle switch at IP8 (VALUE DEPEND ON ENERGY AND CROSSING ANGLE: CHANGES AT 6.50 TeV)
+//------------------------------------------------------------------------------------------------------------
+on_x8=1;
+//-------------------------------------------------------------------------------------------
+//LHC vertical separation switch at IP8 (1=SEPARATED BEAMS ON THE Y PLANE, =0 FOR COLLISION)
+//-------------------------------------------------------------------------------------------
+on_sep8=0;
+
+
+
+//*****************************************************************************************************************************************
+//LHCB ATS MATCHING BY Stephane Fartoukh (ACTIVATE FOR INJECTION, DEACTIVATE FOR COLLISION) gives y=-3.5mm and py=-30murad with ON_LHCB=0;
+//*****************************************************************************************************************************************
+
+/*
+acbxv1.l8 =          -3.15e-05 ;
+acbxv1.r8 =          -3.15e-05 ;
+acbxh1.l8 =             -1e-06 + 0.0000105*on_sep8h;
+acbxh1.r8 =              1e-06 + 0.0000105*on_sep8h;
+acbxv2.l8 =          -3.15e-05 ;
+acbxv2.r8 =          -3.15e-05 ;
+acbxh2.l8 =             -1e-06 ;
+acbxh2.r8 =              1e-06 ;
+acbxv3.l8 =          -3.15e-05 ;
+acbxv3.r8 =          -3.15e-05 ;
+acbxh3.l8 =             -1e-06 ;
+acbxh3.r8 =              1e-06 ;
+acbyvs4.l8b1 =   -1.902243401e-05 ;
+acbyvs4.r8b1 =   -5.986842444e-05 ;
+acbcvs5.l8b1 =   -1.354669721e-05 ;
+acbyvs5.r8b1 =    8.218259546e-06 ;
+acbyhs4.l8b1 =    1.149322694e-05 ;
+acbyhs4.r8b1 =   -6.005717551e-05 ;
+acbchs5.l8b1 =    3.799746292e-05 ;
+acbyhs5.r8b1 =   -6.159770179e-06 ;
+acbch5.l8b1 =                  0 ;
+acbwh5.l8b1 =                  0 ;
+acbyvs4.l8b2 =    5.963491874e-05 ;
+acbyvs4.r8b2 =    1.967646903e-05 ;
+acbcvs5.l8b2 =   -8.555539062e-06 ;
+acbyvs5.r8b2 =    1.405262022e-05 ;
+acbyhs4.l8b2 =   -5.982056242e-05 ;
+acbyhs4.r8b2 =    1.019595604e-05 ;
+acbchs5.l8b2 =   -5.980551705e-06 ;
+acbyhs5.r8b2 =    3.616750043e-05 ;
+*/
+
+//***************************************************************************************
+//LHCB ATS MATCHING BY Reine Versteegen (ACTIVATE FOR COLLISION, DEACTIVATE FOR INJECTION)
+//***************************************************************************************
+! Matching of the bumps in IR8 for 250murad h-crossing, 1mm v-sep at 7TeV (Beta*(IP8)=3.0m).
+
+
+acbch5.l8b1 =0 - 0.00001351014316300000*on_sep8h;
+acbwh5.l8b1 =0;
+acbxh1.l8 =         -1.35e-005  *on_x8;
+acbxh2.l8 =         -1.35e-005  *on_x8;
+acbxh3.l8 =         -1.35e-005  *on_x8;
+acbxh1.r8 =          1.35e-005  *on_x8;
+acbxh2.r8 =          1.35e-005  *on_x8;
+acbxh3.r8 =          1.35e-005  *on_x8;
+acbyhs4.l8b1 =  -2.316569434e-005  *on_x8 + 0.00003607488450500000*on_sep8h;
+acbyhs4.r8b1 =  -7.934198807e-005  *on_x8 + 0.00000961455004700000*on_sep8h;
+acbchs5.l8b1 =   7.419357014e-005  *on_x8;
+acbyhs5.r8b1 =   7.012924362e-006  *on_x8;
+acbyhs4.l8b2 =  -5.176809812e-005  *on_x8 - 0.00001150595744700000*on_sep8h;
+acbyhs4.r8b2 =  -2.382477645e-005  *on_x8 - 0.00003540238967900000*on_sep8h;
+acbchs5.l8b2 =  -7.529703167e-005  *on_x8 + 0.00000586461933700000*on_sep8h;
+acbyhs5.r8b2 =   7.114503018e-005  *on_x8 + 0.00001301617334500000*on_sep8h;
+acbxv1.l8 =            -6e-006 *on_sep8 + 0.00001050000000000000*on_x8v;
+acbxv2.l8 =            -6e-006 *on_sep8;
+acbxv3.l8 =            -6e-006 *on_sep8;
+acbxv1.r8 =            -6e-006 *on_sep8 - 0.00001050000000000000*on_x8v;
+acbxv2.r8 =            -6e-006 *on_sep8;
+acbxv3.r8 =            -6e-006 *on_sep8;
+acbyvs4.l8b1 =  -1.022213234e-005 *on_sep8 - 0.00001110410000000000 *on_x8v;
+acbyvs4.r8b1 =  -3.203118178e-005 *on_sep8 - 0.00002345790000000000 *on_x8v;
+acbcvs5.l8b1 =  -7.817984683e-007 *on_sep8 - 0.00003828510000000000 *on_x8v;
+acbyvs5.r8b1 =   1.180849716e-005 *on_sep8 + 0.00003288820000000000 *on_x8v;
+acbyvs4.l8b2 =   3.334005869e-005 *on_sep8 - 0.00002710330000000000 *on_x8v;
+acbyvs4.r8b2 =   1.022920268e-005 *on_sep8 - 0.00001145040000000000 *on_x8v;
+acbcvs5.l8b2 =  -1.234182126e-005 *on_sep8 + 0.00003437360000000000 *on_x8v;
+acbyvs5.r8b2 =   8.048753886e-007 *on_sep8 - 0.00003941520000000000 *on_x8v;
+
+
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+
+//*******
+//BEAM 1
+//*******
+
+//-----------------------------------
+//Use the sequence you want (beam 1)
+//-----------------------------------
+use,sequence=lhcb1;
+
+//-------------------------------------
+//Define the type and amount of output
+//-------------------------------------
+select,flag=twiss,clear;
+select,flag=twiss,
+column=name,s,l,betx,bety,sigx,ex,sigy,ey,dx,dpx,dy,dpy,x,y,aper_1,aper_2,aper_3,aper_4,alfx,alfy,px,py,sigxd,sigyd,wx,wy,T,PT,DELTAP,beta;
+
+//---------------------------------------------------------------------------------------------------
+//Execute the Twiss command to calculate the Twiss parameters and save the data in columns in .tfs
+//---------------------------------------------------------------------------------------------------
+twiss,table=twiss,file="param_b1_ip8.tfs";
+
+
+
+
+//*******
+//BEAM 2  
+//*******
+
+//-----------------------------------
+//Use the sequence you want (beam 2)
+//-----------------------------------
+use,sequence=lhcb2;
+
+//-------------------------------------
+//Define the type and amount of output
+//-------------------------------------
+select,flag=twiss,clear;
+select,flag=twiss,
+column=name,s,l,betx,bety,sigx,ex,sigy,ey,dx,dpx,dy,dpy,x,y,aper_1,aper_2,aper_3,aper_4,alfx,alfy,px,py,sigxd,sigyd,wx,wy,T,PT,DELTAP,beta;
+
+//---------------------------------------------------------------------------------------------------
+//Execute the Twiss command to calculate the Twiss parameters and display the data in columns in .tfs
+//---------------------------------------------------------------------------------------------------
+twiss,table=twiss,file="param_b2_ip8.tfs";
+
+
+
+//---------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+
+
+
+//****************
+//To start at IP8
+//****************
+seqedit,sequence=lhcb1; flatten; cycle,start=IP8; endedit;
+seqedit,sequence=lhcb2; flatten; cycle,start=IP8; endedit;
+
+
+//*******
+//BEAM 1
+//*******
+
+//-----------------------------------
+//Use the sequence you want (beam 1)
+//-----------------------------------
+use,sequence=lhcb1;
+
+//-------------------------------------
+//Define the type and amount of output
+//-------------------------------------
+select,flag=twiss,clear;
+select,flag=twiss,
+column=name,s,l,betx,bety,sigx,ex,sigy,ey,dx,dpx,dy,dpy,x,y,aper_1,aper_2,aper_3,aper_4,alfx,alfy,px,py,sigxd,sigyd,wx,wy,T,PT,DELTAP,beta;
+
+//---------------------------------------------------------------------------------------------------
+//Execute the Twiss command to calculate the Twiss parameters and save the data in columns in .tfs
+//---------------------------------------------------------------------------------------------------
+twiss,table=twiss,file="coll_b1_ip8.tfs";
+
+//------------------------------------
+//Generate a file with apertures only
+//------------------------------------
+
+select,flag=twiss,clear;
+use,sequence=lhcb1;
+select, flag=twiss, pattern =full ,column=name,s,l,aper_1,aper_2,aper_3,aper_4,apertype,x,y,z;
+twiss,table=twiss,file="aperture_b1.tfs";
+
+
+// Show half x separation 
+value,table(twiss,IP8,x); 
+// Show half y separation  
+value,table(twiss,IP8,y); 
+// Show half crossing x 
+value,table(twiss,IP8,px); 
+// Show half crossing y
+value,table(twiss,IP8,py);
+// Show beta x 
+value,table(twiss,IP8,betx); 
+// Show beta y
+value,table(twiss,IP8,bety); 
+// Show s
+value,table(twiss,IP8,s);
+
+//*******
+//BEAM 2  
+//*******
+
+//-----------------------------------
+//Use the sequence you want (beam 2)
+//-----------------------------------
+use,sequence=lhcb2;
+
+//-------------------------------------
+//Define the type and amount of output
+//-------------------------------------
+select,flag=twiss,clear;
+select,flag=twiss,
+column=name,s,l,betx,bety,sigx,ex,sigy,ey,dx,dpx,dy,dpy,x,y,aper_1,aper_2,aper_3,aper_4,alfx,alfy,px,py,sigxd,sigyd,wx,wy,T,PT,DELTAP,beta;
+
+//---------------------------------------------------------------------------------------------------
+//Execute the Twiss command to calculate the Twiss parameters and display the data in columns in .tfs
+//---------------------------------------------------------------------------------------------------
+twiss,table=twiss,file="coll_b2_ip8.tfs";
+
+
+//------------------------------------
+//Generate a file with apertures only
+//------------------------------------
+
+select,flag=twiss,clear;
+use,sequence=lhcb2;
+select, flag=twiss, pattern =full ,column=name,s,l,aper_1,aper_2,aper_3,aper_4,apertype,x,y,z;
+twiss,table=twiss,file="aperture_b2.tfs";
+
+
+
+// Show half x separation 
+value,table(twiss,IP8,x); 
+// Show half y separation  
+value,table(twiss,IP8,y); 
+// Show half crossing x 
+value,table(twiss,IP8,px); 
+// Show half crossing y
+value,table(twiss,IP8,py);
+// Show beta x 
+value,table(twiss,IP8,betx); 
+// Show beta y
+value,table(twiss,IP8,bety); 
+// Show s
+value,table(twiss,IP8,s);
+
+!exit;
+
+
+
+//----------------------------------
+// SURVEY FILE GENERATION
+//----------------------------------
+option, -echo,-warn,-info; 
+
+// ****beam 1****
+//real const R0 = 1.0;          ! to obtain the average ring
+OPTION, -echo, -info;
+USE, period=lhcb1;
+SELECT, flag=survey,clear;  ! uncomment if the optional select below is used
+SELECT, FLAG=survey, COLUMN=name,s,l,aper_1,aper_2,aper_3,aper_4,apertype,x,y,z,theta;
+SELECT, FLAG=survey, PATTERN=full;
+survey,file="survey_lhcb1.tfs";
+
+
+
+// ****beam 2****
+//real const R0 = 1.0;          ! to obtain the average ring
+OPTION, -echo, -info;
+USE, period=lhcb2;
+SELECT, flag=survey,clear;  ! uncomment if the optional select below is used
+SELECT, FLAG=survey, COLUMN=name,s,l,aper_1,aper_2,aper_3,aper_4,apertype,x,y,z,theta;
+SELECT, FLAG=survey, PATTERN=full;
+survey, file="survey_lhcb2.tfs";
+
+
+
+stop;
+
+
+
+
