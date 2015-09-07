@@ -1,1 +1,0 @@
-convert -delay 50 -loop 0 *.png x_xp.gif

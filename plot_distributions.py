@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import rc
 from matplotlib import rcParams
 from numpy import *

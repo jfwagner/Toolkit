@@ -54,3 +54,6 @@ doc/images
 doc/*.madx
 doc/*.py
 test
+
+inputs/madx/tests
+inputs/sixtrack/1_0/collimation
