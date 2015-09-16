@@ -26,19 +26,13 @@ total_particles = list_input[5]
 # ------------------------------------------------------------------------------
 # Extract losses in the aperture
 # ------------------------------------------------------------------------------
-icoll = load_data(infile, 0)
-s = load_data(infile, 2)
-x = load_data(infile, 3)
-y = load_data(infile, 5)
-
-x_tct = []
-y_tct = []
-s_tct = []
-for e1,e2,e3,e4 in zip(icoll, x, y, s):
-    if e1==id_col:
-        x_tct.append(e2)
-        y_tct.append(e3)
-        s_tct.append(e4)
+from datetime import datetime
+start_time = datetime.now()
+s_tct = load_data_coll(infile, 2, list_input[1])
+x_tct = load_data_coll(infile, 3, list_input[1])
+y_tct = load_data_coll(infile, 5, list_input[1])
+end_time = datetime.now()
+print('Duration: {}'.format(end_time - start_time))
         
 # ------------------------------------------------------------------------------
 # Plot characteristics
@@ -76,6 +70,22 @@ plt.savefig(name + '_sy.png', dpi=DPI)
 plt.clf()
 
 # ------------------------------------------------------------------------------
+# Plot the distribution histogram
+# ------------------------------------------------------------------------------
+n, bins, patches = plt.hist(y_tct, 100, color='green', alpha=0.8, linewidth=0.1)
+plt.bar(halfgap, max(n), color='blue', log=False, width=0.0005, align='center', edgecolor='blue', linewidth=0.1)
+plt.bar(-1*halfgap, max(n), color='blue', log=False, width=0.0005, align='center', edgecolor='blue', linewidth=0.1)
+x_halfgap = linspace(-1*halfgap, halfgap)
+plt.fill_between(x_halfgap, max(n), facecolor='blue', alpha=0.2, label='Gap', linewidth=0.1)
+plt.xlabel("y (mm)")
+plt.grid(b=None, which='major')
+plt.title(name + ". Hits = " + str(len(x_tct)) + '/' + str(total_particles))
+plt.legend(loc='upper right', prop={'size':6})
+plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+plt.savefig(name + '_histogram_coordinate.png', dpi=DPI)
+plt.clf()
+
+# ------------------------------------------------------------------------------
 # Plot the impact parameter
 # ------------------------------------------------------------------------------
 abs_coord = []
@@ -83,7 +93,7 @@ if orientation=='vertical':
     for e1 in y_tct: 
             abs_coord.append(abs(e1) - halfgap)
 
-plt.hist(abs_coord, 100, color='green', alpha=0.8)
+plt.hist(abs_coord, 100, color='green', alpha=0.8, linewidth=0.1)
 plt.xlabel("Impact parameter (mm)")
 plt.grid(b=None, which='major')
 plt.title(name + ". Hits = " + str(len(x_tct)) + '/' + str(total_particles))
@@ -91,15 +101,7 @@ plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
 plt.savefig(name + '_histogram_impact_parameter.png', dpi=DPI)
 plt.clf()
 
-# ------------------------------------------------------------------------------
-# Plot the distribution histogram
-# ------------------------------------------------------------------------------
-plt.hist(y_tct, 100, color='green', alpha=0.8)
-plt.xlabel("y (mm)")
-plt.grid(b=None, which='major')
-plt.title(name + ". Hits = " + str(len(x_tct)) + '/' + str(total_particles))
-plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-plt.savefig(name + '_histogram_coordinate.png', dpi=DPI)
+
 
 
 
