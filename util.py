@@ -6,6 +6,18 @@ import pylab as P
 from matplotlib import pyplot as plt
 from numpy import *
 
+def load_data_coll(infile,column_number, coll_id):
+    f = open(infile, 'r')
+    my_list = []
+    for line in f.xreadlines():
+        columns = line.strip('\n').split()
+        if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind' or columns[0] != coll_id:
+            continue
+        my_list.append(float(columns[column_number]))
+    f.close()
+    my_array = asarray(my_list)
+    return my_list
+
 def get_lines(infile):
     """Extracts the lines of a data file. Used in the get_columns function."""
     for character in open(infile):
@@ -13,7 +25,7 @@ def get_lines(infile):
         if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind':
             continue
         yield columns
-
+        
 def get_columns(infile, x, y, type):
     """Extracts the columns of a data file using the get_lines function. 
 
@@ -190,24 +202,3 @@ def get_ellipse_coords(a=0.0, b=0.0, x=0.0, y=0.0, angle=0.0, k=2):
 
     return pts
 
-def histogram_coll(x, bins, flag, name, halfgap, halfgap_minus, title):
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    tile = '%s'%title
-    n, bins, patches = P.hist(x, bins=bins, normed=False, histtype='bar', cumulative=False)
-    ax.set_xlim([0, 1])
-    ax.grid(b=None, which='major')
-    ax.set_title(name + ' (Number of hits = ' + str(len(x)) + ')')
-    ax.set_xlabel(title + '(mm)')
-    
-    if flag==True:
-        ax.bar(halfgap, max(n), color='g', log=False, width=0.0005, align='center', edgecolor='g')
-        ax.bar(halfgap_minus, max(n), color='g', log=False, width=0.001, align='center', edgecolor='g')
-        x_halfgap = linspace(halfgap_minus, halfgap)
-        ax.fill_between(x_halfgap, max(n), facecolor='green', alpha=0.2, label='Gap')
-        ax.legend(loc='upper right', prop={'size':6})
-
-    else:
-        print 'No halfgaps in plot'
-    plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-    plt.savefig('histogram_' + title + '_' + name + '.png', dpi=300)
