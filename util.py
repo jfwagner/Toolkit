@@ -6,17 +6,23 @@ import pylab as P
 from matplotlib import pyplot as plt
 from numpy import *
 
-def load_data_coll(infile,column_number, coll_id):
+def load_data_coll(infile, coll_id):
     f = open(infile, 'r')
-    my_list = []
+    s = []
+    x = []
+    y = []
     for line in f.xreadlines():
         columns = line.strip('\n').split()
         if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind' or columns[0] != coll_id:
             continue
-        my_list.append(float(columns[column_number]))
+        s.append(float(columns[2]))
+        x.append(float(columns[3]))
+        y.append(float(columns[5]))
     f.close()
-    my_array = asarray(my_list)
-    return my_list
+    s_array = asarray(s)
+    x_array = asarray(x)
+    y_array = asarray(y)
+    return s_array, x_array, y_array
 
 def get_lines(infile):
     """Extracts the lines of a data file. Used in the get_columns function."""
