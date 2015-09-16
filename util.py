@@ -2,9 +2,6 @@
 # Series of useful functions to help plotting
 # --------------------------------------------
 import re
-import pylab as P
-from matplotlib import pyplot as plt
-from numpy import *
 
 def load_data_coll(infile, coll_id):
     f = open(infile, 'r')
