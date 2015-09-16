@@ -1,11 +1,8 @@
 #!/usr/local/bin/python
-import pylab as P
 import numpy as np
-from collections import Counter
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
-from matplotlib.backends.backend_pdf import PdfPages
 from util import *
 
 # ------------------------------------------------------------------------------
