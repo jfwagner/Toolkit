@@ -84,28 +84,6 @@ def get_column(infile, column_number, data_structure, data_type):
         my_final_column = my_column
     return my_final_column
 
-def get_dump_plot(infile, turn_number, column_number):
-    my_column = []
-    my_data = get_lines(infile)
-    for columns in my_data:
-        if columns[1] == turn_number:
-            my_column.append(float(columns[column_number])*(10**(-3)))
-    my_final_column = asarray(my_column)
-    return my_final_column
-
-def get_dump(infile, col_number_a, col_number_b, turn):
-    turn_i = '%i'%turn
-    a = []
-    b = []
-    my_data = get_lines(infile)
-    for column in my_data:
-        if column[1] == turn_i:
-            a.append(float(column[col_number_a]))
-            b.append(float(column[col_number_b]))
-    var_x = asarray(a)
-    var_y = asarray(b)
-    return var_x, var_y
-
 def get_ip1(x,y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
     around IP1 (i.e. convert s coordinate of 26900 m to -100 m).
