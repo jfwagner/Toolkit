@@ -1,0 +1,87 @@
+
+!----------------------------------------------------------------------
+!         Detuning with momentum offset
+!----------------------------------------------------------------------
+!
+option, echo;
+
+
+
+/*************************************************************
+ * Prepare parameters to be written in the table: tunevsdpp
+ *************************************************************/
+
+select, flag=twiss, range=#E,
+        column=name,s,betx,alfx,mux,x,px,dx,dpx,bety,alfy,muy,y,py,dy,dpy;
+
+create, table=tunevsdpp,
+        column=dpp,dqx,dqy,
+        gtr,chrom1,chrom2,dxmax,dymax,xcomax,ycomax,
+        betxmax,betymax,xcorms,ycorms,dxrms,dyrms;
+
+dqx:=table(summ,q1)-26;
+dqy:=table(summ,q2)-26;
+chrom1:=table(summ,dq1);
+chrom2:=table(summ,dq2);
+gtr:=table(summ,gammatr);
+dxmax:=table(summ,dxmax);
+dymax:=table(summ,dymax);
+xcomax:=table(summ,xcomax);
+ycomax:=table(summ,ycomax);
+betxmax:=table(summ,betxmax);
+betymax:=table(summ,betymax);
+xcorms:=table(summ,xcorms);
+ycorms:=table(summ,ycorms);
+dxrms:=table(summ,dxrms);
+dyrms:=table(summ,dyrms);
+
+
+
+
+/*************************************************************
+ * Calculate parameters for each dpp, and store in: tunevsdpp
+ *************************************************************/
+
+n=0;
+while (n < 11)
+{
+n = n + 1;
+dpp=0.001*(n-6);
+twiss, deltap=dpp, SUMM;
+!write, table=SUMM;
+fill, table=tunevsdpp;
+}
+
+
+
+
+/*************************************************************
+ * Write the table: tunevsdpp  on to the file: tunevsdpp.prt
+ *************************************************************/
+
+system,"rm tunevsdpp.prt";
+write, table=tunevsdpp, file="tunevsdpp.prt";
+
+
+
+
+/*************************************************************
+ * Plot the table: tunevsdpp
+ *************************************************************/
+
+resplot;
+setplot, xsize:=28, ysize:=20,
+         ASCALE:=1.2, LSCALE:=1.2, RSCALE:=1.2, SSCALE:=1.2,
+         post:=2;
+
+plot, title='TUNES vs DELTAP'
+    , table=tunevsdpp
+    , haxis=dpp, vaxis1=dqx
+    , RANGE=#S/#E, FILE=madx;
+
+option, -echo;
+print, text="The warning:";
+print, text="++++++ warning: PEPLOT: deltap is not part of the twiss header";
+print, text="is a bug in the plotting routines. To be corrected. O.Berrig"
+
+return;

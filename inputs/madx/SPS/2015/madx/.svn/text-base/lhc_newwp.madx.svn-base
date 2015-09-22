@@ -1,0 +1,107 @@
+
+
+/***************************************************
+ * MADX
+ *
+ * This madx file is used for:
+ * ! Qh=26.13, QV=26.18 - no qsplit - chromaticity (0.0/0.0)  - SPS units
+ *
+ * lhc_newwp.str is used for the LHC beam:
+ * 1) at injection (26 GeV/c, not 14)
+ * 2) during the ramp
+ * 3) and at extraction (450 GeV/c)
+ *
+ * Call the file by: >madx < lhc_newwp.madx
+ ***************************************************/
+
+ option, -echo;
+
+
+
+/***************************************************
+ * SPECIFY THE SPS BEAM CONFIGURATION, ENERGY and EMITTANCES
+ ***************************************************/
+
+ call, file = '../beams/lhc_beam_injection.beamx';
+
+
+
+/***************************************************
+ * files for SPS
+ ***************************************************/
+
+ call, file = '../elements/sps.ele';
+ call, file = '../aperture/aperturedb_1.dbx';
+ call, file = '../aperture/aperturedb_2.dbx';
+ call, file = '../sequence/sps.seq';
+ call, file = '../aperture/aperturedb_3.dbx';
+ call, file = '../strength/lhc_newwp.str';
+ call, file = '../strength/elements.str';
+ option, echo;
+
+
+/***************************************************
+ * SEQEDIT
+ * Junction between TT10 and SPS
+ ***************************************************/
+
+/*
+SEQEDIT, SEQUENCE=SPS;
+ENDTT10 : MARKER;
+install, element = ENDTT10, at = -0.1375, from = BPH.12008;
+ENDEDIT;
+
+SEQEDIT, SEQUENCE=SPS;
+ENDVKNV : MARKER;
+install, element = ENDVKNV, at = 10.3015+0.1755, from = BPD.11833;
+ENDEDIT;
+
+SEQEDIT, SEQUENCE=SPS;
+flatten ; cycle, start=  ENDVKNV;
+ENDEDIT;
+*/
+
+
+
+/***************************************************
+ * use
+ ***************************************************/
+
+ use, sequence=SPS;
+
+
+
+
+/***************************************************
+ * TWISS
+ ***************************************************/
+
+ set,  format="11.8f";
+ set,  format="-18s";
+
+ select, flag=twiss, clear;
+ select, flag=twiss
+       , column=name,s,x,px,alfx,betx,dx,mux,y,py,alfy,bety,dy,muy;
+
+ twiss, DELTAP=0.000,  centre;
+!twiss, DELTAP=0.000;
+
+
+/***************************************************
+ * Write twiss table.
+ ***************************************************/
+
+ write,table=twiss,file="../out/optics_lhc_newwp.outx";
+
+!write,table=twiss;
+!value,table(twiss,SPS$END,dx);
+
+
+
+
+ stop;
+
+
+
+
+

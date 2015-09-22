@@ -1,0 +1,104 @@
+!---|----1----|----2----|----3----|----4----|----5----|----6----|----7----|----8
+!--------------------------------------------------------------------------
+!
+! Calculation of the direct space charge tune shift for a gaussian bunch
+! (transverse and longitudinal)
+! See K. Schindl - CERN/PS 99-012 - eq (41) - (43)
+! ( http://doc.cern.ch/archive/electronic/cern/preprints/ps/ps-99-012.pdf )
+! M. Martini - CERN/PS 93-23 (PA) - eq (26)
+! ( http://accelconf.web.cern.ch/AccelConf/p93/PDF/PAC1993_3699.PDF       )
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+option, echo;
+
+
+/***********************************************************
+ * Initializations
+ ***********************************************************/
+somma(xx,yy,zz): macro={myval=table(xx,yy,zz);};
+
+USE, period=SPS, range=#S/#E;
+
+BETA=SQRT(1-1/BEAM->GAMMA^2); !             (Relativistic beta        )
+RCP:=1.5346982532116462e-18;  !             (Classical particle radius)
+! r0 = e^2/(4*PI*e0*m0*c^2)= 1.54*10-18     (Classical particle radius)
+! e  = 1.60210 x 10-19 coulombs             (Charge of electron       )
+! e0 = 8.854 x 10-12 farads / meter         (Vacuum permittivity      )
+! m0 = 1.67252 x 10-27 kg  or   0.93826 GeV (Proton rest mass         )
+! c  = 2.997925 x 10^8 meter / second       (speed of light in vacuum )
+SBUNCH=CLIGHT*BETA*TBUNCH;    !             (r.m.s. bunch length      )
+! TBUNCH                                    (r.m.s. bunch duration    )
+! CLIGHT = 2.997925 x 10^8 meter / second   (speed of light in vacuum )
+
+SCHARGE:= (RCP/(SQRT(TWOPI)*TWOPI))
+         *(Z^2/A)
+         *(BEAM->NPART/(BETA^2*BEAM->GAMMA^3))
+         *(1/SBUNCH);
+! NPART = Number of particles per bunch
+! A     = Number of protons plus neutrons
+! Z     = Atomic number, the number of protons
+
+value, scharge,beta,rcp,sbunch, beam->ex,beam->ey,beam->NPART,A,Z,CLIGHT;
+
+
+
+/***********************************************************
+ * DQH and DQV. The tune changes caused by the space charge
+ ***********************************************************/
+option, -warn; ! The definition of DQH and DQV give warnings
+
+DQH:=SCHARGE*table(twiss,BETX)/SQRT(table(twiss,betx)*BEAM->EX
+    +(table(twiss,dx)*DPP)^2)/(SQRT(table(twiss,betx)*BEAM->EX
+    +(table(twiss,dx)*DPP)^2)+SQRT(table(twiss,bety)*BEAM->EY
+    +(table(twiss,dy)*DPP)^2))*table(twiss,L);
+
+DQV:=SCHARGE*table(twiss,BETY)/SQRT(table(twiss,BETY)*BEAM->EY
+    +(table(twiss,dy)*DPP)^2)/(SQRT(table(twiss,betx)*BEAM->EX
+    +(table(twiss,dx)*DPP)^2)+SQRT(table(twiss,bety)*BEAM->EY
+    +(table(twiss,dy)*DPP)^2))*table(twiss,L);
+
+option, warn;
+
+
+
+/***********************************************************
+ * Calculate the tune changes, as function of space charge.
+ * Results will be in twiss table
+ ***********************************************************/
+
+ select, flag=twiss, clear;
+ select, flag=twiss, column=name,s,betx,bety,dx,dy,DQH,DQV,L;
+ twiss,sequence=sps,file=scharge.txt;
+
+ option,echo,-info;
+
+
+
+
+i=0;
+incval=0;
+while (i<10000) {
+exec,somma(twiss,dqh,$i);
+incval=incval+myval;
+i=i+1;
+}
+value, incval, myval;
+
+i=0;
+incval=0;
+while (i<10000) {
+exec,somma(twiss,dqv,$i);
+incval=incval+myval;
+i=i+1;
+}
+value, incval, myval;
+
+
+
+option,-echo,info;
+
+return;
+
+
+

@@ -1,0 +1,439 @@
+! CALCULATION OF EXTRACTION TRAJECTORY AND
+! INITIAL CONDITIONS FOR THE EXTRACTION LINES
+! 100 % NORTH - Calculation of the initial conditions for the TT20 line from theoretical separatrix
+
+
+
+
+ option,echo;
+
+ TITLE, S='SPS - Slow-extraction to North - no qsplit';
+
+
+/**************************************************************************************************
+ !!!!!!!!!!!North separatrix (extracted beam) - No Qsplit
+ !!! Normalised coordinates
+ !!! from MEMO 08/6/2007
+ !!! Beta norm=  109 m
+ **************************************************************************************************/
+ betan:=109.0;
+
+ Nsep01x:=26.88e-3;Nsep01px:=10.71e-3;
+ Nsep02x:=26.88e-3;Nsep02px:=12.43e-3; ! These are normalized coordinates.
+ Nsep03x:=42.29e-3;Nsep03px:=16.99e-3; ! They need to be transformed to real coordinates
+ Nsep04x:=42.29e-3;Nsep04px:=15.27e-3;
+
+
+
+
+
+ factorlength:=1.0; ! relative factor to increase the length of the separatrix w.r.t. theoretical settings
+ factorwidth:=1.0; ! relative factor to increase the thickness of the separatrix w.r.t. theoretical settings
+ roterr:=0.0; ! rotation (in radians) of the separatrix w.r.t. theoretical angle
+
+ DXH:=(factorlength-1.0)*(Nsep03x-Nsep02x)/2.0;
+ DPXH:=(factorwidth-1.0)*(Nsep02px-Nsep01px)/2.0;
+ TGSEP:=(Nsep03px-Nsep02px)/(Nsep03x-Nsep02x);
+
+ ! The following lines do not change the values of the extracted ellipse
+ Nsep1x:=(Nsep01x-DXH)*COS(ROTERR)+(Nsep01px-DPXH-TGSEP*DXH)*SIN(ROTERR);
+ Nsep1px:=-(Nsep01x-DXH)*SIN(ROTERR)+(Nsep01px-DPXH-TGSEP*DXH)*COS(ROTERR);
+ Nsep2x:=(Nsep02x-DXH)*COS(ROTERR)+(Nsep02px+DPXH-TGSEP*DXH)*SIN(ROTERR);
+ Nsep2px:=-(Nsep02x-DXH)*SIN(ROTERR)+(Nsep02px+DPXH-TGSEP*DXH)*COS(ROTERR);
+ Nsep3x:=(Nsep03x+DXH)*COS(ROTERR)+(Nsep03px+DPXH+TGSEP*DXH)*SIN(ROTERR);
+ Nsep3px:=-(Nsep03x+DXH)*SIN(ROTERR)+(Nsep03px+DPXH+TGSEP*DXH)*COS(ROTERR);
+ Nsep4x:=(Nsep04x+DXH)*COS(ROTERR)+(Nsep04px-DPXH+TGSEP*DXH)*SIN(ROTERR);
+ Nsep4px:=-(Nsep04x+DXH)*SIN(ROTERR)+(Nsep04px-DPXH+TGSEP*DXH)*COS(ROTERR);
+
+
+
+
+
+/**************************************************************************************************
+ * Center the extracted ellipse
+ **************************************************************************************************/
+ Nsepcentrex:=(Nsep1x+Nsep2x+Nsep3x+Nsep4x)/4.0;
+ Nsepcentrepx:=(Nsep1px+Nsep2px+Nsep3px+Nsep4px)/4.0;
+
+ Ns1x:=Nsep1x-Nsepcentrex; Ns1px:=Nsep1px-Nsepcentrepx;
+ Ns2x:=Nsep2x-Nsepcentrex; Ns2px:=Nsep2px-Nsepcentrepx;
+ Ns3x:=Nsep3x-Nsepcentrex; Ns3px:=Nsep3px-Nsepcentrepx;
+ Ns4x:=Nsep4x-Nsepcentrex; Ns4px:=Nsep4px-Nsepcentrepx;
+
+
+/**************************************************************************************************
+ * Calculate the angle of the extracted ellipse
+ **************************************************************************************************/
+ sepangle:=ATAN((ns1px+ns2px)/(ns1x+ns2x))/PI*180.0;
+
+ value,Ns1x,Ns2x,Ns3x,Ns4x;
+ value,Ns1px,Ns2px,Ns3px,Ns4px;
+
+
+
+/**************************************************************************************************
+ * INSTALL two markers: extnorth and extptn
+ **************************************************************************************************/
+ extnorth: marker;
+ extptn: marker;
+
+ seqedit, sequence=sps;
+ Select, flag=seqedit, pattern="^ZS.21633$";
+ Install, element=extnorth, at:=-ZS->l/2, from=selected; !ZS entrance
+ Select, flag=seqedit, clear = true;
+
+ Select, flag=seqedit, pattern="^BPA.21931$";
+ Install, element=extptn, at:=-.6075, from=selected;
+ Select, flag=seqedit, clear = true;
+ endedit;
+
+
+
+/**************************************************************************************************
+ * SPS Ring. Closed solution
+ **************************************************************************************************/
+
+/* Setup the closed bump to TT20 ******************************************************************
+ * Modify the definition of  MPSH.21202, MPLH.21431, MPNH.21732, MPLH.21995, MPLH.22195 ***********/
+ MPSH.21202: RBEND, L = .714, angle=0.0;
+ MPLH.21431: RBEND, L = 2.06, angle=0.0;
+ MPNH.21732: RBEND, L = 2.04, angle=0.0;
+ MPLH.21995: RBEND, L = 2.06, angle=0.0;
+ MPLH.22195: RBEND, L = 2.06, angle=0.0;
+
+
+ USE, period=SPS, range=#S/#E;    ! Calculation for SPS ring
+ ! SE North - no Q-split
+ select, flag=error, range=MPSH.21202[1];
+ efcomp, order:=0, dkn:=.11706436e-3;
+ EPRINT;
+ select, flag=error, clear;
+ select, flag=error, range=MPLH.21431[1];
+ efcomp, order:=0, dkn:=-0.44722305e-3;
+ EPRINT;
+ select, flag=error, clear;
+ select, flag=error, range=MPNH.21732[1];
+ efcomp, order:=0, dkn:=-0.33309045e-3;
+ EPRINT;
+ select, flag=error, clear;
+ select, flag=error, range=MPLH.21995[1];
+ efcomp, order:=0, dkn:=-0.28870534e-3;
+ EPRINT;
+ select, flag=error, clear;
+ select, flag=error, range=MPLH.22195[1];
+ efcomp, order:=0, dkn:=.30868771e-3;
+ EPRINT;
+ select, flag=error, clear;
+
+
+
+
+
+
+ savebeta, label=zsnorth, place=extnorth[1];
+ select, flag=twiss, range=#S/#E,column=name,s,betx,alfx,mux,x,px,dx,dpx,bety,alfy,muy,y,py,dy,dpy;
+ TWISS, DELTAP=0.0, save;
+ write, table=twiss, file=twiss0.prt;
+
+
+
+
+
+/**************************************************************************************************
+ **************************************************************************************************
+ *
+ * Setup extraction channel
+ *
+ **************************************************************************************************
+ **************************************************************************************************/
+
+/**************************************************************************************************
+ * Initial optical functions for the TT20 extraction channel
+ * Calculate alfa and beta corresponding to the extracted ellipse
+ **************************************************************************************************/
+ X0EXTR1:=Ns1x*SQRT(zsnorth->betx/betan);
+ PX0EXTR1:=1/sqrt(betan*zsnorth->betx)*(Ns1px-zsnorth->alfx*Ns1x);
+
+ X0EXTR2:=Ns2x*SQRT(zsnorth->betx/betan);
+ PX0EXTR2:=1/sqrt(betan*zsnorth->betx)*(Ns2px-zsnorth->alfx*Ns2x);
+
+ xx1:=X0EXTR1;
+ xpx1:=PX0EXTR1;
+
+ xx2:=X0EXTR2;
+ xpx2:=PX0EXTR2;
+
+
+ value, xx1, xx2;
+ value, xpx1, xpx2;
+
+ !!!!Twiss parameters for minimum ellipse
+ alfanorm:=-(xpx1+xpx2)/(xpx1-xpx2);
+ betanorm:=(xx1+xx2)/(xpx1-xpx2);
+ value, betanorm, alfanorm,betan;
+
+
+
+ nxx1:=xx1*SQRT(betan/betanorm);
+ nxpx1:=xx1*SQRT(betan/betanorm)*alfanorm+xpx1*SQRT(betan*betanorm);
+
+ nxx2:=xx2*SQRT(betan/betanorm);
+ nxpx2:=xx2*SQRT(betan/betanorm)*alfanorm+xpx2*SQRT(betan*betanorm);
+
+
+
+
+ ! angle of the North separatrix. It must be zero if the normalization is done properly.
+ Nsepangle:=ATAN((nxpx1+nxpx2)/(nxx1+nxx2))/PI*180.0;
+ value, Nsepangle,Nsepangle/360, nxx1,nxpx1,nxx2,nxpx2;
+
+ /*** The beam now has alfx = 0 and betx = 1 *****************************************************/
+
+
+
+
+
+/**************************************************************************************************
+ * Set strengths for the elements in the extraction channel
+ **************************************************************************************************/
+
+/* Setup the extraction channel to TT20 ***********************************************************
+ * Modify the definition of QDA.21910,
+ *                           ZS.21633,  ZS.21638,  ZS.21655,  ZS.21671,  ZS.21676,
+ *                          MSE.21832, MSE.21837, MSE.21852, MSE.21857, MSE.21872,
+ *                          MST.21774, MST.21779, MST.21794
+ **************************************************************************************************/
+ QDA.21910  :  QUADRUPOLE, L = 3.791  , K1=KQD*9.0/11.0*(-.16000500);
+ ZS.21633   :  RBEND     , L = 3.13   , angle=0.0;
+ ZS.21638   :  RBEND     , L = 3.13   , angle=0.0;
+ ZS.21655   :  RBEND     , L = 3.13   , angle=0.0;
+ ZS.21671   :  RBEND     , L = 3.13   , angle=0.0;
+ ZS.21676   :  RBEND     , L = 3.13   , angle=0.0;
+
+ MSE.21832  :  RBEND     , L = 2.38   , angle=0.0;
+ MSE.21837  :  RBEND     , L = 2.38   , angle=0.0;
+ MSE.21852  :  RBEND     , L = 2.38   , angle=0.0;
+ MSE.21857  :  RBEND     , L = 2.38   , angle=0.0;
+ MSE.21872  :  RBEND     , L = 2.38   , angle=0.0;
+
+ MST.21774  :  RBEND     , L = 2.38   , angle=0.0;
+ MST.21779  :  RBEND     , L = 2.38   , angle=0.0;
+ MST.21794  :  RBEND     , L = 2.38   , angle=0.0;
+
+
+
+ USE, period=SPS, range=extnorth[1]/extptn[1];
+
+
+ ! SE North - no Q-split
+ select, flag=error, range=MPNH.21732[1];
+ efcomp, order:=0, dkn:=-0.33309045e-3;
+ select, flag=error, clear;
+ select, flag=error, range=QDA.21910[1];
+ ealign, dx=300.94e-3; !distance of neutral axis in coil window (M. Gyr)
+ select, flag=error, clear;
+ select, flag=error, pattern="ZS.*";
+ efcomp, order:=0, dkn:=-0.36333333e-3/5.0;
+ select, flag=error, clear;
+ select, flag=error, pattern="MST.*";
+ efcomp, order:=0, dkn:=-1.69520713e-3/3.0;
+ select, flag=error, clear;
+ select, flag=error, pattern="MSE.*";
+ efcomp, order:=0, dkn:=-9.74519477e-3/5.0;
+ select, flag=error, clear;
+
+
+ select, flag=twiss, range=#S/#E,column=name,s,betx,alfx,mux,x,px,dx,dpx,bety,alfy,muy,y,py,dy,dpy;
+
+
+ value, QDA.21910->k1;
+ value, QFA.21810->k1;
+ value, QDA.21710->k1;
+ value, QFA.21610->k1;
+
+
+
+/**************************************************************************************************
+ * Extraction channel calculation. First point
+ **************************************************************************************************/
+ ! kick calculated from separatrix data in normalised coordinates
+ ! for definition CERN/SL-98-055-BT
+ ! Beta norm=  109 m
+
+ NORTHX0EXTRN:=Nsep1x;
+ NORTHPX0EXTRN:=Nsep1px;
+ NORTHX0EXTR:=NORTHX0EXTRN*SQRT(zsnorth->betx/betan);
+ NORTHPX0EXTR:=1/sqrt(betan*zsnorth->betx)*(NORTHPX0EXTRN-zsnorth->alfx*NORTHX0EXTRN);
+ value, northx0extr;
+ value, northpx0extr;
+
+
+
+
+ savebeta, label=point, place=extptn[1];
+
+ twiss, BETX=betanorm,ALFX=alfanorm,DX=zsnorth->dx,dpx=zsnorth->DPX,
+ X=zsnorth->x+NORTHX0EXTR,PX=zsnorth->px+NORTHPX0EXTR,
+ BETY=zsnorth->bety,alfy=zsnorth->ALFY,DY=zsnorth->dy,DPY=zsnorth->dpy,
+ y=0.0,PY=0.0,DELTAP=0.0,save;
+ write, table=twiss, file=twiss1.prt;
+
+ point1x= point->x;
+ point1px= point->px;
+
+ mux1= point->mux;
+ muy1= point->muy;
+
+
+
+/**************************************************************************************************
+ * Extraction channel calculation. Second point
+ **************************************************************************************************/
+ NORTHX0EXTRN:=Nsep2x;
+ NORTHPX0EXTRN:=Nsep2px;
+ NORTHX0EXTR:=NORTHX0EXTRN*SQRT(zsnorth->betx/betan);
+ NORTHPX0EXTR:=1/sqrt(betan*zsnorth->betx)*(NORTHPX0EXTRN-zsnorth->alfx*NORTHX0EXTRN);
+ value, northx0extr;
+ value, northpx0extr;
+
+ savebeta, label=point2, place=extptn[1];
+ twiss, BETX= betanorm, ALFX=alfanorm, DX=zsnorth->dx, dpx=zsnorth->DPX,
+ X=zsnorth->x+NORTHX0EXTR,PX=zsnorth->px+NORTHPX0EXTR, BETY=zsnorth->bety,
+ alfy=zsnorth->ALFY, DY=zsnorth->dy, DPY=zsnorth->dpy, y=0.0,Py= 0.0, DELTAP=0.0,save;
+ write, table=twiss, file=twiss2.prt;
+
+ point2x=point2->x;
+ point2px=point2->px;
+
+
+
+/**************************************************************************************************
+ * Extraction channel calculation. Third point
+ **************************************************************************************************/
+ NORTHX0EXTRN:=Nsep3x;
+ NORTHPX0EXTRN:=Nsep3px;
+ NORTHX0EXTR:=NORTHX0EXTRN*SQRT(zsnorth->betx/betan);
+ NORTHPX0EXTR:=1/sqrt(betan*zsnorth->betx)*(NORTHPX0EXTRN-zsnorth->alfx*NORTHX0EXTRN);
+ value, northx0extr;
+ value, northpx0extr;
+
+
+ savebeta, label=point3, place=extptn[1];
+ twiss, BETX  = betanorm,    ALFX = alfanorm
+      , DX    = zsnorth->dx,    dpx = zsnorth->DPX
+      , X    =  zsnorth->x+NORTHX0EXTR,PX = zsnorth->px+NORTHPX0EXTR
+      , BETY  = zsnorth->bety, alfy = zsnorth->ALFY
+      , DY    =  zsnorth->dy,  DPY = zsnorth->dpy
+      , y    =  0.0,    Py = 0.0
+      , DELTAP= 0.0  ,    save;
+ write, table=twiss, file=twiss3.prt;
+
+ point3x=point3->x;
+ point3px=point3->px;
+
+
+
+/**************************************************************************************************
+ * Extraction channel calculation. Fourth point
+ **************************************************************************************************/
+ NORTHX0EXTRN:=Nsep4x;
+ NORTHPX0EXTRN:=Nsep4px;
+ NORTHX0EXTR:=NORTHX0EXTRN*SQRT(zsnorth->betx/betan);
+ NORTHPX0EXTR:=1/sqrt(betan*zsnorth->betx)*(NORTHPX0EXTRN-zsnorth->alfx*NORTHX0EXTRN);
+ value, northx0extr;
+ value, northpx0extr;
+
+ savebeta, label=point4, place=extptn[1];
+ twiss, BETX  = betanorm,    ALFX = alfanorm
+      , DX    = zsnorth->dx,    dpx = zsnorth->DPX
+      , X    =  zsnorth->x+NORTHX0EXTR,PX= zsnorth->px+NORTHPX0EXTR
+      , BETY  = zsnorth->bety, alfy = zsnorth->ALFY
+      , DY    =  zsnorth->dy,  DPY = zsnorth->dpy
+      , y    =  0.0,    Py = 0.0
+      , DELTAP= 0.0  ,    save;
+ write, table=twiss, file=twiss4.prt;
+
+ point4x=point4->x;
+ point4px=point4->px;
+
+
+
+/**************************************************************************************************
+ * Calculate the position (x,px) and optical functions, at the end of the extraction channel
+ * These values will be transmitted to TT20, as initial values
+ **************************************************************************************************/
+ XCENTRE:=(point1x+point2x+point3x+point4x)/4.0;
+ PXCENTRE:=(point1px+point2px+point3px+point4px)/4.0;
+
+ !!Points 1 to 4 are the points delimiting the
+ !!extracted beam at the extraction point
+ !!
+ X40=point4x-xcentre;
+ X30=point3x-xcentre;
+ X20=point2x-xcentre;
+ X10=point1x-xcentre;
+
+ pX40=point4px-pxcentre;
+ pX30=point3px-pxcentre;
+ pX20=point2px-pxcentre;
+ pX10=point1px-pxcentre;
+
+ value, xcentre, x10, x20, x30, x40;
+ value, pxcentre, px10, px20, px30, px40;
+
+
+ MUXINP = 0;
+ MUYINP = 0;
+ XINP = 0;
+ YINP = 0;
+ PXINP = 0;
+ PYINP = 0;
+
+
+ BETX0  := point4->betx;
+ ALFX0  := point4->alfx;
+ MUX0   := point4->mux ;
+ BETY0  := point4->bety;
+ ALFY0  := point4->alfy;
+ MUY0   := point4->muy ;
+ X0     := 0.0 ;
+ PX0    := 0.0 ;
+ Y0     := 0.0 ;
+ PY0    := 0.0 ;
+ T0     := 0.0 ;
+ PT0    := 0.0 ;
+ DX0    := point4->dx ;
+ DPX0   := point4->dpx;
+ DY0    := point4->dy ;
+ DPY0   := point4->dpy;
+
+
+
+/**************************************************************************************************
+ * Remember to return the definition of the closed bump and extraction channel elements:
+ * MPSH.21202, MPLH.21431, MPNH.21732, MPLH.21995, MPLH.22195
+ **************************************************************************************************/
+ MPSH.21202          : MPSH ; ! closed bump
+ MPLH.21431          : MPLH ; ! closed bump
+ MPNH.21732          : MPNH ; ! closed bump
+ MPLH.21995          : MPLH ; ! closed bump
+ MPLH.22195          : MPLH ; ! closed bump
+
+  QDA.21910          :  QDA ; ! Extraction element
+   ZS.21633          :  ZS  ; ! Extraction element
+   ZS.21638          :  ZS  ; ! Extraction element
+   ZS.21655          :  ZS  ; ! Extraction element
+   ZS.21671          :  ZS  ; ! Extraction element
+   ZS.21676          :  ZS  ; ! Extraction element
+  MSE.21832          :  MSE ; ! Extraction element
+  MSE.21837          :  MSE ; ! Extraction element
+  MSE.21852          :  MSE ; ! Extraction element
+  MSE.21857          :  MSE ; ! Extraction element
+  MSE.21872          :  MSE ; ! Extraction element
+  MST.21774          :  MST ; ! Extraction element
+  MST.21779          :  MST ; ! Extraction element
+  MST.21794          :  MST ; ! Extraction element
+
+
+
+ return;

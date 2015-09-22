@@ -1,3 +1,4 @@
+#!/usr/local/bin/python
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams

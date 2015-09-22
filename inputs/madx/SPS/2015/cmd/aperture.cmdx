@@ -1,0 +1,68 @@
+option, echo;
+
+set,  format="-21s";
+set,  format="12.8f";
+
+USE, period=SPS,range=#S/#E;
+
+/*
+ON_misalign:=1.0; //switches on(1.0)/off(0.0) volountary displacements
+qda11710Hentry:=-0.0048*ON_misalign;
+qda11710Hexit:=-0.0048*ON_misalign;
+qda11710Ventry:=-0.005*ON_misalign;
+qda11710Vexit:=-0.005*ON_misalign;
+select, flag=error, pattern=QDA11710;
+ealign, dx:=(qda11710Hentry+qda11710Hexit)/2.0, dy:=(qda11710Ventry+qda11710Vexit)/2.0;
+select, flag=error, clear = true;
+*/
+
+sX:=SQRT(table(twiss,betx)*BEAM->EX+table(twiss,dx)^2*DPP^2);
+sY:=SQRT(table(twiss,bety)*BEAM->EY+table(twiss,dy)^2*DPP^2);
+option, -warn;
+aX:=(table(twiss,aper_1)-ABS(table(twiss,x)))/sX;
+aY:=(table(twiss,aper_2)-ABS(table(twiss,y)))/sY;
+option, warn;
+fullaperx:=2*table(twiss,aper_1)*1000;
+fullapery:=2*table(twiss,aper_2)*1000;
+
+!!!dispx:=table(error,dx);
+!!!select, flag=error, range=#S/#E;
+!!!eprint, full=true;
+!!!esave, file=error.prt;
+
+!select, flag=twiss, range=#S/#E,column=name,s,apertype,aper_1,aper_2;
+!select, flag=twiss, range=#S/#E,column=name,s,betx,x,dx,mux,bety,y,dy,muy,apertype,aper_1,aper_2,fullaperx,fullapery,sX,sY,aX,aY;
+ select, flag=twiss, range=#S/#E,column=name,s,x,y,apertype,aper_1,aper_2,fullaperx,fullapery,sX,sY,aX,aY;
+!select, flag=twiss, pattern="^MK.*$",column=name,s,betx,dx,bety,apertype,fullaperx,fullapery;
+TWISS, DELTAP=0.0;
+write, table=twiss, file="../out/aperture.prt";
+
+ resplot;
+ setplot, post=2;
+
+ plot, title='Aperture', table=twiss, style:=100, symbol:=4, haxis=s, vaxis=aX, FILE='../out/aper';
+!plot, title='Aperture', table=twiss, style:=100, symbol:=4, haxis=s, vaxis1=aper_1, vaxis2=aper_2, FILE='../out/aper';
+! Generates file: aper01.eps in directory: /out
+
+/*
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aX, VMIN:=0.,VMAX:=15.,HMIN:=0, HMAX:=7000;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aY, VMIN:=0.,VMAX:=8.,HMIN:=0, HMAX:=1000.;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aX, VMIN:=0.,VMAX:=15.,HMIN:=0, HMAX:=1000;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aY, VMIN:=0.,VMAX:=8.,HMIN:=1000, HMAX:=2000.;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aX, VMIN:=0.,VMAX:=15.,HMIN:=1000, HMAX:=2000;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aY, VMIN:=0.,VMAX:=8.,HMIN:=2000, HMAX:=3000.;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aX, VMIN:=0.,VMAX:=15.,HMIN:=2000, HMAX:=3000;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aY, VMIN:=0.,VMAX:=8.,HMIN:=3000, HMAX:=4000.;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aX, VMIN:=0.,VMAX:=15.,HMIN:=3000, HMAX:=4000;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aY, VMIN:=0.,VMAX:=8.,HMIN:=4000, HMAX:=5000.;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aX, VMIN:=0.,VMAX:=15.,HMIN:=4000, HMAX:=5000;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aY, VMIN:=0.,VMAX:=8.,HMIN:=5000, HMAX:=6000.;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aX, VMIN:=0.,VMAX:=15.,HMIN:=5000, HMAX:=6000;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aY, VMIN:=0.,VMAX:=8.,HMIN:=6000, HMAX:=7000.;
+Plot, table=twiss, colour:=100, haxis=s, vaxis=aX, VMIN:=0.,VMAX:=15.,HMIN:=6000, HMAX:=7000;
+*/
+
+
+stop;
+
+

@@ -75,7 +75,6 @@ def dist_generator(particles, emittance, beta, bunch, spread, factor, job):
     for particle_yp in ran_yp:
         yp.append(float(factor*particle_yp*tp_max))
 
-    print "Generating z,E...",
 
     z = []
     E = []
@@ -97,7 +96,7 @@ def dist_generator(particles, emittance, beta, bunch, spread, factor, job):
             #inside bucket; accept!
             z.append(float(trial_z))
             E.append(float(trial_e)*10**(-6))
-    print " done!"
+
 
     for e1, e2, e3, e4, e5, e6 in zip(x, xp, y, yp, z, E):
         f.write('%8.6e %8.6e %8.6e %8.6e %8.6e %8.6e\n' % (e1, e2, e3, e4, e5, e6))

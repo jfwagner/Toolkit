@@ -1,0 +1,27 @@
+!--------------------------------------------------------------------
+! LSS1 Quadrupole Displacement for Beam Dumping
+! see e.g. SPS/AOP/DV/Note/79-1,
+!          EDMS/CCD SPSLNINS0004, 
+!          EDMS/CCD SPSLNINS0005 
+!--------------------------------------------------------------------
+option, echo;
+
+SELECT, FLAG= ERROR, CLEAR;
+SELECT, FLAG= ERROR, PATTERN= "QDA.11710.*";
+EALIGN, DX= -0.0048, DY= -0.005;
+EPRINT;
+
+SELECT, FLAG= ERROR, CLEAR;
+SELECT, FLAG= ERROR, PATTERN= "QFA.11810.*";
+EALIGN, DX= -0.00297,DY= -0.01649;
+EPRINT;
+
+SELECT, FLAG= ERROR, CLEAR;
+SELECT, FLAG= ERROR, PATTERN= "QDA.11910.*";
+EALIGN, DX= -0.0048, DY= -0.005;
+EPRINT;
+
+
+select, flag= twiss, clear;
+select, flag= twiss, column= KEYWORD,NAME,S,L,BETX,BETY,ALFX,ALFY,MUX,MUY,DX,DY,DPX,DPY,X,Y,PX,PY;
+twiss,  sequence= sps, file= "out.twiss.tfs";

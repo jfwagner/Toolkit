@@ -1,0 +1,52 @@
+!--------------------------------------------------------------------------
+! MAD file for SPS optics calculations
+!  G.Arduini
+!--------------------------------------------------------------------------
+
+ !title, 'Untitled';
+
+
+ set,  format="-15s";
+ set,  format="10.6f";
+
+
+
+ option, echo;
+ option, RBARC=FALSE;  ! the length of a rectangular magnet is the distance between the polefaces and not the arc length
+!assign, ECHO=ECHO.PRT;
+
+
+!---------------------------------------------------------------
+!         SPECIFY THE SPS CONFIGURATION, ENERGY and EMITTANCES
+!---------------------------------------------------------------
+ call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/beams/cngs_after_capture.beamx';
+
+
+
+!--------------------------------------------------------------------------
+! call the element definition file for SPS
+!--------------------------------------------------------------------------
+ call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/elements/sps2010.ele';
+ option, -warn;
+ call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/sequence/sps2010.seq';
+ option, warn;
+ call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/strength/ft_noqs_ext_2010.str';
+ call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/strength/elements.str';
+
+
+
+!--------------------------------------------------------------------
+! produces twiss file of the whole SPS
+!---------------------------------------------------------------------
+USE, period=SPS, range=#S/#E;
+call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/cmd/twiss.cmdx';
+
+
+
+!--------------------------------------------------------------------------
+! determine initial conditions for the TT20 transfer line
+!--------------------------------------------------------------------------
+ call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/cmd/northextraction.cmdx';
+
+return;
+

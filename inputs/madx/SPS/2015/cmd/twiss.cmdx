@@ -1,0 +1,19 @@
+select, flag=twiss, clear=true;
+select, flag=twiss, range=#S/#E
+      , column=name,s,betx,alfx,mux,x,px,dx,dpx,bety,alfy,muy,y,py,dy,dpy;
+
+/*
+select, flag=twiss, clear=true;
+select, flag=twiss, class=QM
+      , column=name,s,betx,alfx,mux,x,px,dx,dpx,bety,alfy,muy,y,py,dy,dpy;
+*/
+
+TWISS, DELTAP=0.0;
+write, table=twiss, file=twiss.prt;
+
+resplot;
+setplot, post=2;
+
+plot, title='Twiss', table=twiss, style:=100, symbol:=4, haxis=s, vaxis1=dx;
+
+return;

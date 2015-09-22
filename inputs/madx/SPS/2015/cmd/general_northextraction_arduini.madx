@@ -1,0 +1,112 @@
+!--------------------------------------------------------------------------
+! MAD file for SPS optics calculations
+!  G.Arduini
+!--------------------------------------------------------------------------
+
+ !title, 'Untitled';
+
+ set,  format="-15s";
+ set,  format="10.6f";
+
+
+
+
+ option, echo;
+ option, RBARC=FALSE;  ! the length of a rectangular magnet is the distance between the polefaces and not the arc length
+ assign, ECHO=ECHO.PRT;
+
+
+!---------------------------------------------------------------
+!         SPECIFY THE SPS CONFIGURATION, ENERGY and EMITTANCES
+!---------------------------------------------------------------
+
+call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/beams/cngs_after_capture.beamx';
+
+
+
+!--------------------------------------------------------------------------
+! call the element definition file for SPS
+!--------------------------------------------------------------------------
+call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/elements/sps_arduini.elex';
+call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/strength/elements_arduini.strx';
+call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/strength/ft_noqs_ext_arduini.strx';
+call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/sequence/sps_arduini.seqx';
+
+
+
+ USE, period=SPS, range=#S/#E;
+
+!call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/cmd/olav'; ! contains BETX0, ALFX0 ect. for SPS
+!
+!INITBETA0: BETA0,
+!  BETX=BETX0,
+!  ALFX=ALFX0,
+!  MUX=MUX0,
+!  BETY=BETY0,
+!  ALFY=ALFY0,
+!  MUY=MUY0,
+!  X=X0,
+!  PX=PX0,
+!  Y=Y0,
+!  PY=PY0,
+!  T=T0,
+!  PT=PT0,
+!  DX=DX0,
+!  DPX=DPX0,
+!  DY=DY0,
+!  DPY=DPY0;
+!  PSHIFT =0;
+!
+!
+!
+!
+!   ptc_create_universe;
+!   ptc_create_layout,model=2,method=6,nst=5,time=true,exact;
+!   ptc_twiss, table=ptc_twiss, beta0=initbeta0, icase=5, no=1; ! , file="twiss"
+!   ptc_end;
+!
+!select,flag=ptc_twiss,clear;
+!select,flag=ptc_twiss, column = name,s,x,px,disp1,disp2,alfa11,beta11,alfa12,alfa21,mu1,mu3,
+!                                       y,py,disp3,disp4,alfa22,beta22,beta12,beta21,mu2,mu4;
+!write,table=ptc_twiss,file="./twiss0_INIT_arduini.out";
+!
+!
+!stop;
+
+!select, flag=twiss, clear=true;
+!select, flag=twiss, range=#S/#E
+!      , column=name,s,betx,alfx,mux,x,px,dx,dpx,bety,alfy,muy,y,py,dy,dpy;
+!
+!
+!
+!     twiss , centre,  BETA0=INITBETA0
+!     twiss , BETA0=INITBETA0
+!           , DELTAP = PSHIFT
+!           , file="twiss0_INIT_arduini.out";
+
+
+
+
+
+
+!--------------------------------------------------------------------
+! produces twiss file of the whole SPS
+!---------------------------------------------------------------------
+call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/cmd/twiss.cmdx';
+
+
+
+
+!--------------------------------------------------------------------------
+! determine initial conditions for the TT20 transfer line
+!--------------------------------------------------------------------------
+ call, file = '/afs/cern.ch/eng/sps/optics2010/SPS/SPSRing/2010/cmd/northextraction_arduini.cmdx';
+
+
+
+
+
+
+
+
+
