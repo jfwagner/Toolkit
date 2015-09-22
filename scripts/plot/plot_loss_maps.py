@@ -35,7 +35,7 @@ g.close()
 # ------------------------------------------------------------------------------
 # Extract ID and name from coll_summary.dat
 # ------------------------------------------------------------------------------
-collsum_data = np.loadtxt("coll_sum.dat", str)
+collsum_data = np.loadtxt(infile_collsum, str)
 
 name_collsum = []
 id_collsum = []
@@ -47,7 +47,7 @@ for line in collsum_data:
 # ------------------------------------------------------------------------------
 # Extract name and position from CollPositions
 # ------------------------------------------------------------------------------
-collpos_data = np.loadtxt("CollPositions.b1.dat", str, "%Ind")
+collpos_data = np.loadtxt(infile_collpos, str, "%Ind")
 
 name_collpos = []
 position_collpos = []
@@ -106,15 +106,20 @@ rcParams['figure.figsize']=textwidth, textwidth/1.618
 pos_coll = np.asarray(pos)
 pos_ap = np.asarray(pos_lpi)
 
+# Percentages
+coll_per = str(round((len(pos_coll)*100)/total_particles, 1))
+ap_per = str(round((len(pos_ap)*100)/total_particles, 3))
+
+# Weights
 weights_coll = np.ones_like(pos_coll)/total_particles
 weights_ap = np.ones_like(pos_ap)/total_particles
 
-plt.hist(pos, 500, color='black', alpha=0.8, linewidth=0.1, weights=weights_coll, log=True, label='Collimation')
-plt.hist(pos_lpi, 500, color='green', alpha=0.8, linewidth=0.1, weights=weights_ap, log=True, label='Aperture')
+plt.hist(pos, 500, color='black', alpha=0.8, linewidth=0.1, weights=weights_coll, log=True, label='Collimation ' + coll_per + '%')
+plt.hist(pos_lpi, 500, color='green', alpha=0.8, linewidth=0.1, weights=weights_ap, log=True, label='Aperture ' + ap_per + '%')
 plt.xlabel("s (m)")
 plt.ylabel("Particles lost per 10 cm")
 plt.grid(b=None, which='major')
-plt.title('Loss map')
+plt.title('Loss Maps')
 plt.legend(loc='upper right', prop={'size':6})
 plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
 plt.savefig('loss_maps.png', dpi=DPI)
