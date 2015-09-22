@@ -2,6 +2,7 @@
 # Series of useful functions to help plotting
 # --------------------------------------------
 import re
+import numpy as np
 
 def load_data_coll(infile, coll_id):
     f = open(infile, 'r')
@@ -16,9 +17,9 @@ def load_data_coll(infile, coll_id):
         x.append(float(columns[3]))
         y.append(float(columns[5]))
     f.close()
-    s_array = asarray(s)
-    x_array = asarray(x)
-    y_array = asarray(y)
+    s_array = np.asarray(s)
+    x_array = np.asarray(x)
+    y_array = np.asarray(y)
     return s_array, x_array, y_array
 
 def get_lines(infile):
