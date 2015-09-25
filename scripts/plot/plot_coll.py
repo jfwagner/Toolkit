@@ -1,4 +1,5 @@
 #!/usr/local/bin/python
+import sys
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import rc
@@ -8,14 +9,12 @@ from util import *
 # ------------------------------------------------------------------------------
 # Feed the input to the script by command line
 # ------------------------------------------------------------------------------
-user_input = raw_input('impacts real/coll id/coll name/orientation/halfgap (mm)/# of particles >> ')
-list_input = user_input.split('/')
-infile = list_input[0].strip()
-id_col = float(list_input[1])
-name = '%s' %list_input[2].strip()
-orientation = str(list_input[3]).strip()
-halfgap = float(list_input[4])
-total_particles = list_input[5]
+infile = sys.argv[1]
+id_col = float(sys.argv[2])
+name = '%s' %sys.argv[3]
+orientation = str(sys.argv[4])
+halfgap = float(sys.argv[5])
+total_particles = sys.argv[6]
 
 # ------------------------------------------------------------------------------
 # ############################## IMPACTS REAL ##################################
@@ -25,7 +24,7 @@ total_particles = list_input[5]
 # ------------------------------------------------------------------------------
 from datetime import datetime
 start_time = datetime.now()
-s_tct, x_tct, y_tct = load_data_coll(infile, list_input[1])
+s_tct, x_tct, y_tct = load_data_coll(infile, sys.argv[2])
 
 # ------------------------------------------------------------------------------
 # Plot characteristics

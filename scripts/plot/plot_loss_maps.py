@@ -1,4 +1,5 @@
 #!/usr/local/bin/python
+import sys
 import numpy as np
 from datetime import datetime
 from matplotlib import pyplot as plt
@@ -8,13 +9,11 @@ from matplotlib import rcParams
 # ------------------------------------------------------------------------------
 # Feed the input to the script by command line
 # ------------------------------------------------------------------------------
-user_input = raw_input('LPI/impacts_real/coll_summary/coll_positions/total particles >> ')
-list_input = user_input.split('/')
-infile_lpi = list_input[0].strip()
-infile_impacts = list_input[1].strip()
-infile_collsum = list_input[2].strip()
-infile_collpos = list_input[3].strip()
-total_particles = float(list_input[4].strip())
+infile_lpi = sys.argv[1]
+infile_impacts = sys.argv[2]
+infile_collsum = sys.argv[3]
+infile_collpos = sys.argv[4]
+total_particles = float(sys.argv[5])
 
 start_time = datetime.now()
 # ------------------------------------------------------------------------------
