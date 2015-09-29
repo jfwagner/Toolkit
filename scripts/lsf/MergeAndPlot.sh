@@ -2,10 +2,12 @@
 # This script takes care of the post processing of the data acquired by launching jobs in LSF - A. Santamaria Garcia
 #-------------------------------------------------------------------------------
 # Rename the one digit folders so that the next loop works without regex
-for d in [1-9]
-do
-    (mv $d 0$d)
-done 
+for dir in [1-9]
+if [ -d $dir ]; then
+    do
+	(mv $dir 0$dir)
+    done 
+fi
 
 # Execute the merging script in each of the folders
 for d in [0-9][0-9]
