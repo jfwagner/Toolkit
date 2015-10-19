@@ -2,6 +2,7 @@
 # Series of useful functions to help plotting
 # --------------------------------------------
 import re
+from matplotlib import pyplot as plt
 import numpy as np
 
 def load_data_coll(infile, coll_id):
@@ -126,36 +127,28 @@ def get_ir(ir, ylim):
     position = t[ir-1]
     return position, ylim
 
-def get_element(infile, column_name, column_position, regex, text_height):
-    """This function extracts the information relevant to the plotting of the accelerator's elements.
-
-    The function arguments' are (in order):
-    - File 
-    - Number of the column corresponding to the name
-    - Number of the column corresponding to the position
-    - List of regular expressions defining the elements you want to plot (e.g. all that start with the 
-    letter 'V')
-    - The height at which the name of the element will appear in the plot
+def plot_elem(color, height, bottom, name_in = [], s_in = [], l_in = [], *args):
+    """
+    >> Input: color, height and bottom of the element, list of all the names, positions and lengths, list of element names
+    >> Output: bar plot
 
     Example:
-    name, pos, height = get_element('twiss_ip1_b1.tfs', 0, 3, ['VC+'], 0.6)
+    plot_elem('red', height, bottom, name_b1_twiss, s_b1_twiss, l_b1_twiss,  'MQXFA', 'MQXFB') # Triplet: Q1, Q3, Q2
     """
-    name = []
-    position = []
-    my_data = get_lines(infile)
-    for column in my_data:
-        name.append(column[column_name].strip('"'))
-        position.append(float(column[column_position]))
-
-    new_name = []
-    new_position = []
-    for expression in regex:
-        regex = re.compile(expression)
-        for e1, e2 in zip(name,position):
-            if regex.match(e1):
-                new_name.append(e1)
-                new_position.append(e2)
-    return new_name, new_position, text_height
+    regex_list = list(args)
+    name_out = []
+    s_out = []
+    l_out = []
+    for a in regex_list:
+        regex = re.compile(a)
+        for list_1, list_2, list_3 in zip(name_in, s_in, l_in):
+            if regex.match(list_1):
+                name_out.append(list_1)
+                s_out.append(float(list_2))
+                l_out.append(float(list_3))
+    for s, element, l in zip(s_out, name_out, l_out):
+        f = s-l
+        plt.bar(f, height, l, bottom, color=color, alpha=0.7) # left, height, width, bottom
 
 def get_ellipse_coords(a=0.0, b=0.0, x=0.0, y=0.0, angle=0.0, k=2):
     """ Draws an ellipse using (360*k + 1) discrete points; based on pseudo code
