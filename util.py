@@ -184,3 +184,43 @@ def get_ellipse_coords(a=0.0, b=0.0, x=0.0, y=0.0, angle=0.0, k=2):
 
     return pts
 
+def get_madx_columns(infile, *args):
+    """
+    >> Input: data file to read, list of column headers that you want to extract
+    >> Output: a dictionary of lists, key accesible with the name of the header
+
+    Example:
+    dict_b1_twiss = get_madx_columns(infile_b1_twiss, 'S', 'L', 'BETX', 'BETY', 'X', 'Y', 'NAME')
+    dict_b1_twiss['S']
+    """
+
+    f = open(infile, 'r')
+    # Skip rows starting with certain symbols
+    column_filter = ('#', '@', '*', '$', '%', '%1=s', '%Ind') #ToDo:function in util.py
+    extract_header = ('#', '@', '$', '%', '%1=s', '%Ind')
+
+    # Choose which parameters you want to extract to a list
+    my_list = list(args)
+    my_dict = {i:[] for i in my_list}
+
+    # Extract the associated column index
+    col_idx = []
+    col_name = [] #ToDo: convert this to tuple to skip the zip
+    for line in f.xreadlines():
+        columns = line.strip('\n').split()
+        for idx, value in enumerate(columns):
+            if columns[0] in extract_header:
+                    continue
+            if value in my_list: # for item in my_list: /if value == item: 
+                col_idx.append(idx-1)
+                col_name.append(value)
+        for index, name in zip(col_idx, col_name):
+            if columns[0] in column_filter:
+                continue
+            if name != 'NAME':
+                my_dict[name].append(float(columns[index]))
+            elif name == 'NAME':
+                my_dict[name].append(columns[index].strip('"'))
+    f.close()
+    return my_dict
+
