@@ -9,6 +9,7 @@ rm -r LSF*
 find results -name "impacts_real.dat" | xargs cat > imp_real.dat
 find results -name "LPI_test.s" | xargs cat > aperture.dat
 find results -name "coll_summary.dat" | xargs cat > coll_sum.dat
+find results -name "dump_ip1.txt" | xargs cat > dump.txt
 
 # Copy back any coll_summary, assuming the first job worked
 cp results/job_1/coll_summary.dat .
