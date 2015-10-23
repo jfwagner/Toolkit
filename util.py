@@ -89,9 +89,7 @@ def get_column(infile, column_number, data_structure, data_type):
 def get_ip1(x,y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
     around IP1 (i.e. convert s coordinate of 26900 m to -100 m).
-
     The function arguments' are the variables x and y that you want to treat, respectively . 
-
     Example:
     var_x, var_y = get_ip1(var_x, var_y)
     """
