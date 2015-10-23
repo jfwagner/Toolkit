@@ -19,6 +19,7 @@ done
 find -name "imp_real.dat" | xargs cat > impacts_real.dat
 find -name "aperture.dat" | xargs cat > LPI.s
 find -name "coll_sum.dat" | xargs cat > coll_sum_tot.dat
+find -name "dump.txt" | xargs cat > dump_ip1.txt
 
 # Copy some needed files
 cp 01/results/job_1/coll_summary.dat .
