@@ -70,3 +70,5 @@ cp collgaps.dat $DIR/results/job_$current
 cp LPI_test.s $DIR/results/job_$current
 cp all_absorptions.dat $DIR/results/job_$current
 cp fort.3 $DIR/results/job_$current
+cp dump_ip1.txt $DIR/results/job_$current
+cp dynksets.dat $DIR/results/job_$current
