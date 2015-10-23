@@ -8,41 +8,38 @@ from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
 from util import get_ip1
+from util import get_madx_columns
+from util import plot_elem
 
-# Choose your data file and open it
-infile = 'twiss_lhcb1.tfs'
-f = open(infile, 'r')
+# Data files
+infile_b1_twiss = 'twiss_lhcb1.tfs'
+infile_b1_survey = 'survey_ip1_b1.tfs'
+infile_b2_twiss = 'twiss_lhcb2.tfs'
+infile_b2_survey = 'survey_ip1_b2.tfs'
 
-# Skip rows starting with certain symbols
-column_filter = ('#', '@', '*', '$', '%', '%1=s', '%Ind') #ToDo:function in util.py
-extract_header = ('#', '@', '$', '%', '%1=s', '%Ind')
+# Get the columns for each file
+dict_b1_twiss = get_madx_columns(infile_b1_twiss, 'S', 'L', 'BETX', 'BETY', 'X', 'Y', 'NAME')
+dict_b1_survey = get_madx_columns(infile_b1_survey, 'S', 'L', 'BETX', 'BETY', 'X', 'Y', 'NAME')
+dict_b2_twiss = get_madx_columns(infile_b2_twiss, 'S', 'L', 'BETX', 'BETY', 'X', 'Y', 'NAME')
+dict_b2_survey = get_madx_columns(infile_b2_survey, 'S', 'L', 'BETX', 'BETY', 'X', 'Y', 'NAME')
 
-# Choose which parameters you want to extract to a list
-my_list = ['S', 'L', 'BETX', 'BETY', 'X', 'Y', 'NAME']
-my_dict = {i:[] for i in my_list}
+# Constants
+gamma_rel = 7460.52280875
+beta_rel = 0.999999991017
+emittance = 2.5e-6
 
-# Extract the associated column index
-col_idx = []
-col_name = [] #ToDo: convert this to tuple to skip the zip
-for line in f.xreadlines():
-    columns = line.strip('\n').split()
-    for idx, value in enumerate(columns):
-        if columns[0] in extract_header:
-                continue
-        if value in my_list: # for item in my_list: /if value == item: 
-            col_idx.append(idx-1)
-            col_name.append(value)
-    for index, name in zip(col_idx, col_name):
-        if columns[0] in column_filter:
-            continue
-        if name != 'NAME':
-            my_dict[name].append(float(columns[index]))
-        elif name == 'NAME':
-            my_dict[name].append(columns[index].strip('"'))
-f.close()
+# Treat data for IP1
+s_b1_twiss, name_b1_twiss = get_ip1(dict_b1_twiss['S'], dict_b1_twiss['NAME']) #ToDo: fix the get_ip1 function
+temp, l_b1_twiss = get_ip1(dict_b1_twiss['S'], dict_b1_twiss['L'])
+temp, y_b1_twiss = get_ip1(dict_b1_twiss['S'], dict_b1_twiss['Y'])
+sx_b1_twiss, betax_b1_twiss = get_ip1(dict_b1_twiss['S'], dict_b1_twiss['BETX'])
+sy_b1_twiss, betay_b1_twiss = get_ip1(dict_b1_twiss['S'], dict_b1_twiss['BETY'])
 
-if len(my_dict['NAME'])!=len(my_dict['S']):
-    print '>> Something is wrong: length of names is not equal to length of s positions'
+s_b1_survey, name_b1_survey = get_ip1(dict_b1_survey['S'], dict_b1_survey['NAME']) #ToDo: fix the get_ip1 function
+temp, l_b1_survey = get_ip1(dict_b1_survey['S'], dict_b1_survey['L'])
+temp, y_b1_survey = get_ip1(dict_b1_survey['S'], dict_b1_survey['Y'])
+sx_b1_survey, betax_b1_survey = get_ip1(dict_b1_survey['S'], dict_b1_survey['BETX'])
+sy_b1_survey, betay_b1_survey = get_ip1(dict_b1_survey['S'], dict_b1_survey['BETY'])
 
 # ------------------------------------------------------------------------------
 # PLOTTING
@@ -62,48 +59,45 @@ rcParams['figure.figsize']=textwidth, textwidth/1.618
 rcParams.update(font_spec)
 
 # Plot the beta functions
-sx, beta_x = get_ip1(my_dict['S'], my_dict['BETX'])
-sy, beta_y = get_ip1(my_dict['S'], my_dict['BETY'])
-plt.plot(sx, beta_x, label='Beta x')
-plt.plot(sy, beta_y, label='Beta y')
+plt.plot(sx_b1_twiss, betax_b1_twiss, label='Beta x')
+plt.plot(sy_b1_twiss, betay_b1_twiss, label='Beta y')
 plt.xlabel("s (m)")
 plt.ylabel("Beta functions (m)")
 plt.xlim([-200,200])
 plt.ylim([0,3e4])
 plt.grid(b=None, which='major')
-# plt.title('HL-LHC Optics 1.2, IP1')
 plt.legend(loc='lower right', prop={'size':9})
 plt.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
 
-# Function to plot different elements
-def plot_elem(color, height, bottom, *args):
-    regex_list = list(args)
-    name = []
-    position = []
-    length = []
-    for a in regex_list:
-        regex = re.compile(a)
-        dict_s, dict_name = get_ip1(my_dict['S'], my_dict['NAME'])
-        dict_s_2, dict_l = get_ip1(my_dict['S'], my_dict['L'])
-        for a, b, c in zip( dict_name, dict_s, dict_l):
-            if regex.match(a):
-                name.append(a)
-                position.append(float(b))
-                length.append(float(c))
-    for s, element, l in zip(position, name, length):
-        f = s-l
-        plt.bar(f, height, l, bottom, color=color, alpha=0.7) # left, height, width, bottom
-
-# Use the function to plot groups of elements
-height=3e3
-bottom=2.4e4
-plot_elem('red', height, bottom, 'MQXFA', 'MQXFB') # Triplet: Q1, Q3, Q2
-plot_elem('blue', height, bottom, 'MBX', 'MBRC', 'MBRS', 'MBRB', 'MB') # Dipoles: D1, D2, D3, D4
-plot_elem('orange', height, bottom, 'TAXS', 'TAXN') # Passive protectors: TAS, TAN
-plot_elem('black', height, bottom, 'TCT') # Tertiary collimators
-plot_elem('green', height, bottom, 'ACF') # CRab cavities
+# Plot the elements
+height = 3e3
+bottom = 2.4e4
+plot_elem('red', height, bottom, name_b1_twiss, s_b1_twiss, l_b1_twiss,  'MQXFA', 'MQXFB') # Triplet: Q1, Q3, Q2
+plot_elem('blue', height, bottom, name_b1_twiss, s_b1_twiss, l_b1_twiss,  'MBX', 'MBRC', 'MBRS', 'MBRB', 'MB') # Dipoles: D1, D2, D3, D4
+plot_elem('orange', height, bottom, name_b1_twiss, s_b1_twiss, l_b1_twiss,  'TAXS', 'TAXN') # Passive protectors: TAS, TAN
+plot_elem('black', height, bottom, name_b1_twiss, s_b1_twiss, l_b1_twiss,  'TCT') # Tertiary collimators
+plot_elem('green', height, bottom, name_b1_twiss, s_b1_twiss, l_b1_twiss,  'ACF') # CRab cavities
 
 # Save the plot
 plt.subplots_adjust(left=0.12, bottom=0.15, right=0.97, top=0.91)
 plt.savefig('beta_functions.png', dpi=DPI)
 plt.clf()
+
+# Plot the beams
+s_b1_twiss_array = np.asarray(s_b1_twiss)
+y_b1_twiss_array = np.asarray(y_b1_twiss)
+y_b1_survey_array = np.asarray(y_b1_survey)
+betay_b1_twiss_array = np.asarray(betay_b1_twiss)
+sigma_y = np.sqrt(betay_b1_twiss_array*emittance)
+
+plt.plot(s_b1_twiss_array, y_b1_twiss_array + y_b1_survey_array, color='blue', label='Beam 1')
+plt.plot(s_b1_twiss_array, y_b1_twiss_array + y_b1_survey_array  + sigma_y, color='blue')
+plt.plot(s_b1_twiss_array, y_b1_twiss_array + y_b1_survey_array - sigma_y, color='blue')
+plt.xlabel("s (m)")
+plt.ylabel("Orbit (m)")
+plt.xlim([-200,200])
+# plt.ylim([0,3e4])
+plt.grid(b=None, which='major')
+plt.legend(loc='lower right', prop={'size':9})
+plt.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
+plt.show()
