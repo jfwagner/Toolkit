@@ -1,6 +1,8 @@
+#!/usr/local/bin/python
 import os
+import sys
 
-rootdir = '/home/andrea/afs_lhc_mib/cc_sims/tau_1/results'
+rootdir = sys.argv[1]
 
 phase = []
 particles = []
@@ -15,20 +17,22 @@ for item in os.listdir(rootdir):
                 particles.append(sum(1 for line in open(os.path.join(rootdir, item, data))))
 
 if len(particles) == len(phase):
-    print '>> Correct!'
-
+    print '>> All jobs seem to be there!'
+    print '>> Number of lines = ', len(phase)
+else:
+    print '>> There seems to be a problem'
 tau = []
 for number in range(1,len(phase) + 1):
-    tau.append(1)
+    tau.append(4)
 
-outfile = 'tau_1.txt'
+outfile = '3d_data.txt'
 f = open(outfile,'w')
 for e1, e2, e3 in zip(tau, phase, particles):
-    print max(particles)
     f.write('%.0f %.0f %.0f \n' % (e1, e2, e3-1))
 f.close()
     
-
+print '>> Maximum of particles lost = ', max(particles)/64, '%'
+print '>> Maximum of particles lost = ', max(particles)
 
 
             
