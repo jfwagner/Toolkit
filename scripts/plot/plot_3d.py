@@ -80,7 +80,7 @@ textwidth = 6
 font_spec = {"font.family": "serif", # use as default font
              "font.serif": ["New Century Schoolbook"], # custom serif font
              "font.sans-serif": ["helvetica"], # custom sans-serif font
-             "font.size":8,
+             "font.size":12,
              "font.weight":"bold",
             }
 rc('text', usetex=True)
@@ -93,15 +93,41 @@ triang = mtri.Triangulation(X, Y)
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1, projection='3d')
 # ax.plot_trisurf(triang, Z, cmap=plt.cm.CMRmap)
-ax.plot_trisurf(Y, X, Z, cmap=cm.jet, linewidth=0.2)
-ax.set_ylabel("Time constant of failure (turns)")
-ax.set_xlabel("Phase trip (degrees)")
+ax.plot_trisurf(X, Y, Z, cmap=cm.jet, linewidth=0.2)
+ax.set_xlabel("Time constant of failure (turns)")
+ax.set_ylabel("Phase trip (degrees)")
 ax.set_zlabel("Bunch lost (\%)")
-ax.set_xlim([0,360])
+ax.set_ylim([0,360])
 # plt.grid(b=None, which='major')
-# plt.title('Loss Maps')
+plt.title('Failure of 2 crab cavities')
 # plt.legend(loc='upper right', prop={'size':6})
 # plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
 plt.savefig('phases.png', dpi=DPI)
 plt.clf()
 # plt.show()
+
+plt.scatter(t1_f,t1_p, marker="+", color="blue", label='1 turn')
+plt.scatter(t2_f,t2_p, marker="+",  color="red",label='2 turns')
+plt.scatter(t3_f,t3_p, marker="+", color="green", label='3 turns')
+plt.scatter(t4_f,t4_p, marker="+",  color="orange",label='4 turns')
+
+
+par = []
+ph1 = []
+ph2 = []
+for i in range(1,101):
+    par.append(i)
+    ph1.append(140)
+    ph2.append(360)
+    
+# plt.plot(ph,par, color="black")
+plt.axvspan(140, 360, alpha=0.2, color='blue')
+plt.xlabel("Phase shift (deg)")
+plt.ylabel("Bunch lost (\%)")
+plt.xlim([0,360])
+# plt.ylim([0,100])
+plt.grid(b=None, which='major')
+plt.legend(loc='upper left', prop={'size':6})
+plt.subplots_adjust(left=0.13, bottom=0.14, right=0.94, top=0.93)
+plt.savefig('phases_2.png', dpi=DPI)
+plt.clf()
