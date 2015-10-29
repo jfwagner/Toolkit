@@ -3,6 +3,7 @@ import os
 import sys
 
 rootdir = sys.argv[1]
+turn = float(sys.argv[2])
 
 phase = []
 particles = []
@@ -23,7 +24,7 @@ else:
     print '>> There seems to be a problem'
 tau = []
 for number in range(1,len(phase) + 1):
-    tau.append(4)
+    tau.append(turn)
 
 outfile = '3d_data.txt'
 f = open(outfile,'w')
@@ -31,8 +32,8 @@ for e1, e2, e3 in zip(tau, phase, particles):
     f.write('%.0f %.0f %.0f \n' % (e1, e2, e3-1))
 f.close()
     
-print '>> Maximum of particles lost = ', max(particles)/64, '%'
-print '>> Maximum of particles lost = ', max(particles)
+print '>> Maximum percentage  lost = ', max(particles)/64, '%'
+print '>> Number of particles lost = ', max(particles)
 
 
             
