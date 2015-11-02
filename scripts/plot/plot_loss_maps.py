@@ -118,7 +118,7 @@ plt.hist(pos_lpi, 500, color='green', alpha=0.8, linewidth=0.1, weights=weights_
 plt.xlabel("s (m)")
 plt.ylabel("Particles lost per 10 cm")
 plt.grid(b=None, which='major')
-plt.title('Loss Maps')
+# plt.title('Loss Maps')
 plt.legend(loc='upper right', prop={'size':6})
 plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
 plt.savefig('loss_maps.png', dpi=DPI)
