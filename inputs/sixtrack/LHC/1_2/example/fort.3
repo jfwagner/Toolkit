@@ -2,7 +2,7 @@ GEOM
 PRINTOUT
 NEXT
 TRACKING
-50 0 32 0 17 0 1
+10 0 32 0 17 0 1
  1 1 0 0 0
 0 0 1 1 1 20000 2
 NEXT
@@ -24,6 +24,9 @@ INITIAL COORDINATES
 7000000.0
 7000000.0
 NEXT
+FLUCTUATION
+100000 1 7 3
+NEXT
 ITERATION ACCURACY
 50 0.10E-13 0.10E-14
 10 0.10E-09 0.10E-09
@@ -39,39 +42,6 @@ NEXT
 SYNC
 35640 .0003225 16 0 26658.864 938.2796 1
  1 1
-NEXT
-DYNK
-FUN off CONST 0.0
-FUN on_1a CONST 2.467571280
-FUN on_1b CONST 2.467571280
-FUN on_1c CONST 2.467571280
-FUN on_1d CONST 2.467571280
-FUN on_2a CONST 2.421832080
-FUN on_2b CONST 2.421832080
-FUN on_2c CONST 2.421832080
-FUN on_2d CONST 2.421832080
-FUN c2 FILELIN crab2
-/-----------------------------------
-SET CRAB1A voltage on_1a 1 50 0
-SET CRAB1B voltage on_1b 1 50 0
-SET CRAB1C voltage on_1c 1 50 0
-SET CRAB1D voltage on_1d 1 50 0
-/-----------------------------------
-SET CRAB2A voltage off 1 1 0
-SET CRAB2B voltage off 1 1 0
-SET CRAB2C voltage off 1 1 0
-SET CRAB2D voltage off 1 1 0
-/-----------------------------------
-SET CRAB2A voltage on_2a 2 50 0
-SET CRAB2B voltage on_2b 2 50 0
-SET CRAB2C voltage on_2c 2 50 0
-SET CRAB2D voltage on_2d 2 50 0
-/-----------------------------------
-SET CRAB2A phase c2 1 50 0
-SET CRAB2B phase c2 1 50 0
-SET CRAB2C phase c2 1 50 0
-SET CRAB2D phase c2 1 50 0
-/-----------------------------------
 NEXT
 COLLIMATION
 .TRUE. 
