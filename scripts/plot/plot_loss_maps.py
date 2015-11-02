@@ -104,7 +104,8 @@ for line in f.xreadlines():
     columns = line.strip('\n').split()
     if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind':
         continue
-    pos.append(d[int(columns[0])])
+    if columns[7] == '1':
+        pos.append(d[int(columns[0])])
 f.close()
 
 # ------------------------------------------------------------------------------
@@ -114,6 +115,7 @@ pos_coll = np.asarray(pos)
 
 # Percentages
 coll_per = str(round((len(pos_coll)*100)/total_particles, 1))
+print '>>', coll_per, '% lost'
 
 # Weights
 weights_coll = np.ones_like(pos_coll)/total_particles
