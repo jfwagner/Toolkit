@@ -1,10 +1,20 @@
 #!/usr/local/bin/python
+import os
 import sys
 import numpy as np
 from datetime import datetime
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
+
+# ------------------------------------------------------------------------------
+# Plot characteristics
+# ------------------------------------------------------------------------------
+DPI = 300
+textwidth = 6
+rc('font',**{'family':'serif','serif':['Computer Modern Roman'], 'size':10})
+rc('text', usetex=True)
+rcParams['figure.figsize']=textwidth, textwidth/1.618
 
 # ------------------------------------------------------------------------------
 # Feed the input to the script by command line
@@ -19,14 +29,21 @@ start_time = datetime.now()
 # ------------------------------------------------------------------------------
 # ################################## APERTURE ##################################
 # ------------------------------------------------------------------------------
-g = open(infile_lpi, 'r')
-pos_lpi = []
-for line in g.xreadlines():
-    columns = line.strip('\n').split()
-    if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind':
-        continue
-    pos_lpi.append(float(columns[2]))
-g.close()
+if os.stat(infile_lpi).st_size == 0:
+    print '>> No losses in the aperture'
+else:
+    g = open(infile_lpi, 'r')
+    pos_lpi = []
+    for line in g.xreadlines():
+        columns = line.strip('\n').split()
+        if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind':
+            continue
+        pos_lpi.append(float(columns[2]))
+    g.close()
+    pos_ap = np.asarray(pos_lpi)
+    ap_per = str(round((len(pos_ap)*100)/total_particles, 3))
+    weights_ap = np.ones_like(pos_ap)/total_particles
+    plt.hist(pos_lpi, 500, color='green', alpha=0.8, linewidth=0.1, weights=weights_ap, log=True, label='Aperture ' + ap_per + '%')
 
 # ------------------------------------------------------------------------------
 # ############################### COLLIMATION ##################################
@@ -93,28 +110,15 @@ f.close()
 # ------------------------------------------------------------------------------
 # ################################### PLOT #####################################
 # ------------------------------------------------------------------------------ 
-# ------------------------------------------------------------------------------
-# Plot characteristics
-# ------------------------------------------------------------------------------
-DPI = 300
-textwidth = 6
-rc('font',**{'family':'serif','serif':['Computer Modern Roman'], 'size':10})
-rc('text', usetex=True)
-rcParams['figure.figsize']=textwidth, textwidth/1.618
-
 pos_coll = np.asarray(pos)
-pos_ap = np.asarray(pos_lpi)
 
 # Percentages
 coll_per = str(round((len(pos_coll)*100)/total_particles, 1))
-ap_per = str(round((len(pos_ap)*100)/total_particles, 3))
 
 # Weights
 weights_coll = np.ones_like(pos_coll)/total_particles
-weights_ap = np.ones_like(pos_ap)/total_particles
 
 plt.hist(pos, 500, color='black', alpha=0.8, linewidth=0.1, weights=weights_coll, log=True, label='Collimation ' + coll_per + '%')
-plt.hist(pos_lpi, 500, color='green', alpha=0.8, linewidth=0.1, weights=weights_ap, log=True, label='Aperture ' + ap_per + '%')
 plt.xlabel("s (m)")
 plt.ylabel("Particles lost per 10 cm")
 plt.grid(b=None, which='major')
