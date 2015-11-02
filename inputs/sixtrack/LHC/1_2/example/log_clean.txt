@@ -1,0 +1,8 @@
+- - - - - - - -
+         Impact file: FLUKA_impacts.dat
+           Loss file: LPI_test.s
+     Collimator file: CollPositionsHL.b1.dat
+ "coll_summary" file: coll_summary.dat
+- - - - - - - -
+Number of collimators: 55
+Number of collimator positions: 55
