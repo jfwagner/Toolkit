@@ -36,7 +36,11 @@ for line in g.xreadlines():
     value.append(float(columns[5]))
 g.close()
 
+my_list = []
 for e1,e2,e3,e4 in zip(turn, element, attribute, value):
     my_dict = dict(zip(['turn', 'element', 'attribute', 'value'],[e1, e2, e3, e4]))
+    my_list.append(my_dict)
 
-print my_dict
+for item in my_list:
+    if my_list[0]['attribute'] == 'voltage':
+#TBC
