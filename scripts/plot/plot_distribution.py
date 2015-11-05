@@ -1,4 +1,5 @@
 #!/usr/local/bin/python
+import sys
 import numpy as np
 from datetime import datetime
 from matplotlib import pyplot as plt
@@ -9,13 +10,11 @@ from util import *
 start_time = datetime.now()
 
 # Feed the input to the script by command line
-user_input = raw_input('DUMP file/coordinate 1/coordinate 2/turn/bins >> ')
-list_input = user_input.split('/')
-infile = list_input[0].strip()
-coord_hor = list_input[1].strip()
-coord_ver = list_input[2].strip()
-turn = list_input[3].strip()
-nbins =  int(list_input[4].strip())
+infile = sys.argv[1]
+coord_hor = sys.argv[2]
+coord_ver = sys.argv[3]
+turn = float(sys.argv[4])
+nbins =  int(sys.argv[5])
 
 print '>> Plotting distribution', coord_hor, ',', coord_ver
 
