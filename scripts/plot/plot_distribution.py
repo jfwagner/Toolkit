@@ -13,8 +13,9 @@ start_time = datetime.now()
 infile = sys.argv[1]
 coord_hor = sys.argv[2]
 coord_ver = sys.argv[3]
-turn = float(sys.argv[4])
-nbins =  int(sys.argv[5])
+turn_first = float(sys.argv[4])
+turn_last = float(sys.argv[5])
+nbins =  int(sys.argv[6])
 
 print '>> Plotting distribution', coord_hor, ',', coord_ver
 
@@ -42,27 +43,36 @@ for k, v in my_tup_3:
 # Loop >ONCE< through the DUMP file to extract >only< the relevant information
 # ID turn s[m] x[mm] xp[mrad] y[mm] yp[mrad] z[mm] dE/E ktrack
 f = open(infile, 'r')
-coord_1 = []
-coord_2 = []
+coord_tot_1 = []
+coord_tot_2 = []
+turn_data = []
+for line in f.xreadlines():
+    columns = line.strip('\n').split()
+    if columns[0] in ('#', '@', '*', '$', '%', '%1=s', '%Ind'):
+        continue
+    if coord_ver == 'e':
+        turn_data.append(int(columns[1]))
+        coord_tot_2.append(float(columns[d_1[coord_ver]]))
+        coord_tot_1.append(float(columns[d_1[coord_hor]])*10**-3)
+    elif coord_hor == 'e':
+        coord_tot_1.append(float(columns[d_1[coord_ver]]))
+        coord_tot_2.append(float(columns[d_1[coord_ver]])*10**-3)
+        turn_data.append(int(columns[1]))
+    else:
+        coord_tot_1.append(float(columns[d_1[coord_hor]])*10**-3)
+        coord_tot_2.append(float(columns[d_1[coord_ver]])*10**-3)
+        turn_data.append(int(columns[1]))
 
-for t in range(1, int(turn) + 1):
+for t in range(int(turn_first), int(turn_last) + 1):
+    coord_1 = []
+    coord_2 = []
     turn_i = "%i"%t
     print '>> Turn', t
-
-    for line in f.xreadlines():
-        columns = line.strip('\n').split()
-        if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind' or columns[1] != turn_i:
-            continue
-        if coord_ver == 'e':
-            coord_2.append(float(columns[d_1[coord_ver]]))
-            coord_1.append(float(columns[d_1[coord_hor]])*10**-3)
-        elif coord_hor == 'e':
-            coord_1.append(float(columns[d_1[coord_ver]]))
-            coord_2.append(float(columns[d_1[coord_ver]])*10**-3)
-        else:
-            coord_1.append(float(columns[d_1[coord_hor]])*10**-3)
-            coord_2.append(float(columns[d_1[coord_ver]])*10**-3)
-
+    for e1, e2, e3 in zip(turn_data, coord_tot_1, coord_tot_2):
+        if e1 == t:
+            coord_1.append(e2)
+            coord_2.append(e3)
+            
     # Plot characteristics
     DPI = 300
     textwidth = 6
@@ -116,7 +126,7 @@ for t in range(1, int(turn) + 1):
         phiS    = 0.0      # Radians, synchronous RF phase
         E0      = 7e12     # Beam energy, eV
         p0      = np.sqrt(E0**2-mp**2) #Beam momentum, eV/c
-        
+
         conversion = 299792458/(400.8e6)
         delta = np.linspace(-1e-3*conversion, 1e-3*conversion,200) #delta p / p
         phi   = np.linspace(-3*np.pi,1*np.pi,200)
@@ -124,17 +134,17 @@ for t in range(1, int(turn) + 1):
 
         p = p0*(1.0+DELTA) #eV/c
         E = np.sqrt(p**2 + mp**2)
-        
+
         DELTA_E = E/E0-1
-        
+
         H1 = 0.5* omegaRF* slip*DELTA**2
         H2 = omega0*V/(2*np.pi*beta**2*E)*(np.cos(PHI)-np.cos(phiS)+(PHI-phiS)*np.sin(phiS))
-        
+
         H = H1+H2
 
         PHIp = PHI+np.pi #above transition energy
         plt.contour(PHIp*0.1,DELTA_E,H,40, linewidths=0.3, cmap='terrain_r')
-        
+
     elif coord_hor == 'e' or coord_ver == 'e':
         print '>> No sigmas nor bucket for this coordinate combination. Try (z,e).'
     else:
@@ -155,12 +165,12 @@ for t in range(1, int(turn) + 1):
 
 
     plt.subplots_adjust(left=0.14, bottom=0.17, right=1, top=0.82)
-    
-    if t <= 9:
+
+    if turn_i <= 9:
         plt.savefig('dist_turn_0'+  turn_i + '_'+ coord_hor + '_' + coord_ver +'.png', dpi=DPI)
-    elif t > 9:
+    elif turn_i > 9:
         plt.savefig('dist_turn_'+  turn_i + '_'+ coord_hor + '_' + coord_ver +'.png', dpi=DPI)
-    
+
     plt.clf()
 
 f.close()
