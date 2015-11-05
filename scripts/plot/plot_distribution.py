@@ -139,19 +139,19 @@ for t in range(1, int(turn) + 1):
     elif coord_hor == 'e' or coord_ver == 'e':
         print '>> No sigmas nor bucket for this coordinate combination. Try (z,e).'
     else:
-        pts1 = get_ellipse_coords(a=std(coord_1), b=std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts1 = get_ellipse_coords(a=np.std(coord_1), b=np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
         plt.plot(pts1[:,0], pts1[:,1], color="black", linewidth=0.3)
 
-        pts2 = get_ellipse_coords(a=2*std(coord_1), b=2*std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts2 = get_ellipse_coords(a=2*np.std(coord_1), b=2*np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
         plt.plot(pts2[:,0], pts2[:,1], color="black", linewidth=0.3)
 
-        pts3 = get_ellipse_coords(a=3*std(coord_1), b=3*std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts3 = get_ellipse_coords(a=3*np.std(coord_1), b=3*np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
         plt.plot(pts3[:,0], pts3[:,1], color="black", linewidth=0.3)
 
-        pts4 = get_ellipse_coords(a=4*std(coord_1), b=4*std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts4 = get_ellipse_coords(a=4*np.std(coord_1), b=4*np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
         plt.plot(pts4[:,0], pts4[:,1], color="black", linewidth=0.3)
 
-        pts5 = get_ellipse_coords(a=5*std(coord_1), b=5*std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts5 = get_ellipse_coords(a=5*np.std(coord_1), b=5*np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
         plt.plot(pts5[:,0], pts5[:,1], color="black", linewidth=0.3)
 
 
