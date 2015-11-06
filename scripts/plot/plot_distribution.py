@@ -166,9 +166,9 @@ for t in range(int(turn_first), int(turn_last) + 1):
 
     plt.subplots_adjust(left=0.14, bottom=0.17, right=1, top=0.82)
 
-    if turn_i <= 9:
+    if t <= 9:
         plt.savefig('dist_turn_0'+  turn_i + '_'+ coord_hor + '_' + coord_ver +'.png', dpi=DPI)
-    elif turn_i > 9:
+    elif t > 9:
         plt.savefig('dist_turn_'+  turn_i + '_'+ coord_hor + '_' + coord_ver +'.png', dpi=DPI)
 
     plt.clf()
