@@ -50,6 +50,9 @@ Thumbs.db
 *.toc
 *.bib
 
+# IPython 1.0 creates intermediate checkpoints
+notebooks/.ipynb_checkpoints/*
+
 doc/images
 doc/*.madx
 doc/*.py
