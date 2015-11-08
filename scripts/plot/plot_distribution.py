@@ -1,10 +1,14 @@
 #!/usr/local/bin/python
+
 import sys
-import numpy as np
+from collections import defaultdict
 from datetime import datetime
+
+import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
+
 from util import *
 
 start_time = datetime.now()
@@ -13,8 +17,9 @@ start_time = datetime.now()
 infile = sys.argv[1]
 coord_hor = sys.argv[2]
 coord_ver = sys.argv[3]
-turn_first = float(sys.argv[4])
-turn_last = float(sys.argv[5])
+turn_first = int(sys.argv[4])
+turn_last = int(sys.argv[5])
+turns = range(turn_first, turn_last + 1)
 nbins =  int(sys.argv[6])
 
 print '>> Plotting distribution', coord_hor, ',', coord_ver
@@ -23,55 +28,41 @@ print '>> Plotting distribution', coord_hor, ',', coord_ver
 coords = ['x', 'xp', 'y', 'yp', 'z', 'e']
 
 col_number = [3, 4, 5, 6, 7, 8]
-my_tup_1 = zip(coords, col_number)
-d_1 = {}
-for k, v in my_tup_1:
-    d_1[k] = v
+d_1 = {k: v for k, v in zip(coords, col_number)}  # dict comprehension
     
 limits = [[-4e-5, 4e-5], [-2e-4, 2e-4], [-8e-5, 8e-5], [1e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]]
-my_tup_2 = zip(coords, limits)
-d_2 = {}
-for k, v in my_tup_2:
-    d_2[k] = v
+d_2 = {k: v for k, v in zip(coords, limits)}
 
 offset = [0, 0, 0, 0.3e-3, 0, 0]
-my_tup_3 = zip(coords, offset)
-d_3 = {}
-for k, v in my_tup_3:
-    d_3[k] = v
+d_3 = {k: v for k, v in zip(coords, offset)}
     
 # Loop >ONCE< through the DUMP file to extract >only< the relevant information
 # ID turn s[m] x[mm] xp[mrad] y[mm] yp[mrad] z[mm] dE/E ktrack
-f = open(infile, 'r')
-coord_tot_1 = []
-coord_tot_2 = []
-turn_data = []
-for line in f.xreadlines():
-    columns = line.strip('\n').split()
-    if columns[0] in ('#', '@', '*', '$', '%', '%1=s', '%Ind'):
-        continue
-    if coord_ver == 'e':
-        turn_data.append(int(columns[1]))
-        coord_tot_2.append(float(columns[d_1[coord_ver]]))
-        coord_tot_1.append(float(columns[d_1[coord_hor]])*10**-3)
-    elif coord_hor == 'e':
-        coord_tot_1.append(float(columns[d_1[coord_ver]]))
-        coord_tot_2.append(float(columns[d_1[coord_ver]])*10**-3)
-        turn_data.append(int(columns[1]))
-    else:
-        coord_tot_1.append(float(columns[d_1[coord_hor]])*10**-3)
-        coord_tot_2.append(float(columns[d_1[coord_ver]])*10**-3)
-        turn_data.append(int(columns[1]))
+turn_data = defaultdict(lambda: defaultdict(list))
+with open(infile, 'r') as f:
+    for line in f.xreadlines():
+        columns = line.strip('\n').split()
+        if columns[0] in ('#', '@', '*', '$', '%', '%1=s', '%Ind'):
+            continue
+        turn = int(columns[1])
+        if turn not in turns:
+            continue
+        if coord_ver == 'e':
+            coord_tot_1 = float(columns[d_1[coord_hor]])*10**-3
+            coord_tot_2 = float(columns[d_1[coord_ver]])
+        elif coord_hor == 'e':
+            coord_tot_1 = float(columns[d_1[coord_ver]])
+            coord_tot_2 = float(columns[d_1[coord_ver]])*10**-3
+        else:
+            coord_tot_1 = float(columns[d_1[coord_hor]])*10**-3
+            coord_tot_2 = float(columns[d_1[coord_ver]])*10**-3
+        turn_data[turn]['coord_tot_1'].append(coord_tot_1)
+        turn_data[turn]['coord_tot_2'].append(coord_tot_2)
 
-for t in range(int(turn_first), int(turn_last) + 1):
-    coord_1 = []
-    coord_2 = []
-    turn_i = "%i"%t
-    print '>> Turn', t
-    for e1, e2, e3 in zip(turn_data, coord_tot_1, coord_tot_2):
-        if e1 == t:
-            coord_1.append(e2)
-            coord_2.append(e3)
+for turn in turns:
+    print '>> Turn', turn
+    coord_1 = turn_data[turn]['coord_tot_1']
+    coord_2 = turn_data[turn]['coord_tot_2']
             
     # Plot characteristics
     DPI = 300
@@ -88,7 +79,7 @@ for t in range(int(turn_first), int(turn_last) + 1):
     plt.pcolormesh(xedges, yedges, Hmasked, norm=None, vmin=0, vmax=100)
     plt.colorbar()
 
-    plt.title('Turn ' + turn_i)
+    plt.title('Turn {}'.format(turn))
     plt.ticklabel_format(style='sci',axis='x',scilimits=(0,0))
     plt.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
 
@@ -163,17 +154,9 @@ for t in range(int(turn_first), int(turn_last) + 1):
         pts5 = get_ellipse_coords(a=5*np.std(coord_1), b=5*np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
         plt.plot(pts5[:,0], pts5[:,1], color="black", linewidth=0.3)
 
-
     plt.subplots_adjust(left=0.14, bottom=0.17, right=1, top=0.82)
-
-    if t <= 9:
-        plt.savefig('dist_turn_0'+  turn_i + '_'+ coord_hor + '_' + coord_ver +'.png', dpi=DPI)
-    elif t > 9:
-        plt.savefig('dist_turn_'+  turn_i + '_'+ coord_hor + '_' + coord_ver +'.png', dpi=DPI)
-
+    plt.savefig('dist_turn_{:02d}_{}_{}.png'.format(turn, coord_hor, coord_ver), dpi=DPI)
     plt.clf()
-
-f.close()
 
 end_time = datetime.now()
 print('>> Duration: {}'.format(end_time - start_time))
