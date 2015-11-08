@@ -67,21 +67,21 @@ for turn in turns:
     # Plot characteristics
     DPI = 300
     textwidth = 6
-    rc('font',**{'family':'serif','serif':['Computer Modern Roman'], 'size':10})
+    rc('font', **{'family': 'serif', 'serif': ['Computer Modern Roman'], 'size':10})
     rc('text', usetex=True)
-    rcParams['figure.figsize']=textwidth, textwidth/1.618
+    rcParams['figure.figsize'] = textwidth, textwidth / 1.618
 
     # 2D histogram
     H, xedges, yedges = np.histogram2d(coord_1, coord_2, bins=nbins)
     H = np.rot90(H)   # H needs to be rotated and flipped
     H = np.flipud(H)
-    Hmasked = np.ma.masked_where(H==0,H) # Mask pixels with a value of zero
+    Hmasked = np.ma.masked_where(H == 0, H) # Mask pixels with a value of zero
     plt.pcolormesh(xedges, yedges, Hmasked, norm=None, vmin=0, vmax=100)
     plt.colorbar()
 
     plt.title('Turn {}'.format(turn))
-    plt.ticklabel_format(style='sci',axis='x',scilimits=(0,0))
-    plt.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
+    plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
 
     # Add the correct units to the labels depending on the coordinate
     for letter in coord_hor:
@@ -105,53 +105,53 @@ for turn in turns:
 
     # Plot the bucket or the sigmas
     if coord_hor == 'z' and coord_ver == 'e':
-        mp = 0.938272046e9 #proton mass, eV/c^2
-        e  = 1.60217657e-19 #C, electron charge
-        c  = 2.99792485e8   #m/s, speed of light
-        h       = 35640    #RF harmonic number
-        omegaRF = 400.8e6*np.pi*2    #Hz, omegaRF = h*omega0
-        omega0  = omegaRF/h
-        slip    = 3.467e-4 #Slip factor @ collission
-        V       = 16e6     #V, RF voltage @ collissions
-        beta    = 1.0      # Relativistic beta
-        phiS    = 0.0      # Radians, synchronous RF phase
-        E0      = 7e12     # Beam energy, eV
-        p0      = np.sqrt(E0**2-mp**2) #Beam momentum, eV/c
+        mp      = 0.938272046e9                 # proton mass, eV/c^2
+        e       = 1.60217657e-19                # C, electron charge
+        c       = 2.99792485e8                  # m/s, speed of light
+        h       = 35640                         # RF harmonic number
+        omegaRF = 400.8e6 * np.pi * 2           # Hz, omegaRF = h*omega0
+        omega0  = omegaRF / h
+        slip    = 3.467e-4                      # Slip factor @ collission
+        V       = 16e6                          # V, RF voltage @ collissions
+        beta    = 1.0                           # Relativistic beta
+        phiS    = 0.0                           # Radians, synchronous RF phase
+        E0      = 7e12                          # Beam energy, eV
+        p0      = np.sqrt(E0 ** 2 - mp ** 2)    # Beam momentum, eV/c
 
-        conversion = 299792458/(400.8e6)
-        delta = np.linspace(-1e-3*conversion, 1e-3*conversion,200) #delta p / p
-        phi   = np.linspace(-3*np.pi,1*np.pi,200)
-        DELTA,PHI = np.meshgrid(delta,phi)
+        conversion = 299792458 / 400.8e6
+        delta = np.linspace(-1e-3 * conversion, 1e-3 * conversion, 200) # delta p / p
+        phi   = np.linspace(-3 * np.pi, 1 * np.pi, 200)
+        DELTA,PHI = np.meshgrid(delta, phi)
 
-        p = p0*(1.0+DELTA) #eV/c
-        E = np.sqrt(p**2 + mp**2)
+        p = p0 * (1.0 + DELTA)  # eV/c
+        E = np.sqrt(p ** 2 + mp ** 2)
 
-        DELTA_E = E/E0-1
+        DELTA_E = E / E0 - 1
 
-        H1 = 0.5* omegaRF* slip*DELTA**2
-        H2 = omega0*V/(2*np.pi*beta**2*E)*(np.cos(PHI)-np.cos(phiS)+(PHI-phiS)*np.sin(phiS))
+        H1 = 0.5 * omegaRF * slip * DELTA ** 2
+        H2 = omega0 * V / (2 * np.pi * beta ** 2 * E) * (np.cos(PHI) - np.cos(phiS) + (PHI - phiS) * np.sin(phiS))
 
-        H = H1+H2
+        H = H1 + H2
 
-        PHIp = PHI+np.pi #above transition energy
-        plt.contour(PHIp*0.1,DELTA_E,H,40, linewidths=0.3, cmap='terrain_r')
+        PHIp = PHI + np.pi  # above transition energy
+        plt.contour(PHIp * 0.1, DELTA_E, H, 40, linewidths=0.3, cmap='terrain_r')
 
     elif coord_hor == 'e' or coord_ver == 'e':
         print '>> No sigmas nor bucket for this coordinate combination. Try (z,e).'
     else:
-        pts1 = get_ellipse_coords(a=np.std(coord_1), b=np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts1 = get_ellipse_coords(a=np.std(coord_1), b=np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts1[:,0], pts1[:,1], color="black", linewidth=0.3)
 
-        pts2 = get_ellipse_coords(a=2*np.std(coord_1), b=2*np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts2 = get_ellipse_coords(a=2 * np.std(coord_1), b=2 * np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts2[:,0], pts2[:,1], color="black", linewidth=0.3)
 
-        pts3 = get_ellipse_coords(a=3*np.std(coord_1), b=3*np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts3 = get_ellipse_coords(a=3 * np.std(coord_1), b=3 * np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts3[:,0], pts3[:,1], color="black", linewidth=0.3)
 
-        pts4 = get_ellipse_coords(a=4*np.std(coord_1), b=4*np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts4 = get_ellipse_coords(a=4 * np.std(coord_1), b=4 * np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts4[:,0], pts4[:,1], color="black", linewidth=0.3)
 
-        pts5 = get_ellipse_coords(a=5*np.std(coord_1), b=5*np.std(coord_2), x=0, y=d_3[coord_ver],k=1)
+        pts5 = get_ellipse_coords(a=5 * np.std(coord_1), b=5 * np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts5[:,0], pts5[:,1], color="black", linewidth=0.3)
 
     plt.subplots_adjust(left=0.14, bottom=0.17, right=1, top=0.82)
