@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
 
-from util import *
+from util import get_ellipse_coords
 
 start_time = datetime.now()
 
@@ -139,19 +139,21 @@ for turn in turns:
     elif coord_hor == 'e' or coord_ver == 'e':
         print '>> No sigmas nor bucket for this coordinate combination. Try (z,e).'
     else:
-        pts1 = get_ellipse_coords(a=np.std(coord_1), b=np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
+        std_coord_1 = np.std(coord_1)
+        std_coord_2 = np.std(coord_2)
+        pts1 = get_ellipse_coords(a=std_coord_1, b=std_coord_2, x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts1[:,0], pts1[:,1], color="black", linewidth=0.3)
 
-        pts2 = get_ellipse_coords(a=2 * np.std(coord_1), b=2 * np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
+        pts2 = get_ellipse_coords(a=2 * std_coord_1, b=2 * std_coord_2, x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts2[:,0], pts2[:,1], color="black", linewidth=0.3)
 
-        pts3 = get_ellipse_coords(a=3 * np.std(coord_1), b=3 * np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
+        pts3 = get_ellipse_coords(a=3 * std_coord_1, b=3 * std_coord_2, x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts3[:,0], pts3[:,1], color="black", linewidth=0.3)
 
-        pts4 = get_ellipse_coords(a=4 * np.std(coord_1), b=4 * np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
+        pts4 = get_ellipse_coords(a=4 * std_coord_1, b=4 * std_coord_2, x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts4[:,0], pts4[:,1], color="black", linewidth=0.3)
 
-        pts5 = get_ellipse_coords(a=5 * np.std(coord_1), b=5 * np.std(coord_2), x=0, y=d_3[coord_ver], k=1)
+        pts5 = get_ellipse_coords(a=5 * std_coord_1, b=5 * std_coord_2, x=0, y=d_3[coord_ver], k=1)
         plt.plot(pts5[:,0], pts5[:,1], color="black", linewidth=0.3)
 
     plt.subplots_adjust(left=0.14, bottom=0.17, right=1, top=0.82)
