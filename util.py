@@ -1,6 +1,7 @@
 # --------------------------------------------
 # Series of useful functions to help plotting
 # --------------------------------------------
+from __future__ import division
 import re
 from matplotlib import pyplot as plt
 import numpy as np
@@ -54,8 +55,8 @@ def get_columns(infile, x, y, type):
             a.append(float(column[x]))
             b.append(float(column[y]))
     if type == "float":
-        var_x = asarray(a)
-        var_y = asarray(b)
+        var_x = np.asarray(a)
+        var_y = np.asarray(b)
     elif type == "string":
         var_x = a
         var_y = b
@@ -215,3 +216,50 @@ def get_madx_columns(infile, *args):
     f.close()
     return my_dict
 
+def plot_beams(x, y, energy, norm_em, beta_x, beta_y, ip1):
+    m = 938272046 #eV/c
+    gamma_rel = energy/m
+    beta_rel = np.sqrt(1-(1/gamma_rel**2))
+    geom_em = norm_em/(gamma_rel*beta_rel)
+    if ip1 == 'yes':
+        x_final, y_final = get_ip1(x,y)
+        beta_x_final, beta_y_final = get_ip1(beta_x, beta_y)
+    elif ip1 == 'no':
+        x_final = x
+        y_final = y
+        beta_x_final = beta_x
+        beta_y_final = beta_y
+    # sigma x
+    sigma_x = []
+    for i in beta_x_final:
+        print i
+        sigma_x.append(np.sqrt(geom_em*i))
+    one_sigma_x = []
+    for i, j in zip(sigma_x, x_final):
+        one_sigma_x.append(j + i)
+    m_one_sigma_x = []
+    for i, j in zip(sigma_x, x_final):
+        m_one_sigma_x.append(j - i)
+    five_sigma_x = []
+    for i, j in zip(sigma_x, x_final):
+        five_sigma_x.append(j + 5*i)
+    m_five_sigma_x = []
+    for i, j in zip(sigma_x, x_final):
+        m_five_sigma_x.append(j - 5*i)
+    # sigma y
+    sigma_y = []
+    for i in beta_y_final:
+        sigma_y.append(np.sqrt(geom_em*i))
+    one_sigma_y = []
+    for i, j in zip(sigma_y, y_final):
+        one_sigma_y.append(j + i)
+    m_one_sigma_y = []
+    for i, j in zip(sigma_y, y_final):
+        m_one_sigma_y.append(j - i)
+    five_sigma_y = []
+    for i, j in zip(sigma_y, y_final):
+        five_sigma_y.append(j + 5*i)
+    m_five_sigma_y = []
+    for i, j in zip(sigma_y, y_final):
+        m_five_sigma_y.append(j - 5*i)
+    return x_final, y_final, one_sigma_x, m_one_sigma_x, five_sigma_x, m_five_sigma_x, one_sigma_y, m_one_sigma_y, five_sigma_y, m_five_sigma_y
