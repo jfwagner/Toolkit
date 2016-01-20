@@ -2,6 +2,7 @@
 # ------------------------------------------------------------------------------
 # A script to read TFS files
 # ------------------------------------------------------------------------------
+from __future__ import division
 import argparse
 import re
 import sys
@@ -12,12 +13,7 @@ from matplotlib import rcParams
 from util import get_ip1
 from util import get_madx_columns
 from util import plot_elem
-
-# ------------------------------------------------------------------------------
-# Constants
-# ------------------------------------------------------------------------------
-gamma_rel = 7460.52280875
-beta_rel = 0.999999991017
+from util import plot_beams
 
 # ------------------------------------------------------------------------------
 # Feed the input to the script by command line
@@ -52,6 +48,11 @@ print " "
 twiss_b1 = get_madx_columns(args.twiss_b1, 'S', 'X', 'Y', 'BETX', 'BETY', 'NAME', 'L')
 twiss_b2 = get_madx_columns(args.twiss_b2, 'S', 'X', 'Y', 'BETX', 'BETY', 'NAME', 'L')
 
+## calculation of sigma ##
+gamma_rel = 7460.52280875
+beta_rel = 0.999999991017
+geom_em = args.emittance/(gamma_rel*beta_rel)
+
 ## plot characteristics ##
 DPI = 300
 textwidth = 6
@@ -65,7 +66,8 @@ rc('text', usetex=True)
 rc('text.latex', preamble=r'\usepackage{cmbright}')
 rcParams['figure.figsize']=textwidth, textwidth/1.618
 rcParams.update(font_spec)
-
+fig = plt.figure()
+ax = fig.add_subplot(111)
 
 ## start the correct plot loop ##
 if args.plot == "ORBIT":
@@ -90,13 +92,67 @@ if args.plot == "ORBIT":
         plt.savefig('orbit_y.png', dpi=DPI)
         plt.clf()
     elif args.plot_ip1 == "yes":
-        s_b1, y_b1 = get_ip1(twiss_b1['S'], twiss_b1['Y'])
-        s_b2, y_b2 = get_ip1(twiss_b2['S'], twiss_b2['Y'])
-        plt.plot(s_b1, y_b1, color='blue', label='Beam 1')
-        plt.plot(s_b2, y_b2, color='red', label='Beam 2')
+        # s_b1, y_b1 = get_ip1(twiss_b1['S'], twiss_b1['Y'])
+        # s_b2, y_b2 = get_ip1(twiss_b2['S'], twiss_b2['Y'])
+        s_b1, y_b1, one_sigma_x_b1, m_one_sigma_x_b1, five_sigma_x_b1, m_five_sigma_x_b1, one_sigma_y_b1, m_one_sigma_y_b1, five_sigma_y_b1, m_five_sigma_y_b1 = plot_beams(twiss_b1['S'], twiss_b1['Y'], 7e12, 2.5e-6, twiss_b1['BETX'], twiss_b1['BETY'], 'yes')
+        ax.plot(s_b1, y_b1, color='blue', label='Beam 1')
+        # ax.plot(s_b2, y_b2, color='red', label='Beam 2')
+        # ## calculate the sigmas ##
+        # ## beam 1 ##
+        # ## plus minus 1 sigma ##
+        # s_b1_sigma, betay_b1 = get_ip1(twiss_b1['S'], twiss_b1['BETY'])
+        # sigma_y_b1 = []
+        # for i in betay_b1:
+        #     sigma_y_b1.append(np.sqrt(geom_em*i))
+        # one_sigma_y_b1 = []
+        # for i, j in zip(sigma_y_b1, y_b1):
+        #     one_sigma_y_b1.append(i + j)
+        # plt.plot(s_b1, one_sigma_y_b1, color='blue')
+        # m_one_sigma_y_b1 = []
+        # for i, j in zip(sigma_y_b1, y_b1):
+        #     m_one_sigma_y_b1.append(j - i)
+        # ax.plot(s_b1, m_one_sigma_y_b1, color='blue')
+        # ax.fill_between(s_b1, one_sigma_y_b1, m_one_sigma_y_b1, facecolor='blue')
+        # ## plus minus 5 sigma ##
+        # five_sigma_y_b1 = []
+        # for i, j in zip(sigma_y_b1, y_b1):
+        #     five_sigma_y_b1.append(j + 5*i)
+        # plt.plot(s_b1, one_sigma_y_b1, color='blue', alpha=0.3)
+        # m_five_sigma_y_b1 = []
+        # for i, j in zip(sigma_y_b1, y_b1):
+        #     m_five_sigma_y_b1.append(j - 5*i)
+        # ax.plot(s_b1, m_five_sigma_y_b1, color='blue', alpha=0.3)
+        ax.fill_between(s_b1, one_sigma_y_b1, five_sigma_y_b1, facecolor='blue', alpha=0.3)
+        ax.fill_between(s_b1, m_five_sigma_y_b1, m_one_sigma_y_b1, facecolor='blue', alpha=0.3)
+        ## beam 2 ##
+        ## plus minus 1 sigma ##
+        # s_b2_sigma, betay_b2 = get_ip1(twiss_b2['S'], twiss_b2['BETY'])
+        # sigma_y_b2 = []
+        # for i in betay_b2:
+        #     sigma_y_b2.append(np.sqrt(geom_em*i))
+        # one_sigma_y_b2 = []
+        # for i, j in zip(sigma_y_b2, y_b2):
+        #     one_sigma_y_b2.append(i + j)
+        # plt.plot(s_b2, one_sigma_y_b2, color='red')
+        # m_one_sigma_y_b2 = []
+        # for i, j in zip(sigma_y_b2, y_b2):
+        #     m_one_sigma_y_b2.append(j - i)
+        # ax.plot(s_b2, m_one_sigma_y_b2, color='red')
+        # ax.fill_between(s_b2, one_sigma_y_b2, m_one_sigma_y_b2, facecolor='red')
+        # ## plus minus 5 sigma ##
+        # five_sigma_y_b2 = []
+        # for i, j in zip(sigma_y_b2, y_b2):
+        #     five_sigma_y_b2.append(j + 5*i)
+        # plt.plot(s_b2, one_sigma_y_b2, color='red', alpha=0.3)
+        # m_five_sigma_y_b2 = []
+        # for i, j in zip(sigma_y_b2, y_b2):
+        #     m_five_sigma_y_b2.append(j - 5*i)
+        # ax.plot(s_b2, m_five_sigma_y_b2, color='red', alpha=0.3)
+        # ax.fill_between(s_b2, one_sigma_y_b2, five_sigma_y_b2, facecolor='red', alpha=0.3)
+        # ax.fill_between(s_b2, m_five_sigma_y_b2, m_one_sigma_y_b2, facecolor='red', alpha=0.3)
         ## plot the elements ##
-        height = max(twiss_b1['Y'])/5
-        bottom = max(twiss_b1['Y']) + max(twiss_b1['Y'])/6
+        height = max(five_sigma_y_b1)/5
+        bottom = max(five_sigma_y_b1) + max(five_sigma_y_b1)/4
         s_temp, name  = get_ip1(twiss_b1['S'], twiss_b1['NAME'])
         s, l = get_ip1(twiss_b1['S'], twiss_b1['L'])
         plot_elem('red', height, bottom, name, s, l,  'MQXFA', 'MQXFB') # Triplet: Q1, Q3, Q2
@@ -104,12 +160,12 @@ if args.plot == "ORBIT":
         plot_elem('orange', height, bottom, name, s, l,  'TAXS', 'TAXN') # Passive protectors: TAS, TAN
         plot_elem('black', height, bottom, name, s, l,  'TCT') # Tertiary collimators
         plot_elem('green', height, bottom, name, s, l,  'ACF') # Crab cavities
-        plt.xlabel("s (m)")
-        plt.ylabel("Vertical orbit (m)")
-        plt.xlim([-200,200])
-        plt.grid(b=None, which='major')
-        plt.legend(loc='lower right', prop={'size':9})
-        plt.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
+        ax.set_xlabel("s (m)")
+        ax.set_ylabel("Vertical orbit (m)")
+        ax.set_xlim([-200,200])
+        ax.grid(b=None, which='major')
+        ax.legend(loc='lower right', prop={'size':9})
+        ax.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
         plt.subplots_adjust(left=0.15, bottom=0.15, right=0.94, top=0.90)
         plt.savefig('orbit_y.png', dpi=DPI)
         plt.clf()
