@@ -25,7 +25,6 @@ parser.add_argument('-t_b1','--twiss_b1', help='Twiss Beam 1 file',required=True
 parser.add_argument('-t_b2','--twiss_b2',help='Twiss Beam 2 file', required=True)
 parser.add_argument('-s_b1','--survey_b1', help='Survey Beam 1 file',required=False)
 parser.add_argument('-s_b2','--survey_b2',help='Survey Beam 2 file', required=False)
-parser.add_argument('-em','--emittance', help='Emittance value in [m]',required=True, type=float)
 parser.add_argument('-p','--plot',help='Plot type', required=True)
 parser.add_argument('-ip1','--plot_ip1',help='Plotting around IP1', required=True)
 args = parser.parse_args()
@@ -39,7 +38,6 @@ print ("Twiss file for Beam 1: %s" % args.twiss_b1 )
 print ("Twiss file for Beam 2: %s" % args.twiss_b2 )
 print ("Survey file for Beam 1: %s" % args.survey_b1 )
 print ("Survey file for Beam 2: %s" % args.survey_b2 )
-print ("Emittance [m]: %s" % args.emittance )
 print ("Plot type: %s" % args.plot )
 print ("Plotting around IP1: %s" % args.plot_ip1 )
 print " "
@@ -47,11 +45,6 @@ print " "
 ## put the data in a dictionary ##
 twiss_b1 = get_madx_columns(args.twiss_b1, 'S', 'X', 'Y', 'BETX', 'BETY', 'NAME', 'L')
 twiss_b2 = get_madx_columns(args.twiss_b2, 'S', 'X', 'Y', 'BETX', 'BETY', 'NAME', 'L')
-
-## calculation of sigma ##
-gamma_rel = 7460.52280875
-beta_rel = 0.999999991017
-geom_em = args.emittance/(gamma_rel*beta_rel)
 
 ## plot characteristics ##
 DPI = 300
@@ -67,110 +60,99 @@ rc('text.latex', preamble=r'\usepackage{cmbright}')
 rcParams['figure.figsize']=textwidth, textwidth/1.618
 rcParams.update(font_spec)
 fig = plt.figure()
-ax = fig.add_subplot(111)
 
 ## start the correct plot loop ##
+
 if args.plot == "ORBIT":
-    if args.plot_ip1 == "no":
-        plt.plot(twiss_b1['S'], twiss_b1['Y'] ,color='blue', label='Beam 1')
-        plt.plot(twiss_b2['S'], twiss_b2['Y'] , color='red', label='Beam 2')
-        ## plot the elements ##
-        height = max(twiss_b1['Y'])/5
-        bottom = max(twiss_b1['Y']) + max(twiss_b1['Y'])/6
-        plot_elem('red', height, bottom, twiss_b1['NAME'], twiss_b1['S'], twiss_b1['L'],  'MQXFA', 'MQXFB') # Triplet: Q1, Q3, Q2
-        plot_elem('blue', height, bottom, twiss_b1['NAME'], twiss_b1['S'], twiss_b1['L'],  'MBX', 'MBRC', 'MBRS', 'MBRB', 'MB') # Dipoles: D1, D2, D3, D4
-        plot_elem('orange', height, bottom, twiss_b1['NAME'], twiss_b1['S'], twiss_b1['L'],  'TAXS', 'TAXN') # Passive protectors: TAS, TAN
-        plot_elem('black', height, bottom, twiss_b1['NAME'], twiss_b1['S'], twiss_b1['L'],  'TCT') # Tertiary collimators
-        plot_elem('green', height, bottom, twiss_b1['NAME'], twiss_b1['S'], twiss_b1['L'],  'ACF') # Crab cavities
-        plt.xlabel("s (m)")
-        plt.ylabel("Vertical orbit (m)")
-        plt.xlim([-200,200])
-        plt.grid(b=None, which='major')
-        plt.legend(loc='lower right', prop={'size':9})
-        plt.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
-        plt.subplots_adjust(left=0.15, bottom=0.15, right=0.94, top=0.90)
-        plt.savefig('orbit_y.png', dpi=DPI)
-        plt.clf()
-    elif args.plot_ip1 == "yes":
-        # s_b1, y_b1 = get_ip1(twiss_b1['S'], twiss_b1['Y'])
-        # s_b2, y_b2 = get_ip1(twiss_b2['S'], twiss_b2['Y'])
-        s_b1, y_b1, one_sigma_x_b1, m_one_sigma_x_b1, five_sigma_x_b1, m_five_sigma_x_b1, one_sigma_y_b1, m_one_sigma_y_b1, five_sigma_y_b1, m_five_sigma_y_b1 = plot_beams(twiss_b1['S'], twiss_b1['Y'], 7e12, 2.5e-6, twiss_b1['BETX'], twiss_b1['BETY'], 'yes')
-        ax.plot(s_b1, y_b1, color='blue', label='Beam 1')
-        # ax.plot(s_b2, y_b2, color='red', label='Beam 2')
-        # ## calculate the sigmas ##
-        # ## beam 1 ##
-        # ## plus minus 1 sigma ##
-        # s_b1_sigma, betay_b1 = get_ip1(twiss_b1['S'], twiss_b1['BETY'])
-        # sigma_y_b1 = []
-        # for i in betay_b1:
-        #     sigma_y_b1.append(np.sqrt(geom_em*i))
-        # one_sigma_y_b1 = []
-        # for i, j in zip(sigma_y_b1, y_b1):
-        #     one_sigma_y_b1.append(i + j)
-        # plt.plot(s_b1, one_sigma_y_b1, color='blue')
-        # m_one_sigma_y_b1 = []
-        # for i, j in zip(sigma_y_b1, y_b1):
-        #     m_one_sigma_y_b1.append(j - i)
-        # ax.plot(s_b1, m_one_sigma_y_b1, color='blue')
-        # ax.fill_between(s_b1, one_sigma_y_b1, m_one_sigma_y_b1, facecolor='blue')
-        # ## plus minus 5 sigma ##
-        # five_sigma_y_b1 = []
-        # for i, j in zip(sigma_y_b1, y_b1):
-        #     five_sigma_y_b1.append(j + 5*i)
-        # plt.plot(s_b1, one_sigma_y_b1, color='blue', alpha=0.3)
-        # m_five_sigma_y_b1 = []
-        # for i, j in zip(sigma_y_b1, y_b1):
-        #     m_five_sigma_y_b1.append(j - 5*i)
-        # ax.plot(s_b1, m_five_sigma_y_b1, color='blue', alpha=0.3)
-        ax.fill_between(s_b1, one_sigma_y_b1, five_sigma_y_b1, facecolor='blue', alpha=0.3)
-        ax.fill_between(s_b1, m_five_sigma_y_b1, m_one_sigma_y_b1, facecolor='blue', alpha=0.3)
-        ## beam 2 ##
-        ## plus minus 1 sigma ##
-        # s_b2_sigma, betay_b2 = get_ip1(twiss_b2['S'], twiss_b2['BETY'])
-        # sigma_y_b2 = []
-        # for i in betay_b2:
-        #     sigma_y_b2.append(np.sqrt(geom_em*i))
-        # one_sigma_y_b2 = []
-        # for i, j in zip(sigma_y_b2, y_b2):
-        #     one_sigma_y_b2.append(i + j)
-        # plt.plot(s_b2, one_sigma_y_b2, color='red')
-        # m_one_sigma_y_b2 = []
-        # for i, j in zip(sigma_y_b2, y_b2):
-        #     m_one_sigma_y_b2.append(j - i)
-        # ax.plot(s_b2, m_one_sigma_y_b2, color='red')
-        # ax.fill_between(s_b2, one_sigma_y_b2, m_one_sigma_y_b2, facecolor='red')
-        # ## plus minus 5 sigma ##
-        # five_sigma_y_b2 = []
-        # for i, j in zip(sigma_y_b2, y_b2):
-        #     five_sigma_y_b2.append(j + 5*i)
-        # plt.plot(s_b2, one_sigma_y_b2, color='red', alpha=0.3)
-        # m_five_sigma_y_b2 = []
-        # for i, j in zip(sigma_y_b2, y_b2):
-        #     m_five_sigma_y_b2.append(j - 5*i)
-        # ax.plot(s_b2, m_five_sigma_y_b2, color='red', alpha=0.3)
-        # ax.fill_between(s_b2, one_sigma_y_b2, five_sigma_y_b2, facecolor='red', alpha=0.3)
-        # ax.fill_between(s_b2, m_five_sigma_y_b2, m_one_sigma_y_b2, facecolor='red', alpha=0.3)
-        ## plot the elements ##
-        height = max(five_sigma_y_b1)/5
-        bottom = max(five_sigma_y_b1) + max(five_sigma_y_b1)/4
-        s_temp, name  = get_ip1(twiss_b1['S'], twiss_b1['NAME'])
-        s, l = get_ip1(twiss_b1['S'], twiss_b1['L'])
-        plot_elem('red', height, bottom, name, s, l,  'MQXFA', 'MQXFB') # Triplet: Q1, Q3, Q2
-        plot_elem('blue', height, bottom, name, s, l,  'MBX', 'MBRC', 'MBRS', 'MBRB', 'MB') # Dipoles: D1, D2, D3, D4
-        plot_elem('orange', height, bottom, name, s, l,  'TAXS', 'TAXN') # Passive protectors: TAS, TAN
-        plot_elem('black', height, bottom, name, s, l,  'TCT') # Tertiary collimators
-        plot_elem('green', height, bottom, name, s, l,  'ACF') # Crab cavities
-        ax.set_xlabel("s (m)")
-        ax.set_ylabel("Vertical orbit (m)")
-        ax.set_xlim([-200,200])
-        ax.grid(b=None, which='major')
-        ax.legend(loc='lower right', prop={'size':9})
-        ax.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
-        plt.subplots_adjust(left=0.15, bottom=0.15, right=0.94, top=0.90)
-        plt.savefig('orbit_y.png', dpi=DPI)
-        plt.clf()
-    else:
-        print "Input for plottinga round IP1 option should be yes or no"
+    
+    ## beam 1 data ##
+    s_b1_y, y_b1, one_sigma_y_b1, m_one_sigma_y_b1, five_sigma_y_b1, m_five_sigma_y_b1 = plot_beams(twiss_b1['S'], twiss_b1['Y'], 7e12, 2.5e-6, twiss_b1['BETY'], args.plot_ip1)
+    s_b1_x, x_b1, one_sigma_x_b1, m_one_sigma_x_b1, five_sigma_x_b1, m_five_sigma_x_b1 = plot_beams(twiss_b1['S'], twiss_b1['X'], 7e12, 2.5e-6, twiss_b1['BETX'], args.plot_ip1)
+
+    ## beam 2 data ##
+    s_b2_y, y_b2, one_sigma_y_b2, m_one_sigma_y_b2, five_sigma_y_b2, m_five_sigma_y_b2 = plot_beams(twiss_b2['S'], twiss_b2['Y'], 7e12, 2.5e-6, twiss_b2['BETY'], args.plot_ip1)
+    s_b2_x, x_b2, one_sigma_x_b2, m_one_sigma_x_b2, five_sigma_x_b2, m_five_sigma_x_b2 = plot_beams(twiss_b2['S'], twiss_b2['X'], 7e12, 2.5e-6, twiss_b2['BETX'], args.plot_ip1)
+
+    ## VERTICAL ORBIT ##
+    ax1 = fig.add_subplot(111)
+    ## plot beam 1 ##
+    ax1.plot(s_b1_y, y_b1, color='blue', label='Beam 1')
+    ax1.plot(s_b1_y, one_sigma_y_b1, color='blue')
+    ax1.plot(s_b1_y, m_one_sigma_y_b1, color='blue')
+    ax1.fill_between(s_b1_y, one_sigma_y_b1, m_one_sigma_y_b1, facecolor='blue')
+    ax1.plot(s_b1_y, m_five_sigma_y_b1, color='blue', alpha=0.3)
+    ax1.fill_between(s_b1_y, one_sigma_y_b1, five_sigma_y_b1, facecolor='blue', alpha=0.3)
+    ax1.fill_between(s_b1_y, m_five_sigma_y_b1, m_one_sigma_y_b1, facecolor='blue', alpha=0.3)
+
+    ## plot beam 2 ##
+    ax1.plot(s_b2_y, y_b2, color='red', label='Beam 2')
+    ax1.plot(s_b2_y, one_sigma_y_b2, color='red')
+    ax1.plot(s_b2_y, m_one_sigma_y_b2, color='red')
+    ax1.fill_between(s_b2_y, one_sigma_y_b2, m_one_sigma_y_b2, facecolor='red')
+    ax1.plot(s_b2_y, m_five_sigma_y_b2, color='red', alpha=0.3)
+    ax1.fill_between(s_b2_y, one_sigma_y_b2, five_sigma_y_b2, facecolor='red', alpha=0.3)
+    ax1.fill_between(s_b2_y, m_five_sigma_y_b2, m_one_sigma_y_b2, facecolor='red', alpha=0.3)
+
+    ## plot the elements ##
+    height = max(five_sigma_y_b1)/5
+    bottom = max(five_sigma_y_b1) + max(five_sigma_y_b1)/4
+    s_temp, name  = get_ip1(twiss_b1['S'], twiss_b1['NAME'])
+    s, l = get_ip1(twiss_b1['S'], twiss_b1['L'])
+    plot_elem('red', height, bottom, name, s, l,  'MQXFA', 'MQXFB') # Triplet: Q1, Q3, Q2
+    plot_elem('blue', height, bottom, name, s, l,  'MBX', 'MBRC', 'MBRS', 'MBRB', 'MB') # Dipoles: D1, D2, D3, D4
+    plot_elem('orange', height, bottom, name, s, l,  'TAXS', 'TAXN') # Passive protectors: TAS, TAN
+    plot_elem('black', height, bottom, name, s, l,  'TCT') # Tertiary collimators
+    plot_elem('green', height, bottom, name, s, l,  'ACF') # Crab cavities
+    ax1.set_xlabel("s (m)")
+    ax1.set_ylabel(r"$y, \sigma_y, 5 \sigma_y$ [m]")
+    ax1.set_xlim([-200,200])
+    ax1.grid(b=None, which='major')
+    ax1.legend(loc='lower right', prop={'size':9})
+    ax1.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
+    plt.subplots_adjust(left=0.15, bottom=0.15, right=0.94, top=0.90)
+    plt.savefig('orbit_y.png', dpi=DPI)
+    plt.clf()
+
+
+    ## HORIZONTAL ORBIT ##
+    ax2 = fig.add_subplot(111)
+    ## plot beam 1 ##
+    ax2.plot(s_b1_x, x_b1, color='blue', label='Beam 1')
+    ax2.plot(s_b1_x, one_sigma_x_b1, color='blue')
+    ax2.plot(s_b1_x, m_one_sigma_x_b1, color='blue')
+    ax2.fill_between(s_b1_x, one_sigma_x_b1, m_one_sigma_x_b1, facecolor='blue')
+    ax2.plot(s_b1_x, m_five_sigma_x_b1, color='blue', alpha=0.3)
+    ax2.fill_between(s_b1_x, one_sigma_x_b1, five_sigma_x_b1, facecolor='blue', alpha=0.3)
+    ax2.fill_between(s_b1_x, m_five_sigma_x_b1, m_one_sigma_x_b1, facecolor='blue', alpha=0.3)
+
+    ## plot beam 2 ##
+    ax2.plot(s_b2_x, x_b2, color='red', label='Beam 2')
+    ax2.plot(s_b2_x, one_sigma_x_b2, color='red')
+    ax2.plot(s_b2_x, m_one_sigma_x_b2, color='red')
+    ax2.fill_between(s_b2_x, one_sigma_x_b2, m_one_sigma_x_b2, facecolor='red')
+    ax2.plot(s_b2_x, m_five_sigma_x_b2, color='red', alpha=0.3)
+    ax2.fill_between(s_b2_x, one_sigma_x_b2, five_sigma_x_b2, facecolor='red', alpha=0.3)
+    ax2.fill_between(s_b2_x, m_five_sigma_x_b2, m_one_sigma_x_b2, facecolor='red', alpha=0.3)
+
+    ## plot the elements ##
+    height = max(five_sigma_x_b1)/5
+    bottom = max(five_sigma_x_b1) + max(five_sigma_x_b1)/4
+    s_temp, name  = get_ip1(twiss_b1['S'], twiss_b1['NAME'])
+    s, l = get_ip1(twiss_b1['S'], twiss_b1['L'])
+    plot_elem('red', height, bottom, name, s, l,  'MQXFA', 'MQXFB') # Triplet: Q1, Q3, Q2
+    plot_elem('blue', height, bottom, name, s, l,  'MBX', 'MBRC', 'MBRS', 'MBRB', 'MB') # Dipoles: D1, D2, D3, D4
+    plot_elem('orange', height, bottom, name, s, l,  'TAXS', 'TAXN') # Passive protectors: TAS, TAN
+    plot_elem('black', height, bottom, name, s, l,  'TCT') # Tertiary collimators
+    plot_elem('green', height, bottom, name, s, l,  'ACF') # Crab cavities
+    ax2.set_xlabel("s (m)")
+    ax2.set_ylabel(r"$x, \sigma_x, 5 \sigma_x$ [m]")
+    ax2.set_xlim([-200,200])
+    ax2.grid(b=None, which='major')
+    ax2.legend(loc='lower right', prop={'size':9})
+    ax2.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
+    plt.subplots_adjust(left=0.15, bottom=0.15, right=0.94, top=0.90)
+    plt.savefig('orbit_x.png', dpi=DPI)
+    plt.clf()
    
 elif args.plot == "BETA":
     if args.plot_ip1 == "no":
