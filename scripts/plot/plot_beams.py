@@ -7,6 +7,9 @@
 # Example of use (options can be written in any order):
 # plot_beams.py -t_b1 twiss_ip1_b1.tfs -t_b2 twiss_ip1_b2.tfs -p ORBIT -ip 8 -lim 250
 # ------------------------------------------------------------------------------
+# plot_beams.py -t_b1 twiss_ip1_b1.tfs -t_b2 twiss_ip1_b2.tfs -p OTHER -ip 8 -lim 250 -arg1 S -arg2 BETX -arg3 BETY
+# ------------------------------------------------------------------------------
+
 from __future__ import division
 import argparse
 import re
@@ -139,7 +142,7 @@ if args.plot == "ORBIT": ## orbit plots ##
     ## set the plot details ##
     ax1.set_xlabel("s (m)")
     ax1.set_ylabel(r"$y, \sigma_y, 5 \sigma_y$ [m]")
-    ax1.set_xlim([-float(args.limit), float(args.limit)])
+    ax1.set_xlim(-float(args.limit), float(args.limit))
     ax1.set_title('IP' + args.plot_ip )
     ax1.grid(b=None, which='major')
     ax1.legend(loc='lower right', prop={'size':9})
@@ -186,7 +189,7 @@ if args.plot == "ORBIT": ## orbit plots ##
     ## set the plot details ##
     ax2.set_xlabel("s (m)")
     ax2.set_ylabel(r"$x, \sigma_x, 5 \sigma_x$ [m]")
-    ax2.set_xlim([-float(args.limit), float(args.limit)])
+    ax2.set_xlim(-float(args.limit), float(args.limit))
     ax1.set_title('IP' + args.plot_ip )
     ax2.grid(b=None, which='major')
     ax2.legend(loc='lower right', prop={'size':9})
