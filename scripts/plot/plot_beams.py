@@ -19,6 +19,7 @@ from util import get_ip1
 from util import get_ir
 from util import get_madx_columns
 from util import plot_elem
+from util import plot_twiss_beams
 from util import plot_twiss
 
 
@@ -33,6 +34,9 @@ parser.add_argument('-s_b2','--survey_b2', help='Survey Beam 2 file', required=F
 parser.add_argument('-p','--plot', help='Plot type', required=True)
 parser.add_argument('-ip','--plot_ip', help='Plotting around a certain IP', required=True)
 parser.add_argument('-lim','--limit', help='Horizontal limit of the plot', required=True)
+parser.add_argument('-arg1','--arg_1', help='Horizontal argument of the plot', required=False)
+parser.add_argument('-arg2','--arg_2', help='Vertical argument of the plot', required=False)
+parser.add_argument('-arg3','--arg_3', help='Vertical argument of the plot', required=False)
 args = parser.parse_args()
  
 ## show the values specified by the user##
@@ -77,12 +81,12 @@ if args.plot == "ORBIT": ## orbit plots ##
         print ">> TWISS"
         
         ## beam 1 data ##
-        s_b1_y, y_b1, one_sigma_y_b1, m_one_sigma_y_b1, five_sigma_y_b1, m_five_sigma_y_b1 = plot_twiss(twiss_b1['S'], twiss_b1['Y'], 7e12, 2.5e-6, twiss_b1['BETY'], args.plot_ip, args.limit)
-        s_b1_x, x_b1, one_sigma_x_b1, m_one_sigma_x_b1, five_sigma_x_b1, m_five_sigma_x_b1 = plot_twiss(twiss_b1['S'], twiss_b1['X'], 7e12, 2.5e-6, twiss_b1['BETX'], args.plot_ip, args.limit)
+        s_b1_y, y_b1, one_sigma_y_b1, m_one_sigma_y_b1, five_sigma_y_b1, m_five_sigma_y_b1 = plot_twiss_beams(twiss_b1['S'], twiss_b1['Y'], 7e12, 2.5e-6, twiss_b1['BETY'], args.plot_ip, args.limit)
+        s_b1_x, x_b1, one_sigma_x_b1, m_one_sigma_x_b1, five_sigma_x_b1, m_five_sigma_x_b1 = plot_twiss_beams(twiss_b1['S'], twiss_b1['X'], 7e12, 2.5e-6, twiss_b1['BETX'], args.plot_ip, args.limit)
 
         ## beam 2 data ##
-        s_b2_y, y_b2, one_sigma_y_b2, m_one_sigma_y_b2, five_sigma_y_b2, m_five_sigma_y_b2 = plot_twiss(twiss_b2['S'], twiss_b2['Y'], 7e12, 2.5e-6, twiss_b2['BETY'], args.plot_ip, args.limit)
-        s_b2_x, x_b2, one_sigma_x_b2, m_one_sigma_x_b2, five_sigma_x_b2, m_five_sigma_x_b2 = plot_twiss(twiss_b2['S'], twiss_b2['X'], 7e12, 2.5e-6, twiss_b2['BETX'], args.plot_ip, args.limit)
+        s_b2_y, y_b2, one_sigma_y_b2, m_one_sigma_y_b2, five_sigma_y_b2, m_five_sigma_y_b2 = plot_twiss_beams(twiss_b2['S'], twiss_b2['Y'], 7e12, 2.5e-6, twiss_b2['BETY'], args.plot_ip, args.limit)
+        s_b2_x, x_b2, one_sigma_x_b2, m_one_sigma_x_b2, five_sigma_x_b2, m_five_sigma_x_b2 = plot_twiss_beams(twiss_b2['S'], twiss_b2['X'], 7e12, 2.5e-6, twiss_b2['BETX'], args.plot_ip, args.limit)
             
     if (args.survey_b1 is not None) != (args.survey_b2 is not None): # only one survey file
         print " "
@@ -192,7 +196,47 @@ if args.plot == "ORBIT": ## orbit plots ##
     plt.clf()
 
     print ">> DONE!"
-   
+elif args.plot == "OTHER":
+    if args.arg_1 is not None and args.arg_2 is not None and args.arg_3 is None:
+        print " "
+        print ">> PLOTTING: " +  args.arg_1 + ', ' +  args.arg_2
+        twiss_b1 = get_madx_columns(args.twiss_b1,  args.arg_1,  args.arg_2)
+        x, y = plot_twiss(twiss_b1[args.arg_1], twiss_b1[args.arg_2],  args.plot_ip, args.limit)
+        ax3 = fig.add_subplot(111)
+        ax3.plot(x, y, color='blue', label=args.arg_2)
+        ## set the plot details ##
+        ax3.set_xlabel(args.arg_1)
+        ax3.set_xlim([-float(args.limit), float(args.limit)])
+        ax3.set_title('IP' + args.plot_ip )
+        ax3.grid(b=None, which='major')
+        ax3.legend(loc='lower right', prop={'size':9})
+        ax3.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
+        plt.subplots_adjust(left=0.15, bottom=0.15, right=0.94, top=0.90)
+        plt.savefig( args.arg_1 + '_' +  args.arg_2 + '_' + 'IP' + args.plot_ip  + '.png', dpi=DPI)
+        plt.clf()
+    elif args.arg_1 is not None and args.arg_2 is not None and args.arg_3 is not None:
+        print " "
+        print ">> PLOTTING: " +  args.arg_1 + ', ' +  args.arg_2  + ', ' +  args.arg_3
+        twiss_b1 = get_madx_columns(args.twiss_b1,  args.arg_1,  args.arg_2, args.arg_3)
+        x, y1 = plot_twiss(twiss_b1[args.arg_1], twiss_b1[args.arg_2],  args.plot_ip, args.limit)
+        x_temp, y2 = plot_twiss(twiss_b1[args.arg_1], twiss_b1[args.arg_3],  args.plot_ip, args.limit)
+        ax3 = fig.add_subplot(111)
+        ax3.plot(x, y1, color='blue', label=args.arg_2)
+        ax3.plot(x, y2, color='green', label=args.arg_3)
+        ## set the plot details ##
+        ax3.set_xlabel(args.arg_1)
+        ax3.set_xlim(-float(args.limit), float(args.limit))
+        ax3.set_title('IP' + args.plot_ip )
+        ax3.grid(b=None, which='major')
+        ax3.legend(loc='lower right', prop={'size':9})
+        ax3.ticklabel_format(style='sci',axis='y',scilimits=(0,0))
+        plt.subplots_adjust(left=0.15, bottom=0.15, right=0.94, top=0.90)
+        plt.savefig( args.arg_1 + '_' +  args.arg_2 + '_' +  args.arg_3 + '_' + 'IP' + args.plot_ip  + '.png', dpi=DPI)
+        plt.clf()
+    else:
+        print " "
+        print ">> One argument for plotting is missing"
+
 else:
     print " "
     print ">> Sorry, the " + args.plot +  " plotting option does not exist"

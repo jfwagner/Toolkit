@@ -222,7 +222,7 @@ def get_madx_columns(infile, *args):
     f.close()
     return my_dict
 
-def plot_twiss(s, coord, energy, norm_em, beta, ip, lim):
+def plot_twiss_beams(s, coord, energy, norm_em, beta, ip, lim):
     m = 938272046 #eV/c
     gamma_rel = energy/m
     beta_rel = np.sqrt(1-(1/gamma_rel**2))
@@ -268,3 +268,20 @@ def plot_twiss(s, coord, energy, norm_em, beta, ip, lim):
             m_five_sigma_2.append(e6)
     
     return s_final_2, coord_final_2, one_sigma_2, m_one_sigma_2, five_sigma_2, m_five_sigma_2
+
+def plot_twiss(s, coord, ip, lim):
+    if ip == '1':
+        s_final, coord_final = get_ip1(s, coord)
+    else:
+        s_ip, coord_ip = get_ir(ip, s, coord)
+        s_final, coord_final = get_ip1(s_ip, coord_ip)
+
+    s_final_2 = []
+    coord_final_2 = []
+
+    for e1, e2 in zip(s_final, coord_final):
+        if abs(e1) < float(lim):
+            s_final_2.append(e1)
+            coord_final_2.append(e2)
+    
+    return s_final_2, coord_final_2
