@@ -87,7 +87,7 @@ def get_column(infile, column_number, data_structure, data_type):
         my_final_column = my_column
     return my_final_column
 
-def get_ip1(x,y):
+def get_ip1(x, y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
     around IP1 (i.e. convert s coordinate of 26900 m to -100 m).
     The function arguments' are the variables x and y that you want to treat, respectively . 
@@ -98,7 +98,7 @@ def get_ip1(x,y):
     x_temp = []
     y_temp = []
     for e1, e2 in zipped:
-        if e1 < (26658.8832 / 2):
+        if e1 < (26658.8832/ 2):
             x_temp.append(e1)
             y_temp.append(e2)
         if e1 >= (26658.8832 / 2):
@@ -111,7 +111,7 @@ def get_ip1(x,y):
         y.append(e2)
     return x,y
 
-def get_ir(ir, ylim):
+def get_ir(ir, s, coord):
     """This function stores the information relevant to the plotting of a specific Interaction Region (IR), 
     i.e. the position of the IR in the accelerator and the limit of the vertical coordinate.
 
@@ -123,8 +123,14 @@ def get_ir(ir, ylim):
     position, ylim = get_ir(2, 0.6)
     """
     t = (0, 3332.436584, 6664.7208, 9997.005016, 13329.28923, 16661.72582, 19994.1624, 23315.37898)
-    position = t[ir-1]
-    return position, ylim
+    zipped = zip(s, coord)
+    s_temp = []
+    coord_temp = []
+    for i, j in zipped:
+        s_temp.append(i - t[int(ir)-1])
+        coord_temp.append(j)
+    s_new, coord_new = get_ip1(s_temp, coord_temp)
+    return s_new, coord_new
 
 def plot_elem(color, height, bottom, name_in = [], s_in = [], l_in = [], *args):
     """
@@ -216,18 +222,19 @@ def get_madx_columns(infile, *args):
     f.close()
     return my_dict
 
-def plot_beams(s, coord, energy, norm_em, beta, ip1):
+def plot_twiss(s, coord, energy, norm_em, beta, ip, lim):
     m = 938272046 #eV/c
     gamma_rel = energy/m
     beta_rel = np.sqrt(1-(1/gamma_rel**2))
     geom_em = norm_em/(gamma_rel*beta_rel)
-    if ip1 == 'yes':
+    if ip == '1':
         s_final, coord_final = get_ip1(s, coord)
         s_temp, beta_final = get_ip1(s, beta)
-    elif ip1 == 'no':
-        s_final = s
-        coord_final = coord
-        beta_final = beta
+    else:
+        s_ip, coord_ip = get_ir(ip, s, coord)
+        s_temp, beta_ip = get_ir(ip, s, beta)
+        s_final, coord_final = get_ip1(s_ip, coord_ip)
+        s_temp, beta_final = get_ip1(s_ip, beta_ip)
     # sigma 
     sigma = []
     for i in beta_final:
@@ -244,4 +251,20 @@ def plot_beams(s, coord, energy, norm_em, beta, ip1):
     m_five_sigma = []
     for i, j in zip(sigma, coord_final):
         m_five_sigma.append(j - 5*i)
-    return s_final, coord_final, one_sigma, m_one_sigma, five_sigma, m_five_sigma
+
+    s_final_2 = []
+    coord_final_2 = []
+    one_sigma_2 = []
+    m_one_sigma_2 = []
+    five_sigma_2 = []
+    m_five_sigma_2 = []
+    for e1, e2, e3, e4, e5, e6 in zip(s_final, coord_final, one_sigma, m_one_sigma, five_sigma, m_five_sigma):
+        if abs(e1) < float(lim):
+            s_final_2.append(e1)
+            coord_final_2.append(e2)
+            one_sigma_2.append(e3)
+            m_one_sigma_2.append(e4)
+            five_sigma_2.append(e5)
+            m_five_sigma_2.append(e6)
+    
+    return s_final_2, coord_final_2, one_sigma_2, m_one_sigma_2, five_sigma_2, m_five_sigma_2
