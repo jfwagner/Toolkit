@@ -1,9 +1,10 @@
+#!/usr/local/bin/python
 # ----------------------------------------------------------------------------------------------------------------------------
 # Function to generate a particle distribution as input for the collimation routine in SixTrack (round beams at symmetry point)
 # ----------------------------------------------------------------------------------------------------------------------------
 from random import gauss
 from math import sqrt, pi
-
+import sys
 from longitudinalDyn import longitudinalHamiltonian 
 Hcalculator = longitudinalHamiltonian("HL_coll")
 Hmargin = -0.005  #Hamiltonian to accept below
@@ -102,11 +103,12 @@ def dist_generator(particles, emittance, beta, bunch, spread, factor, job):
         f.write('%8.6e %8.6e %8.6e %8.6e %8.6e %8.6e\n' % (e1, e2, e3, e4, e5, e6))
 
     f.close()
-	  
+
+particles = int(sys.argv[1])
 # (particles, emittance, beta, bunch, spread, factor)
-for number in range(1, 501):
+for number in range(1, 2):
     n = '%s'%number
-    dist_generator(6400, 2.5e-6, 0.15, 75.5, 1.13e-4, 1, n)
+    dist_generator(particles, 2.5e-6, 0.15, 75.5, 1.13e-4, 1, n)
 
 
 
