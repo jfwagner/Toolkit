@@ -30,20 +30,22 @@ coords = ['x', 'xp', 'y', 'yp', 'z', 'e']
 col_number = [3, 4, 5, 6, 7, 8]
 d_1 = {k: v for k, v in zip(coords, col_number)}  # dict comprehension
     
-limits = [[-4e-5, 4e-5], [-2e-4, 2e-4], [-8e-5, 8e-5], [1e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]]
+limits = [[-7.9e-4, -7.1e-4], [-3e-4, 3e-4], [-8e-5, 8e-5], [1e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]]
+# limits = [[-4e-5, 4e-5], [-2e-4, 2e-4], [-8e-5, 8e-5], [-5e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]]
 d_2 = {k: v for k, v in zip(coords, limits)}
 
-offset = [0, 0, 0, 0.3e-3, 0, 0]
+offset = [-7.5e-4, 0, 0, 0.3e-3, 0, 0]
+# offset = [0, 0, 0, 0, 0, 0]
 d_3 = {k: v for k, v in zip(coords, offset)}
     
 # Loop >ONCE< through the DUMP file to extract >only< the relevant information
 # ID turn s[m] x[mm] xp[mrad] y[mm] yp[mrad] z[mm] dE/E ktrack
 turn_data = defaultdict(lambda: defaultdict(list))
 with open(infile, 'r') as f:
+    next(f)
+    next(f)
     for line in f.xreadlines():
         columns = line.strip('\n').split()
-        if columns[0] in ('#', '@', '*', '$', '%', '%1=s', '%Ind'):
-            continue
         turn = int(columns[1])
         if turn not in turns:
             continue
@@ -58,6 +60,7 @@ with open(infile, 'r') as f:
             coord_tot_2 = float(columns[d_1[coord_ver]])*10**-3
         turn_data[turn]['coord_tot_1'].append(coord_tot_1)
         turn_data[turn]['coord_tot_2'].append(coord_tot_2)
+
 
 for turn in turns:
     print '>> Turn', turn
@@ -139,21 +142,25 @@ for turn in turns:
     elif coord_hor == 'e' or coord_ver == 'e':
         print '>> No sigmas nor bucket for this coordinate combination. Try (z,e).'
     else:
-        std_coord_1 = np.std(coord_1)
-        std_coord_2 = np.std(coord_2)
-        pts1 = get_ellipse_coords(a=std_coord_1, b=std_coord_2, x=0, y=d_3[coord_ver], k=1)
+        sigmas = [7.16610376198e-06, 4.76160858517e-05, 7.12405639107e-06, 4.75602973547e-05, 7.45803056032, 767.801389427e-06]
+        d_sigma = {k: v for k, v in zip(coords, sigmas)}  # dict comprehension
+
+        std_coord_1 =  d_sigma[coord_hor]
+        std_coord_2 =  d_sigma[coord_ver]
+
+        pts1 = get_ellipse_coords(a=std_coord_1, b=std_coord_2, x=d_3[coord_hor], y=d_3[coord_ver], k=1)
         plt.plot(pts1[:,0], pts1[:,1], color="black", linewidth=0.3)
 
-        pts2 = get_ellipse_coords(a=2 * std_coord_1, b=2 * std_coord_2, x=0, y=d_3[coord_ver], k=1)
+        pts2 = get_ellipse_coords(a=2 * std_coord_1, b=2 * std_coord_2, x=d_3[coord_hor], y=d_3[coord_ver], k=1)
         plt.plot(pts2[:,0], pts2[:,1], color="black", linewidth=0.3)
 
-        pts3 = get_ellipse_coords(a=3 * std_coord_1, b=3 * std_coord_2, x=0, y=d_3[coord_ver], k=1)
+        pts3 = get_ellipse_coords(a=3 * std_coord_1, b=3 * std_coord_2, x=d_3[coord_hor], y=d_3[coord_ver], k=1)
         plt.plot(pts3[:,0], pts3[:,1], color="black", linewidth=0.3)
 
-        pts4 = get_ellipse_coords(a=4 * std_coord_1, b=4 * std_coord_2, x=0, y=d_3[coord_ver], k=1)
+        pts4 = get_ellipse_coords(a=4 * std_coord_1, b=4 * std_coord_2, x=d_3[coord_hor], y=d_3[coord_ver], k=1)
         plt.plot(pts4[:,0], pts4[:,1], color="black", linewidth=0.3)
 
-        pts5 = get_ellipse_coords(a=5 * std_coord_1, b=5 * std_coord_2, x=0, y=d_3[coord_ver], k=1)
+        pts5 = get_ellipse_coords(a=5 * std_coord_1, b=5 * std_coord_2, x=d_3[coord_hor], y=d_3[coord_ver], k=1)
         plt.plot(pts5[:,0], pts5[:,1], color="black", linewidth=0.3)
 
     plt.subplots_adjust(left=0.14, bottom=0.17, right=1, top=0.82)
