@@ -42,9 +42,9 @@ d_3 = {k: v for k, v in zip(coords, offset)}
 # ID turn s[m] x[mm] xp[mrad] y[mm] yp[mrad] z[mm] dE/E ktrack
 turn_data = defaultdict(lambda: defaultdict(list))
 with open(infile, 'r') as f:
-    next(f)
-    next(f)
     for line in f.xreadlines():
+        if '#' in line:
+            continue
         columns = line.strip('\n').split()
         turn = int(columns[1])
         if turn not in turns:
