@@ -13,7 +13,7 @@ infile = sys.argv[1]
 id_col = float(sys.argv[2])
 name = '%s' %sys.argv[3]
 orientation = str(sys.argv[4])
-halfgap = float(sys.argv[5])
+halfgap = float(sys.argv[5])*10**3
 total_particles = sys.argv[6]
 
 # ------------------------------------------------------------------------------
