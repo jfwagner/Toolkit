@@ -106,7 +106,7 @@ def dist_generator(particles, emittance, beta, bunch, spread, factor, job):
 
 particles = int(sys.argv[1])
 # (particles, emittance, beta, bunch, spread, factor)
-for number in range(1, 2):
+for number in range(1, 301):
     n = '%s'%number
     dist_generator(particles, 2.5e-6, 0.15, 75.5, 1.13e-4, 1, n)
 
