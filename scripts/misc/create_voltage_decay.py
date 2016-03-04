@@ -11,14 +11,14 @@ for value in range(1, max_tau + 1):
     taus.append(value)
 
 min_turn = 7
-max_turn = 25
+max_turn = 50
 
 turns = []
 for value in range(min_turn + 1, max_turn + 1):
     turns.append(value)
     
 turns_const = []
-for value in range(1, min_turn + 1):
+for value in range(2, min_turn + 1):
     turns_const.append(value)
 
 def decay(voltage, turn, min_turn, tau):
@@ -34,6 +34,7 @@ for tau in taus:
         except OSError:
             pass
         f = open(outfile, 'w')
+        f.write('1 0.0\n')
         for turn_const in turns_const:
             f.write('%.0f %.15f\n'%(turn_const, val))
         for turn in turns:
