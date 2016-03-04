@@ -1,4 +1,5 @@
 #!/usr/local/bin/python
+# plot_loss_maps.py LPI_test.s impacts_real.dat coll_summary.dat CollPositionsHL.b1.dat 19968
 import os
 import sys
 import numpy as np
