@@ -1,3 +1,4 @@
+#!/usr/local/bin/python
 # --------------------------------------------
 # Series of useful functions to help plotting
 # --------------------------------------------
@@ -6,86 +7,55 @@ import re
 from matplotlib import pyplot as plt
 import numpy as np
 
-def load_data_coll(infile, coll_id):
-    f = open(infile, 'r')
-    s = []
-    x = []
-    y = []
-    for line in f.xreadlines():
-        columns = line.strip('\n').split()
-        if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind' or columns[0] != coll_id:
-            continue
-        s.append(float(columns[2]))
-        x.append(float(columns[3]))
-        y.append(float(columns[5]))
-    f.close()
-    s_array = np.asarray(s)
-    x_array = np.asarray(x)
-    y_array = np.asarray(y)
-    return s_array, x_array, y_array
 
-def get_lines(infile):
-    """Extracts the lines of a data file. Used in the get_columns function."""
-    for character in open(infile):
-        columns = character.strip('\n').split()
-        if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind':
-            continue
-        yield columns
-        
-def get_columns(infile, x, y, type):
-    """Extracts the columns of a data file using the get_lines function. 
+class Data:
 
-    The function arguments' are (in order): 
-    - File
-    - Number of the column corresponding to coordinate x
-    - Number of the column corresponding to coordinate y
-    - Indicate if the data to return are strings or floats
+    def __init__(self, infile):
+        self.infile = infile
+    
+    def is_header(self, line):
+        """
+        is_header(string)
 
-    Example:
-    var_x, var_y = get_columns('LHCAperture_old.dat', 0, 2, "float")
-    """
-    a = []
-    b = []
-    my_data = get_lines(infile)
-    for column in my_data:
-        if type == "string":
-            a.append(column[x])
-            b.append(column[y])
-        elif type == "float":
-            a.append(float(column[x]))
-            b.append(float(column[y]))
-    if type == "float":
-        var_x = np.asarray(a)
-        var_y = np.asarray(b)
-    elif type == "string":
-        var_x = a
-        var_y = b
-    return var_x, var_y
+        Returns True if the line contains any of the symbols: @, #, $, %, &, *
 
-def get_column(infile, column_number, data_structure, data_type):
-    """Extracts a column of a data file using the get_lines function. 
+        --> Useful to skip lines that contain any of these symbols at any position.
+        --> Used in the data_line function.
+        """
+        return re.search(r'#|@|\*|%|\$|&', line) is not None
 
-    The function arguments' are (in order): 
-    - File
-    - Number of the desired column
-    - Indicate if the data structure to return should be an array or a list
+    def data_line(self):
+        """
+        line(file)
 
-    Example:
-    var_x = get_columns('LHCAperture_old.dat', 2, "array")
-    """
-    my_column = []
-    my_data = list(get_lines(infile))
-    if data_type == "string":
-        for columns in my_data:
-            my_column.append(columns[column_number])
-    elif data_type == "float":
-        for columns in my_data:
-            my_column.append(float(columns[column_number]))
-    if data_structure == "array":
-        my_final_column = asarray(my_column)
-    elif data_structure == "list":
-        my_final_column = my_column
-    return my_final_column
+        Generator function that returns the lines of a file, skipping the lines
+        containing the symbols: @, #, $, %, &, *.
+
+        Example of usage (iterator protocol, returns one line after the next() method):
+        >> a = get_columns('dump.txt')
+        >> a.next()
+
+        --> Useful to read big data files (avoid loading a whole list in memory).
+        --> Used in the data_array function.
+        """
+        with open(self.infile, 'r') as data:  # using with the file is closed automatically
+            for line in data:
+                if is_header(line):
+                    continue
+                line_list = line.strip('\n').split()  # split on contiguous blank spaces and remove return of line
+                yield line_list
+
+
+    def data_array(self, column_number, data_type='float64'):
+        """
+        data_array(file, int, numpy data type)
+
+        Returns a numpy array containing the specified column.
+
+        Numpy data types: http://docs.scipy.org/doc/numpy-1.10.1/user/basics.types.html
+        Use 'str' for strings.
+        """
+        return np.array([column[column_number] for column in data_line(self.infile)]).astype(data_type)
 
 def get_ip1(x, y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
@@ -154,6 +124,24 @@ def plot_elem(color, height, bottom, name_in = [], s_in = [], l_in = [], *args):
     for s, element, l in zip(s_out, name_out, l_out):
         f = s-l
         plt.bar(f, height, l, bottom, color=color, alpha=0.7) # left, height, width, bottom
+
+def load_data_coll(infile, coll_id):
+    f = open(infile, 'r')
+    s = []
+    x = []
+    y = []
+    for line in f.xreadlines():
+        columns = line.strip('\n').split()
+        if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind' or columns[0] != coll_id:
+            continue
+        s.append(float(columns[2]))
+        x.append(float(columns[3]))
+        y.append(float(columns[5]))
+    f.close()
+    s_array = np.asarray(s)
+    x_array = np.asarray(x)
+    y_array = np.asarray(y)
+    return s_array, x_array, y_array
 
 def get_ellipse_coords(a=0.0, b=0.0, x=0.0, y=0.0, angle=0.0, k=2):
     """ Draws an ellipse using (360*k + 1) discrete points; based on pseudo code
