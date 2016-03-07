@@ -24,38 +24,34 @@ class Data:
         """
         return re.search(r'#|@|\*|%|\$|&', line) is not None
 
-    def data_line(self):
+    def data_line(self, **kwargs):
         """
-        line(file)
-
         Generator function that returns the lines of a file, skipping the lines
         containing the symbols: @, #, $, %, &, *.
-
         Example of usage (iterator protocol, returns one line after the next() method):
         >> a = get_columns('dump.txt')
         >> a.next()
-
         --> Useful to read big data files (avoid loading a whole list in memory).
         --> Used in the data_array function.
         """
         with open(self.infile, 'r') as data:  # using with the file is closed automatically
             for line in data:
-                if is_header(line):
+                if self.is_header(line):
                     continue
                 line_list = line.strip('\n').split()  # split on contiguous blank spaces and remove return of line
-                yield line_list
+                if kwargs:
+                    if int(line_list[kwargs['column']]) in range(kwargs['start_range'], kwargs['end_range'] + 1):
+                        yield line_list
+                else:
+                    yield line_list
 
-
-    def data_array(self, column_number, data_type='float64'):
+    def data_array(self, column_number, data_type='float64', **kwargs):
         """
-        data_array(file, int, numpy data type)
-
         Returns a numpy array containing the specified column.
-
         Numpy data types: http://docs.scipy.org/doc/numpy-1.10.1/user/basics.types.html
         Use 'str' for strings.
         """
-        return np.array([column[column_number] for column in data_line(self.infile)]).astype(data_type)
+        return np.array([column[column_number] for column in self.data_line(**kwargs)]).astype(data_type)
 
 def get_ip1(x, y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
