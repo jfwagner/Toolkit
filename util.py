@@ -59,6 +59,53 @@ class GetData:
                     data_dict[count].append(float(item))  # Fill in the lists
         return data_dict
 
+        
+class PlotData(GetData):
+
+    def basic(self, x_coord, y_coord, filename, title=None, x_label=None, y_label=None, x_lim=None, y_lim=None, scatter=False, column=None, regex=None):
+        data_dict = PlotData(self.infile).data_column(column, regex)
+        x = data_dict[x_coord]
+        y = data_dict[y_coord]
+
+        DPI = 300
+        textwidth = 6
+        font_spec = {"font.family": "serif",  # use as default font
+        "font.serif": ["New Century Schoolbook"],  # custom serif font
+        "font.sans-serif": ["helvetica"],  # custom sans-serif font
+        "font.size": 12,
+        "font.weight": "bold"}
+        rc('text', usetex=True)
+        rc('text.latex', preamble=r'\usepackage{cmbright}')
+        rcParams['figure.figsize'] = textwidth, textwidth/1.618
+        rcParams.update(font_spec)
+
+        if scatter:
+            plt.scatter(x,y)
+        else:
+            plt.plot(x, y)
+        
+        plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+        plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+        plt.grid(b=None, which='major')
+
+        if title is not None:
+             plt.title(title)
+
+        if x_label is not None:
+            plt.xlabel(x_label)
+
+        if y_label is not None:
+            plt.ylabel(y_label)
+
+        if x_lim is not None:
+            plt.xlim(x_lim)
+
+        if y_lim is not None:
+            plt.ylim(y_lim)
+
+        plt.subplots_adjust(left=0.13, bottom=0.14, right=0.94, top=0.93)
+        plt.savefig(filename + '.png', dpi=DPI)
+        plt.clf()
 
 def get_ip1(x, y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
