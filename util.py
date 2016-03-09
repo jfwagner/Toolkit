@@ -2,10 +2,12 @@
 # --------------------------------------------
 # Series of useful functions to help plotting
 # --------------------------------------------
-from __future__ import division
 import re
-from matplotlib import pyplot as plt
 import numpy as np
+from __future__ import division
+from matplotlib import pyplot as plt
+from matplotlib import rc
+from matplotlib import rcParams
 
 
 class GetData:
