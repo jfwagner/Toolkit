@@ -2,9 +2,12 @@
 # --------------------------------------------
 # Series of useful functions to help plotting
 # --------------------------------------------
-import re
-import numpy as np
+
 from __future__ import division
+
+import re
+
+import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
@@ -46,7 +49,7 @@ class GetData:
                 else:
                     print 'Column or regex missing from arguments'
 
-    def data_column(self, dtype=float, column=None, regex=None):
+    def data_column(self, column=None, regex=None):
         """
         Returns a dictionary of lists, containing the columns of the data file.
         The dictionary keys are the number of the columns.
