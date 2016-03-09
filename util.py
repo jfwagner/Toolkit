@@ -8,27 +8,23 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
-class Data:
+class GetData:
 
     def __init__(self, infile):
         self.infile = infile
-    
+
     def is_header(self, line):
         """
-        is_header(string)
-
         Returns True if the line contains any of the symbols: @, #, $, %, &, *
-
         --> Useful to skip lines that contain any of these symbols at any position.
         --> Used in the data_line function.
         """
         return re.search(r'#|@|\*|%|\$|&', line) is not None
 
-    def data_line(self, **kwargs):
+    def data_line(self, column=None, regex=None):
         """
         Generator function that returns the lines of a file, skipping the lines
         containing the symbols: @, #, $, %, &, *.
-        Example of usage (iterator protocol, returns one line after the next() method):
         >> a = get_columns('dump.txt')
         >> a.next()
         --> Useful to read big data files (avoid loading a whole list in memory).
@@ -39,19 +35,30 @@ class Data:
                 if self.is_header(line):
                     continue
                 line_list = line.strip('\n').split()  # split on contiguous blank spaces and remove return of line
-                if kwargs:
-                    if int(line_list[kwargs['column']]) in range(kwargs['start_range'], kwargs['end_range'] + 1):
+                if (column and regex) is not None:
+                    if re.match(regex, line_list[column]):
                         yield line_list
-                else:
+                elif (column and regex) is None:
                     yield line_list
+                else:
+                    print 'Column or regex missing from arguments'
 
-    def data_array(self, column_number, data_type='float64', **kwargs):
+    def data_column(self, dtype=float, column=None, regex=None):
         """
-        Returns a numpy array containing the specified column.
-        Numpy data types: http://docs.scipy.org/doc/numpy-1.10.1/user/basics.types.html
-        Use 'str' for strings.
+        Returns a dictionary of lists, containing the columns of the data file.
+        The dictionary keys are the number of the columns.
         """
-        return np.array([column[column_number] for column in self.data_line(**kwargs)]).astype(data_type)
+        start_line = self.data_line(column, regex).next()
+        data_dict = {key: [] for key, item in enumerate(
+            start_line)}  # Create keys and empty lists
+        for line in self.data_line(column, regex):
+            for count, item in enumerate(line):
+                if type(item) == str:
+                    data_dict[count].append(item.strip('"'))  # Strip needed for MAD-X output
+                else:
+                    data_dict[count].append(float(item))  # Fill in the lists
+        return data_dict
+
 
 def get_ip1(x, y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
