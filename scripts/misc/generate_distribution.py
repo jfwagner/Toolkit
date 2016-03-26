@@ -1,11 +1,11 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # ----------------------------------------------------------------------------------------------------------------------------
 # Function to generate a particle distribution as input for the collimation routine in SixTrack (round beams at symmetry point)
 # ----------------------------------------------------------------------------------------------------------------------------
 from random import gauss
 from math import sqrt, pi
 import sys
-from longitudinalDyn import longitudinalHamiltonian 
+from longitudinalDyn import longitudinalHamiltonian
 Hcalculator = longitudinalHamiltonian("HL_coll")
 Hmargin = -0.005  #Hamiltonian to accept below
 
@@ -20,7 +20,7 @@ def dist_generator(particles, emittance, beta, bunch, spread, factor, job):
     gamma_rel = e_tot/mp
     beta_rel = sqrt(gamma_rel**2 - 1)/gamma_rel
 
-    # Twiss Parameters 
+    # Twiss Parameters
     # --------------------------------------------------------------------------------------------------------------
     gamma = 1/beta
 
@@ -31,9 +31,9 @@ def dist_generator(particles, emittance, beta, bunch, spread, factor, job):
 
         # f = open('beam_parameters.txt', 'w')
 
-        # for args in (('Number of particles', particles, ''), ('Energy', e_tot, '[eV]'),('Relativistic gamma', gamma_rel, ''), 
+        # for args in (('Number of particles', particles, ''), ('Energy', e_tot, '[eV]'),('Relativistic gamma', gamma_rel, ''),
         #              ('Relativistic beta', beta_rel, ''), ('Transverse normalized emittance', emittance, '[m]'),
-        #              ('RMS bunchlength', bunch, '[m]'), ('RMS energy spread', spread, '[%]'), ('Transverse beam envelope', t_max, '[m]'), 
+        #              ('RMS bunchlength', bunch, '[m]'), ('RMS energy spread', spread, '[%]'), ('Transverse beam envelope', t_max, '[m]'),
         #              ('Transverse beam amplitude', tp_max, '[m^-1]'), ('Beta star', beta, '[m]'), ('Sigmas', factor, '[m]')):
         #     print >> f, '{:<40} {:<40} {:<40}'.format(*args)
         # f.close()

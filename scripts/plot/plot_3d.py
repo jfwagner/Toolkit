@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 import sys
 import numpy as np
 from datetime import datetime
@@ -119,7 +119,7 @@ for i in range(1,101):
     par.append(i)
     ph1.append(140)
     ph2.append(360)
-    
+
 # plt.plot(ph,par, color="black")
 plt.axvspan(140, 360, alpha=0.2, color='blue')
 plt.xlabel("Phase shift (deg)")

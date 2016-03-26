@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 import sys
 
 import numpy as np
@@ -71,7 +71,7 @@ for i, j in zip(x,y):
     else:
         continue
 
-    
+
 plt.annotate('Total loss: {} \%'.format(round(sum(y_norm), 3)), xy=(0.5, max(y)+0.5*max(y)), size='7')
 
 plt.xlabel("Turns")

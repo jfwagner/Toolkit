@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
@@ -25,7 +25,7 @@ beta_rel = 0.999999991017
 # Initialization of arrays
 # ------------------------------------------------------------------------------
 t = zeros(total_turns)
-    
+
 term_1_x = zeros(total_turns)
 term_2_x = zeros(total_turns)
 term_3_x = zeros(total_turns)

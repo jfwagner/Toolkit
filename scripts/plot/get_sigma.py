@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.patches import Ellipse
@@ -72,7 +72,7 @@ for t in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
 # for i, j in zip(turn, y):
 #     print i, j
-    
+
 
 # failure_turn = 5
 
@@ -114,12 +114,12 @@ def get_sigma(turn, em_geom, beta, sigma):
         sig.append(np.sqrt(beta*j))
         sig_norm.append(np.sqrt(beta*j)/sigma)
     return t, sig, sig_norm
-        
-            
+
+
 # t_y, em_y = get_cs_invariant(turn, y, yp, alpha_y, beta_y, gamma_y)
 t_dy, em_dy = get_delta(turn, y)
 t_sy, sig_y, sig_norm_y = get_sigma(t_dy, em_dy, beta_y, sigma_y)
-    
+
 
 for i, j, k in zip(t_sy, sig_y, sig_norm_y):
     print i, j, k
@@ -147,10 +147,10 @@ for i, j, k in zip(t_sy, sig_y, sig_norm_y):
 # rcParams['figure.figsize']=textwidth, textwidth/1.618
 # rcParams.update(font_spec)
 
-        
-# plt.plot(t_sy, sig_norm_y, marker="+", color="blue")        
+
+# plt.plot(t_sy, sig_norm_y, marker="+", color="blue")
 # plt.xlabel("Turns")
-# plt.ylabel(r"$\Delta y \ \ [\sigma]$")    
+# plt.ylabel(r"$\Delta y \ \ [\sigma]$")
 # plt.subplots_adjust(left=0.13, bottom=0.14, right=0.94, top=0.93)
 # plt.savefig('y_displacement.png', dpi=DPI)
 # plt.clf()

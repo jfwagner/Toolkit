@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # ------------------------------------------------------------------------------
 # This script is designed to plot MAD-X output. It will issue one type of plot
 # at a time. If you want to plot several types, launch this script several times
@@ -28,7 +28,7 @@ from util import plot_twiss
 
 ## feed the input to the script by command line ##
 __author__ = 'Andrea Santamaria Garcia'
- 
+
 parser = argparse.ArgumentParser(description='This is a script to plot data from tfs files.')
 parser.add_argument('-t_b1','--twiss_b1', help='Twiss Beam 1 file',required=True)
 parser.add_argument('-t_b2','--twiss_b2', help='Twiss Beam 2 file', required=True)
@@ -41,7 +41,7 @@ parser.add_argument('-arg1','--arg_1', help='Horizontal argument of the plot', r
 parser.add_argument('-arg2','--arg_2', help='Vertical argument of the plot', required=False)
 parser.add_argument('-arg3','--arg_3', help='Vertical argument of the plot', required=False)
 args = parser.parse_args()
- 
+
 ## show the values specified by the user##
 print " "
 print "********************************************"
@@ -77,12 +77,12 @@ fig = plt.figure()
 
 ## start the correct plot loop ##
 if args.plot == "ORBIT": ## orbit plots ##
-   
+
     if args.survey_b1 is None and args.survey_b2 is None: # no survey files
 
         print " "
         print ">> TWISS"
-        
+
         ## beam 1 data ##
         s_b1_y, y_b1, one_sigma_y_b1, m_one_sigma_y_b1, five_sigma_y_b1, m_five_sigma_y_b1 = plot_twiss_beams(twiss_b1['S'], twiss_b1['Y'], 7e12, 2.5e-6, twiss_b1['BETY'], args.plot_ip, args.limit)
         s_b1_x, x_b1, one_sigma_x_b1, m_one_sigma_x_b1, five_sigma_x_b1, m_five_sigma_x_b1 = plot_twiss_beams(twiss_b1['S'], twiss_b1['X'], 7e12, 2.5e-6, twiss_b1['BETX'], args.plot_ip, args.limit)
@@ -90,26 +90,26 @@ if args.plot == "ORBIT": ## orbit plots ##
         ## beam 2 data ##
         s_b2_y, y_b2, one_sigma_y_b2, m_one_sigma_y_b2, five_sigma_y_b2, m_five_sigma_y_b2 = plot_twiss_beams(twiss_b2['S'], twiss_b2['Y'], 7e12, 2.5e-6, twiss_b2['BETY'], args.plot_ip, args.limit)
         s_b2_x, x_b2, one_sigma_x_b2, m_one_sigma_x_b2, five_sigma_x_b2, m_five_sigma_x_b2 = plot_twiss_beams(twiss_b2['S'], twiss_b2['X'], 7e12, 2.5e-6, twiss_b2['BETX'], args.plot_ip, args.limit)
-            
+
     if (args.survey_b1 is not None) != (args.survey_b2 is not None): # only one survey file
         print " "
         print ">> You are missing one survey file. Exiting program..."
         sys.exit()
-        
+
     if args.survey_b1 is not None and args.survey_b2 is not None: # both survey files
 
         print " "
         print ">> SURVEY"
         print ">> Sorry, the survey option is not available yet"
         sys.exit()
-        
+
     ## starting the orbit plots ##
     print ">> Plotting vertical orbit..."
 
     ## VERTICAL ORBIT ##
     plt.clf()
     ax1 = fig.add_subplot(111)
-    
+
     ## plot beam 1 ##
     ax1.plot(s_b1_y, y_b1, color='blue', label='Beam 1')
     ax1.plot(s_b1_y, one_sigma_y_b1, color='blue')
@@ -152,11 +152,11 @@ if args.plot == "ORBIT": ## orbit plots ##
     plt.clf()
 
     print ">> Plotting horizontal orbit..."
-    
+
     ## HORIZONTAL ORBIT ##
     plt.clf()
     ax2 = fig.add_subplot(111)
-    
+
     ## plot beam 1 ##
     ax2.plot(s_b1_x, x_b1, color='blue', label='Beam 1')
     ax2.plot(s_b1_x, one_sigma_x_b1, color='blue')

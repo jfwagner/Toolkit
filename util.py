@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # --------------------------------------------
 # Series of useful functions to help plotting
 # --------------------------------------------
@@ -120,7 +120,7 @@ class PlotData(GetData):
 def get_ip1(x, y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
     around IP1 (i.e. convert s coordinate of 26900 m to -100 m).
-    The function arguments' are the variables x and y that you want to treat, respectively . 
+    The function arguments' are the variables x and y that you want to treat, respectively .
     Example:
     var_x, var_y = get_ip1(var_x, var_y)
     """
@@ -183,7 +183,7 @@ def get_bucket():
 
 
 def get_ir(ir, s, coord):
-    """This function stores the information relevant to the plotting of a specific Interaction Region (IR), 
+    """This function stores the information relevant to the plotting of a specific Interaction Region (IR),
     i.e. the position of the IR in the accelerator and the limit of the vertical coordinate.
 
     The function arguments' are (in order):

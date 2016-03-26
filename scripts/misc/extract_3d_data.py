@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 import os
 import sys
 
@@ -31,9 +31,9 @@ f = open(outfile,'w')
 for e1, e2, e3 in zip(tau, phase, particles):
     f.write('%.0f %.0f %.0f \n' % (e1, e2, e3-1))
 f.close()
-    
+
 print '>> Maximum percentage  lost = ', max(particles)/64, '%'
 print '>> Number of particles lost = ', max(particles)
 
 
-            
+

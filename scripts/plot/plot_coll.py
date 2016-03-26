@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 import sys
 import numpy as np
 from matplotlib import pyplot as plt
@@ -18,7 +18,7 @@ total_particles = sys.argv[6]
 
 # ------------------------------------------------------------------------------
 # ############################## IMPACTS REAL ##################################
-# ------------------------------------------------------------------------------   
+# ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # Extract losses in the aperture
 # ------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ if orientation=='vertical':
 elif orientation=='horizontal':
     coord_tct = x_tct
     my_label = "x [mm]"
-    
+
 # ------------------------------------------------------------------------------
 # Impacts on the collimator in coord-s
 # ------------------------------------------------------------------------------
@@ -91,9 +91,9 @@ plt.clf()
 # Histogram of the impact parameter
 # ------------------------------------------------------------------------------
 abs_coord = []
-for e1 in coord_tct: 
+for e1 in coord_tct:
     abs_coord.append(abs(e1) - halfgap)
-    
+
 plt.hist(abs_coord, 100, color='green', alpha=0.8, linewidth=0.1)
 plt.xlabel("Impact parameter (mm)")
 plt.grid(b=None, which='major')
@@ -104,4 +104,4 @@ plt.clf()
 
 end_time = datetime.now()
 print('Duration: {}'.format(end_time - start_time))
-        
+

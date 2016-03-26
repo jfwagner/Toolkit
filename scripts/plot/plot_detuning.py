@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 import sys
 import numpy as np
 from math import degrees
@@ -9,10 +9,10 @@ from matplotlib import rcParams
 
 def detune_1(k,v,t,tau):
     return ((-k*(v**2)*tau)/2)*np.exp((-2*t)/tau)
-    
+
 def detune_2(f,t):
     return -f*2*np.pi*t
-    
+
 def exp(t,tau):
     return np.exp(-t/tau)
 

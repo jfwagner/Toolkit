@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 
 import sys
 from collections import defaultdict
@@ -29,7 +29,7 @@ coords = ['x', 'xp', 'y', 'yp', 'z', 'e']
 
 col_number = [3, 4, 5, 6, 7, 8]
 d_1 = {k: v for k, v in zip(coords, col_number)}  # dict comprehension
-    
+
 limits = [[-7.9e-4, -7.1e-4], [-3e-4, 3e-4], [-8e-5, 8e-5], [1e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]]
 # limits = [[-4e-5, 4e-5], [-2e-4, 2e-4], [-8e-5, 8e-5], [-5e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]]
 d_2 = {k: v for k, v in zip(coords, limits)}
@@ -37,7 +37,7 @@ d_2 = {k: v for k, v in zip(coords, limits)}
 offset = [-7.5e-4, 0, 0, 0.3e-3, 0, 0]
 # offset = [0, 0, 0, 0, 0, 0]
 d_3 = {k: v for k, v in zip(coords, offset)}
-    
+
 # Loop >ONCE< through the DUMP file to extract >only< the relevant information
 # ID turn s[m] x[mm] xp[mrad] y[mm] yp[mrad] z[mm] dE/E ktrack
 turn_data = defaultdict(lambda: defaultdict(list))
@@ -66,7 +66,7 @@ for turn in turns:
     print '>> Turn', turn
     coord_1 = turn_data[turn]['coord_tot_1']
     coord_2 = turn_data[turn]['coord_tot_2']
-            
+
     # Plot characteristics
     DPI = 300
     textwidth = 6
