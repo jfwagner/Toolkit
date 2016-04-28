@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams

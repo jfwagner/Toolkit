@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 
 import sys
 from collections import defaultdict
@@ -29,12 +29,15 @@ coords = ['x', 'xp', 'y', 'yp', 'z', 'e']
 
 col_number = [3, 4, 5, 6, 7, 8]
 d_1 = {k: v for k, v in zip(coords, col_number)}  # dict comprehension
-    
-limits = [[-7.9e-4, -7.1e-4], [-3e-4, 3e-4], [-8e-5, 8e-5], [1e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]]
-# limits = [[-4e-5, 4e-5], [-2e-4, 2e-4], [-8e-5, 8e-5], [-5e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]]
+
+# limits = [[-9e-4, -6e-4], [-7e-4, 7e-4], [-8e-5, 8e-5], [-0.5e-3, 0], [-0.02, 0.02], [-2e-4, 2e-4]] # Pencil
+# limits = [[-1e-4, 1e-4], [1e-4, 5e-4], [7e-4, 8e-4], [-2e-4, 2e-4], [-0.4, 0.4], [-5e-4, 5e-4]] # Optics 1.2, IP5
+limits = [[-7.9e-4, -7.1e-4], [-3e-4, 3e-4], [-8e-5, 8e-5], [1e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]] #Optics 1.2, IP1
+# limits = [[-4e-5, 4e-5], [-2e-4, 2e-4], [-8e-5, 8e-5], [-5e-4, 5e-4], [-0.4, 0.4], [-5e-4, 5e-4]]  # Optics 1.0, IP1
 d_2 = {k: v for k, v in zip(coords, limits)}
 
-offset = [-7.5e-4, 0, 0, 0.3e-3, 0, 0]
+# offset = [0, 3e-4, 7.5e-4, 0, 0, 0]  # Optics 1.2, IP5
+offset = [-7.5e-4, 0, 0, 0.3e-3, 0, 0]  # Optics 1.2, IP1
 # offset = [0, 0, 0, 0, 0, 0]
 d_3 = {k: v for k, v in zip(coords, offset)}
     
@@ -70,9 +73,15 @@ for turn in turns:
     # Plot characteristics
     DPI = 300
     textwidth = 6
-    rc('font', **{'family': 'serif', 'serif': ['Computer Modern Roman'], 'size':10})
+    font_spec = {"font.family": "serif",  # use as default font
+                 "font.serif": ["New Century Schoolbook"],  # custom serif font
+                 "font.sans-serif": ["helvetica"],  # custom sans-serif font
+                 "font.size": 12,
+                 "font.weight": "bold"}
     rc('text', usetex=True)
-    rcParams['figure.figsize'] = textwidth, textwidth / 1.618
+    rc('text.latex', preamble=r'\usepackage{cmbright}')
+    rcParams['figure.figsize'] = textwidth, textwidth/1.618
+    rcParams.update(font_spec)
 
     # 2D histogram
     H, xedges, yedges = np.histogram2d(coord_1, coord_2, bins=nbins)
@@ -81,6 +90,20 @@ for turn in turns:
     Hmasked = np.ma.masked_where(H == 0, H) # Mask pixels with a value of zero
     plt.pcolormesh(xedges, yedges, Hmasked, norm=None, vmin=0, vmax=100)
     plt.colorbar()
+
+    z_points = np.linspace(-0.4,0.4,100)
+    y_points = -295*1e-6*z_points
+    plt.plot(z_points, y_points, color='green', label='-295 (should be)')
+
+    # z_points_a = np.linspace(-0.4,0.4,100)
+    # y_points_a = -210*1e-6*z_points
+    # plt.plot(z_points_a, y_points_a, color='red', label='-210 (1 sigma)')
+
+    z_points_b = np.linspace(-0.4,0.4,100)
+    y_points_b = -256*1e-6*z_points
+    plt.plot(z_points_b, y_points_b, color='orange', label='-256 (whole bunch)')
+
+    plt.legend(loc='lower left', prop={'size': 10})
 
     plt.title('Turn {}'.format(turn))
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
@@ -103,8 +126,8 @@ for turn in turns:
         else:
             plt.ylabel(coord_ver + ' [m]')
 
-    plt.xlim(d_2[coord_hor])
-    plt.ylim(d_2[coord_ver])
+    # plt.xlim(d_2[coord_hor])
+    # plt.ylim(d_2[coord_ver])
 
     # Plot the bucket or the sigmas
     if coord_hor == 'z' and coord_ver == 'e':
@@ -142,7 +165,7 @@ for turn in turns:
     elif coord_hor == 'e' or coord_ver == 'e':
         print '>> No sigmas nor bucket for this coordinate combination. Try (z,e).'
     else:
-        sigmas = [7.16610376198e-06, 4.76160858517e-05, 7.12405639107e-06, 4.75602973547e-05, 7.45803056032, 767.801389427e-06]
+        sigmas = [7.16610376198e-06, 4.76160858517e-05, 7.12405639107e-06, 4.75602973547e-05, 0.0745803056032, 767.801389427e-06]
         d_sigma = {k: v for k, v in zip(coords, sigmas)}  # dict comprehension
 
         std_coord_1 =  d_sigma[coord_hor]

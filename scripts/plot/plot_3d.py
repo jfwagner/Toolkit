@@ -1,75 +1,55 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
+import operator
+import os
 import sys
+
 import numpy as np
-from datetime import datetime
 from matplotlib import pyplot as plt
+from matplotlib.patches import Ellipse
 from matplotlib import rc
 from matplotlib import rcParams
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-import matplotlib.tri as mtri
 
-infile = 'data.txt'
+from operator import itemgetter
 
-g = open(infile, 'r')
-tau = []
-phase = []
-particles = []
-for line in g.xreadlines():
-    columns = line.strip('\n').split()
-    if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind':
-        continue
-    tau.append(float(columns[0]))
-    phase.append(float(columns[1]))
-    particles.append((float(columns[2])/6400)*100)
-g.close()
+from util import GetData
 
 
-t1_p = []
-t1_f = []
-t2_p = []
-t2_f = []
-t3_p = []
-t3_f = []
-t4_p = []
-t4_f = []
-for e1, e2, e3 in zip(tau, phase, particles):
-    if e1 == 1:
-        t1_p.append(e3)
-        t1_f.append(e2)
-    if e1 == 2:
-        t2_p.append(e3)
-        t2_f.append(e2)
-    if e1 == 3:
-        t3_p.append(e3)
-        t3_f.append(e2)
-    if e1 == 4:
-        t4_p.append(e3)
-        t4_f.append(e2)
-max_1 = max(t1_p)
-max_2 = max(t2_p)
-max_3 = max(t3_p)
-max_4 = max(t4_p)
+# --------------------------------------------------------------------
+# Extract the data
+# --------------------------------------------------------------------
+infile = 'imp_real_data.txt'
+get = GetData(infile)
 
-print 'Maximums'
-print '----------------------'
+def get_turn(tau):
+    my_data = get.data_column(column=0, regex=tau)
+    return my_data[0], my_data[1], my_data[2], my_data[3]
+    
+tau_1, phase_1, bunch_1, detuning_1 = get_turn(r'1')
+tau_2, phase_2, bunch_2, detuning_2 = get_turn(r'2')
+tau_3, phase_3, bunch_3, detuning_3 = get_turn(r'3')
+tau_4, phase_4, bunch_4, detuning_4 = get_turn(r'4')
 
-for e1, e2 in zip(t1_p, t1_f):
-    if e1==max_1:
-        print 'tau 1',e2,e1
-for e1, e2 in zip(t2_p, t2_f):
-    if e1==max_2:
-        print 'tau 2',e2,e1
-for e1, e2 in zip(t3_p, t3_f):
-    if e1==max_3:
-        print 'tau 3',e2,e1
-for e1, e2 in zip(t4_p, t4_f):
-    if e1==max_4:
-        print 'tau 4',e2,e1
 
-X = np.asarray(tau)
-Y = np.asarray(phase)
-Z = np.asarray(particles)
+def get_max(tau, phase, bunch, detuning):
+    return max(zip(tau, phase, bunch, detuning), key=lambda item:item[2])
+
+def get_phase(tau, phase, bunch, detuning):
+    for i, j, k, l in zip(tau, phase, bunch, detuning):
+        if l == 3:
+            return i, j, k, l
+            
+def get_max_3k(tau, phase, bunch, detuning):
+    t = []
+    p = []
+    b = []
+    d = []
+    for i, j, k, l in zip(tau, phase, bunch, detuning):
+        if l <= 3:
+            t.append(i)
+            p.append(j)
+            b.append(k)
+            d.append(l)
+    return max(zip(t, p, b, d), key=lambda item:item[2])
 
 # ------------------------------------------------------------------------------
 # PLOTTING
@@ -87,47 +67,123 @@ rc('text', usetex=True)
 rc('text.latex', preamble=r'\usepackage{cmbright}')
 rcParams['figure.figsize']=textwidth, textwidth/1.618
 rcParams.update(font_spec)
+el = Ellipse((2, -1), 0.5, 0.5)
 
+# ------------------------------------------------------------------------------
+# Phase vs Losses
+# ------------------------------------------------------------------------------
+plt.scatter(phase_1, bunch_1, marker="+", color="blue", label='1 turn')
+plt.scatter(phase_2, bunch_2, marker="+",  color="red",label='2 turns')
+plt.scatter(phase_3, bunch_3, marker="+", color="green", label='3 turns')
+plt.scatter(phase_4, bunch_4, marker="+",  color="orange",label='4 turns')
 
-triang = mtri.Triangulation(X, Y)
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1, projection='3d')
-# ax.plot_trisurf(triang, Z, cmap=plt.cm.CMRmap)
-ax.plot_trisurf(X, Y, Z, cmap=cm.jet, linewidth=0.2)
-ax.set_xlabel("Time constant of failure (turns)")
-ax.set_ylabel("Phase trip (degrees)")
-ax.set_zlabel("Bunch lost (\%)")
-ax.set_ylim([0,360])
-# plt.grid(b=None, which='major')
-plt.title('Failure of 2 crab cavities')
-# plt.legend(loc='upper right', prop={'size':6})
-# plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-plt.savefig('phases.png', dpi=DPI)
-plt.clf()
-# plt.show()
-
-plt.scatter(t1_f,t1_p, marker="+", color="blue", label='1 turn')
-plt.scatter(t2_f,t2_p, marker="+",  color="red",label='2 turns')
-plt.scatter(t3_f,t3_p, marker="+", color="green", label='3 turns')
-plt.scatter(t4_f,t4_p, marker="+",  color="orange",label='4 turns')
-
-
-par = []
-ph1 = []
-ph2 = []
-for i in range(1,101):
-    par.append(i)
-    ph1.append(140)
-    ph2.append(360)
-    
-# plt.plot(ph,par, color="black")
-plt.axvspan(140, 360, alpha=0.2, color='blue')
 plt.xlabel("Phase shift (deg)")
-plt.ylabel("Bunch lost (\%)")
+plt.ylabel(r"Bunch lost (\%)")
 plt.xlim([0,360])
 # plt.ylim([0,100])
 plt.grid(b=None, which='major')
+# plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
 plt.legend(loc='upper left', prop={'size':6})
 plt.subplots_adjust(left=0.13, bottom=0.14, right=0.94, top=0.93)
-plt.savefig('phases_2.png', dpi=DPI)
+plt.savefig('phase_losses.png', dpi=DPI)
 plt.clf()
+
+
+# ------------------------------------------------------------------------------
+# Detuning vs Losses
+# ------------------------------------------------------------------------------
+plt.scatter(detuning_1, bunch_1, marker="+", color="blue", label='1 turn')
+plt.scatter(detuning_2, bunch_2, marker="+",  color="red",label='2 turns')
+plt.scatter(detuning_3, bunch_3, marker="+", color="green", label='3 turns')
+plt.scatter(detuning_4, bunch_4, marker="+",  color="orange",label='4 turns')
+
+def get_loss(detuning, bunch, phase):
+    x = []
+    y = []
+    p = []
+    for i, j, k in zip(detuning, bunch, phase):
+        if i <= 3:
+            x.append(i)
+            y.append(j)
+            p.append(k)
+    return max(zip(x, y, p), key=lambda item:item[1])
+
+x1, y1, p1 = get_loss(detuning_1, bunch_1, phase_1)
+plt.annotate(str(y1), xy=(x1, y1), xytext=(x1 - 0.2*x1, y1 + 0.1*y1), size='11', color='blue', arrowprops=dict(arrowstyle="wedge,tail_width=0.7", fc="0.6", ec="none", patchB=el, connectionstyle="arc3,rad=-0.3"))
+
+x2, y2, p2 = get_loss(detuning_2, bunch_2, phase_2)
+plt.annotate(str(y2), xy=(x2, y2), xytext=(x2 - 0.2*x2, y2 + 0.1*y2), size='11', color='red', arrowprops=dict(arrowstyle="wedge,tail_width=0.7", fc="0.6", ec="none", patchB=el, connectionstyle="arc3,rad=-0.3"))
+
+x3, y3, p3 = get_loss(detuning_3, bunch_3, phase_3)
+plt.annotate(str(y3), xy=(x3, y3), xytext=(x3 - 0.2*x3, y3 + 0.1*y3), size='11', color='green', arrowprops=dict(arrowstyle="wedge,tail_width=0.7", fc="0.6", ec="none", patchB=el, connectionstyle="arc3,rad=-0.3"))
+
+x4, y4, p4 = get_loss(detuning_4, bunch_4, phase_4)
+plt.annotate(str(y4), xy=(x4, y4), xytext=(x4 - 0.2*x4, y4 + 0.1*y4), size='11', color='orange', arrowprops=dict(arrowstyle="wedge,tail_width=0.7", fc="0.6", ec="none", patchB=el, connectionstyle="arc3,rad=-0.3"))
+
+
+plt.xlabel("Detuning (kHz)")
+plt.ylabel(r"Bunch lost (\%)")
+plt.xlim([0,3])
+# plt.ylim([0,100])
+# plt.grid(b=None, which='major')
+# plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+plt.legend(loc='upper left', prop={'size':6})
+plt.subplots_adjust(left=0.13, bottom=0.14, right=0.94, top=0.93)
+plt.savefig('detuning_losses.png', dpi=DPI)
+plt.clf()
+
+# ------------------------------------------------------------------------------
+# Detuning
+# ------------------------------------------------------------------------------
+plt.scatter(detuning_1, phase_1, marker="+", color="blue", label='1 turn')
+plt.scatter(detuning_2, phase_2,marker="+",  color="red",label='2 turns')
+plt.scatter(detuning_3,phase_3, marker="+", color="green", label='3 turns')
+plt.scatter(detuning_4, phase_4, marker="+",  color="orange",label='4 turns')
+plt.annotate('96', xy=(3, 96), xytext=(4.3, 100), size='11', color='blue', arrowprops=dict(arrowstyle="wedge,tail_width=0.7",
+            fc="0.6", ec="none", patchB=el, connectionstyle="arc3,rad=-0.3"))
+plt.annotate('192', xy=(3, 192), xytext=(4, 210), size='11', color='red', arrowprops=dict(arrowstyle="wedge,tail_width=0.7",
+            fc="0.6", ec="none", patchB=el, connectionstyle="arc3,rad=-0.3"))
+plt.annotate('276', xy=(3, 276), xytext=(3.7, 300), size='11', color='green', arrowprops=dict(arrowstyle="wedge,tail_width=0.7",
+            fc="0.6", ec="none", patchB=el, connectionstyle="arc3,rad=-0.3"))
+plt.axvspan(3, 12, alpha=0.2, color='blue')
+plt.ylabel("Phase shift (deg)")
+plt.xlabel(r"Detuning (kHz)")
+plt.ylim([0,360])
+plt.xlim([0,12])
+# plt.grid(b=None, which='major')
+# plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+plt.legend(loc='lower right', prop={'size':8})
+plt.subplots_adjust(left=0.13, bottom=0.14, right=0.94, top=0.93)
+plt.savefig('phase_detuning.png', dpi=DPI)
+plt.clf() 
+
+# ------------------------------------------------------------------------------
+# Writing output file
+# ------------------------------------------------------------------------------
+outfile = 'summary.txt'
+try:
+    os.remove(outfile)
+except OSError:
+    pass
+            
+with open(outfile, 'w') as log:
+    print >> log, 'Tau | Phase(deg) | Max Bunch Lost (%) | Detuning (kHz)'
+    print >> log, '------------------------------------------------------------------------'
+    print >>log, get_max(tau_1, phase_1, bunch_1, detuning_1)
+    print >>log, get_max(tau_2, phase_2, bunch_2, detuning_2)
+    print >>log, get_max(tau_3, phase_3, bunch_3, detuning_3)
+    print >>log, get_max(tau_4, phase_4, bunch_4, detuning_4)
+    print >> log, ' '
+    print >> log, 'Tau | Phase(deg) | Detuning <= 3 (kHz)| Max Bunch Lost (%)'
+    print >> log, '------------------------------------------------------------------------'
+    print >>log, '1', p1, x1, y1
+    print >>log, '2', p2, x2, y2
+    print >>log, '3', p3, x3, y3
+    print >>log, '4', p4, x4, y4
+    print >> log, ' '
+    print >> log, 'Tau | Max Phase(deg) | Bunch Lost (%) | Detuning (kHz)'
+    print >> log, '------------------------------------------------------------------------'
+    print >>log, get_phase(tau_1, phase_1, bunch_1, detuning_1)
+    print >>log, get_phase(tau_2, phase_2, bunch_2, detuning_2)
+    print >>log, get_phase(tau_3, phase_3, bunch_3, detuning_3)
+    print >>log, get_phase(tau_4, phase_4, bunch_4, detuning_4)

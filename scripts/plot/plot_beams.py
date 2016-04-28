@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # ------------------------------------------------------------------------------
 # This script is designed to plot MAD-X output. It will issue one type of plot
 # at a time. If you want to plot several types, launch this script several times

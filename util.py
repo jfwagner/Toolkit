@@ -49,7 +49,7 @@ class GetData:
                 else:
                     print 'Column or regex missing from arguments'
 
-    def data_column(self, column=None, regex=None):
+    def data_column(self, column=None, regex=None, dtype='number'):
         """
         Returns a dictionary of lists, containing the columns of the data file.
         The dictionary keys are the number of the columns.
@@ -59,10 +59,10 @@ class GetData:
             start_line)}  # Create keys and empty lists
         for line in self.data_line(column, regex):
             for count, item in enumerate(line):
-                if type(item) == str:
+                if dtype == 'string':
                     # Strip needed for MAD-X output
                     data_dict[count].append(item.strip('"'))
-                else:
+                elif dtype == 'number':
                     data_dict[count].append(float(item))  # Fill in the lists
         return data_dict
 
@@ -93,8 +93,8 @@ class PlotData(GetData):
         else:
             plt.plot(x, y)
 
-        plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-        plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+        # plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+        # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         plt.grid(b=None, which='major')
 
         if title is not None:
