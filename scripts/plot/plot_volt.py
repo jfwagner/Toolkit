@@ -27,5 +27,5 @@ x = []
 for a, b, c, d, e, f in zip(yp_before, delta_before, z_before, yp_after, delta_after, z_after):
     term_1 = d / (1 + e)
     term_2 = a / (1 + b)
-    y.append((term_1 - term_2)*7*1e12)
+    y.append((term_1 - term_2) * 7 * 1e12)
     x.append(c)

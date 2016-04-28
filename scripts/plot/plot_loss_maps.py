@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# plot_loss_maps.py LPI_test.s impacts_real.dat coll_summary.dat CollPositionsHL.b1.dat 19968
+# plot_loss_maps.py LPI_test.s impacts_real.dat coll_summary.dat
+# CollPositionsHL.b1.dat 19968
 import os
 import sys
 import numpy as np
@@ -18,15 +19,15 @@ from matplotlib import rcParams
 # rcParams['figure.figsize']=textwidth, textwidth/1.618
 DPI = 600
 textwidth = 3.25
-font_spec = {"font.family": "serif", # use as default font
+font_spec = {"font.family": "serif",  # use as default font
              # "font.serif": ["New Century Schoolbook"], # custom serif font
              # "font.sans-serif": ["helvetica"], # custom sans-serif font
-             "font.size":8,
-             "font.weight":"bold",
-            }
+             "font.size": 8,
+             "font.weight": "bold",
+             }
 rc('text', usetex=True)
 # rc('text.latex', preamble=r'\usepackage{cmbright}')
-rcParams['figure.figsize']=textwidth, textwidth/1.9
+rcParams['figure.figsize'] = textwidth, textwidth / 1.9
 rcParams.update(font_spec)
 fig = plt.figure(dpi=DPI)
 ax2 = fig.add_subplot(111)
@@ -41,7 +42,7 @@ total_particles = float(sys.argv[5])
 
 start_time = datetime.now()
 # ------------------------------------------------------------------------------
-# ################################## APERTURE ##################################
+# ################################## APERTURE ############################
 # ------------------------------------------------------------------------------
 if os.stat(infile_lpi).st_size == 0:
     print '>> No losses in the aperture'
@@ -55,14 +56,15 @@ else:
         pos_lpi.append(float(columns[2]))
     g.close()
     pos_ap = np.asarray(pos_lpi)
-    ap_per = str(round((len(pos_ap)*100)/total_particles, 5))
-    weights_ap = np.ones_like(pos_ap)/total_particles
-    plt.hist(pos_lpi, 500, color='#F03C02', alpha=0.8, linewidth=0.1, weights=weights_ap, log=True, label='Aperture ')
+    ap_per = str(round((len(pos_ap) * 100) / total_particles, 5))
+    weights_ap = np.ones_like(pos_ap) / total_particles
+    plt.hist(pos_lpi, 500, color='#F03C02', alpha=0.8, linewidth=0.1,
+             weights=weights_ap, log=True, label='Aperture ')
     # plt.hist(pos_lpi, 500, color='green', alpha=0.8, linewidth=0.1, weights=weights_ap, log=True, label='Aperture ' + ap_per + '%')
 
 
 # ------------------------------------------------------------------------------
-# ############################### COLLIMATION ##################################
+# ############################### COLLIMATION ############################
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # Extract ID and name from coll_summary.dat
@@ -126,34 +128,42 @@ for line in f.xreadlines():
 f.close()
 
 # ------------------------------------------------------------------------------
-# ################################### PLOT #####################################
-# ------------------------------------------------------------------------------ 
+# ################################### PLOT ###############################
+# ------------------------------------------------------------------------------
 pos_coll = np.asarray(pos)
 
 # Percentages
-coll_per = str(round((len(pos_coll)*100)/total_particles, 2))
+coll_per = str(round((len(pos_coll) * 100) / total_particles, 2))
 print '>>', coll_per, '% lost'
 
 # Weights
-weights_coll = np.ones_like(pos_coll)/total_particles
+weights_coll = np.ones_like(pos_coll) / total_particles
 
-plt.hist(pos, 500, color='#3732bb', alpha=0.8, linewidth=0.1, weights=weights_coll, log=True, label='Collimators')
+plt.hist(pos, 500, color='#3732bb', alpha=0.8, linewidth=0.1,
+         weights=weights_coll, log=True, label='Collimators')
 # plt.hist(pos, 500, color='black', alpha=0.8, linewidth=0.1, weights=weights_coll, log=True, label='Collimation ' + coll_per + '%')
 plt.xlabel("s (m)")
 plt.ylabel("Number of protons lost")
-plt.ylim([0,1e12])
-plt.xlim([0,26658.883])
+plt.ylim([0, 1e12])
+plt.xlim([0, 26658.883])
 # plt.grid(b=None, which='major')
 # plt.title('Loss Maps')
 height = 1e8
-ax2.annotate('IP2', xy=(1, height), xytext=(3332.4, height), weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IR3', xy=(1, height), xytext=(6664.721, height), weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IR4', xy=(1, height), xytext=(9997, height), weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IP5', xy=(1, height), xytext=(13329.28, height), weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IR6', xy=(1, height), xytext=(16661.7, height), weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IR7', xy=(1, height), xytext=(20000, height), weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IP8', xy=(1, height), xytext=(23315.4, height), weight='bold', va='bottom', ha='center', size=7, color='black')
-plt.legend(loc='upper left', prop={'size':6})
+ax2.annotate('IP2', xy=(1, height), xytext=(3332.4, height),
+             weight='bold', va='bottom', ha='center', size=7, color='black')
+ax2.annotate('IR3', xy=(1, height), xytext=(6664.721, height),
+             weight='bold', va='bottom', ha='center', size=7, color='black')
+ax2.annotate('IR4', xy=(1, height), xytext=(9997, height),
+             weight='bold', va='bottom', ha='center', size=7, color='black')
+ax2.annotate('IP5', xy=(1, height), xytext=(13329.28, height),
+             weight='bold', va='bottom', ha='center', size=7, color='black')
+ax2.annotate('IR6', xy=(1, height), xytext=(16661.7, height),
+             weight='bold', va='bottom', ha='center', size=7, color='black')
+ax2.annotate('IR7', xy=(1, height), xytext=(20000, height),
+             weight='bold', va='bottom', ha='center', size=7, color='black')
+ax2.annotate('IP8', xy=(1, height), xytext=(23315.4, height),
+             weight='bold', va='bottom', ha='center', size=7, color='black')
+plt.legend(loc='upper left', prop={'size': 6})
 plt.subplots_adjust(left=0.16, bottom=0.21, right=0.94, top=0.88)
 plt.savefig('loss_maps.png', dpi=DPI)
 plt.clf()

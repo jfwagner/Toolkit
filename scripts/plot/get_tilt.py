@@ -8,10 +8,10 @@ from scipy.optimize import curve_fit
 from util import GetData
 
 infile = 'after.txt'
-obs_turns = [1, 2, 3, 4, 5, 6, 7, 8,9, 10, 11, 12, 13, 14, 15]
+obs_turns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 get = GetData(infile)
 
-sigma = 7.09*1e-3 # [mm], emittance = 2.5 um
+sigma = 7.09 * 1e-3  # [mm], emittance = 2.5 um
 
 for t in obs_turns:
     my_data = get.data_column(column=1, regex='{}\\b'.format(t))
@@ -32,26 +32,27 @@ for t in obs_turns:
     # print 'Turn', t, m[0]*1e6
 
 
-
 # ------------------------------------------------------------------------------
 # PLOTTING
 # ------------------------------------------------------------------------------
 # Plot characteristics
 DPI = 500
 textwidth = 3.25
-font_spec = {"font.family": "serif", # use as default font
+font_spec = {"font.family": "serif",  # use as default font
              # "font.serif": ["New Century Schoolbook"], # custom serif font
              # "font.sans-serif": ["helvetica"], # custom sans-serif font
-             "font.size":8,
-             "font.weight":"bold",
-            }
+             "font.size": 8,
+             "font.weight": "bold",
+             }
 rc('text', usetex=True)
 # rc('text.latex', preamble=r'\usepackage{cmbright}')
-rcParams['figure.figsize']=textwidth, textwidth/1.618
+rcParams['figure.figsize'] = textwidth, textwidth / 1.618
 rcParams.update(font_spec)
 
-n, bins, patches = plt.hist(z_temp, 50, facecolor='blue', alpha=0.5, linewidth=0.3)
-plt.annotate('mean(y)= ' + str(round(np.mean(y_temp),4)) + ' [mm]', xy=(-75.2, 3.5), size='7')
+n, bins, patches = plt.hist(
+    z_temp, 50, facecolor='blue', alpha=0.5, linewidth=0.3)
+plt.annotate('mean(y)= ' + str(round(np.mean(y_temp), 4)) +
+             ' [mm]', xy=(-75.2, 3.5), size='7')
 plt.xlabel(r'z [mm]')
 # plt.xlabel(r'x [m]')
 plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))

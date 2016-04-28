@@ -11,14 +11,14 @@ from util import *
 # ------------------------------------------------------------------------------
 infile = sys.argv[1]
 id_col = float(sys.argv[2])
-name = '%s' %sys.argv[3]
+name = '%s' % sys.argv[3]
 orientation = str(sys.argv[4])
-halfgap = float(sys.argv[5])*10**3
+halfgap = float(sys.argv[5]) * 10**3
 total_particles = sys.argv[6]
 
 # ------------------------------------------------------------------------------
-# ############################## IMPACTS REAL ##################################
-# ------------------------------------------------------------------------------   
+# ############################## IMPACTS REAL ############################
+# ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # Extract losses in the aperture
 # ------------------------------------------------------------------------------
@@ -31,14 +31,15 @@ s_tct, x_tct, y_tct = load_data_coll(infile, sys.argv[2])
 # ------------------------------------------------------------------------------
 DPI = 300
 textwidth = 6
-rc('font',**{'family':'serif','serif':['Computer Modern Roman'], 'size':10})
+rc('font', **{'family': 'serif',
+              'serif': ['Computer Modern Roman'], 'size': 10})
 rc('text', usetex=True)
-rcParams['figure.figsize']=textwidth, textwidth/1.618
+rcParams['figure.figsize'] = textwidth, textwidth / 1.618
 
 # ------------------------------------------------------------------------------
 # Plot the impacts on the collimator in x-y
 # ------------------------------------------------------------------------------
-plt.scatter(x_tct,y_tct, marker=(5,2))
+plt.scatter(x_tct, y_tct, marker=(5, 2))
 plt.grid(b=None, which='major')
 plt.xlabel("x [mm]")
 plt.ylabel("y [mm]")
@@ -51,17 +52,17 @@ plt.clf()
 # ------------------------------------------------------------------------------
 # Coordinate dependent plots
 # ------------------------------------------------------------------------------
-if orientation=='vertical':
+if orientation == 'vertical':
     coord_tct = y_tct
     my_label = "y [mm]"
-elif orientation=='horizontal':
+elif orientation == 'horizontal':
     coord_tct = x_tct
     my_label = "x [mm]"
-    
+
 # ------------------------------------------------------------------------------
 # Impacts on the collimator in coord-s
 # ------------------------------------------------------------------------------
-plt.scatter(s_tct,coord_tct, marker=(5,2))
+plt.scatter(s_tct, coord_tct, marker=(5, 2))
 plt.grid(b=None, which='major')
 plt.xlabel("s [m]")
 plt.ylabel(my_label)
@@ -74,15 +75,19 @@ plt.clf()
 # ------------------------------------------------------------------------------
 # Histogram of coord
 # ------------------------------------------------------------------------------
-n, bins, patches = plt.hist(coord_tct, 100, color='green', alpha=0.8, linewidth=0.1)
-plt.bar(halfgap, max(n), color='blue', log=False, width=0.0005, align='center', edgecolor='blue', linewidth=0.1)
-plt.bar(-1*halfgap, max(n), color='blue', log=False, width=0.0005, align='center', edgecolor='blue', linewidth=0.1)
-x_halfgap = np.linspace(-1*halfgap, halfgap)
-plt.fill_between(x_halfgap, max(n), facecolor='blue', alpha=0.2, label='Gap', linewidth=0.1)
+n, bins, patches = plt.hist(
+    coord_tct, 100, color='green', alpha=0.8, linewidth=0.1)
+plt.bar(halfgap, max(n), color='blue', log=False, width=0.0005,
+        align='center', edgecolor='blue', linewidth=0.1)
+plt.bar(-1 * halfgap, max(n), color='blue', log=False, width=0.0005,
+        align='center', edgecolor='blue', linewidth=0.1)
+x_halfgap = np.linspace(-1 * halfgap, halfgap)
+plt.fill_between(x_halfgap, max(n), facecolor='blue',
+                 alpha=0.2, label='Gap', linewidth=0.1)
 plt.xlabel(my_label)
 plt.grid(b=None, which='major')
 plt.title(name + ". Hits = " + str(len(x_tct)) + '/' + str(total_particles))
-plt.legend(loc='upper right', prop={'size':6})
+plt.legend(loc='upper right', prop={'size': 6})
 plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
 plt.savefig(name + '_histogram_coord.png', dpi=DPI)
 plt.clf()
@@ -91,9 +96,9 @@ plt.clf()
 # Histogram of the impact parameter
 # ------------------------------------------------------------------------------
 abs_coord = []
-for e1 in coord_tct: 
+for e1 in coord_tct:
     abs_coord.append(abs(e1) - halfgap)
-    
+
 plt.hist(abs_coord, 100, color='green', alpha=0.8, linewidth=0.1)
 plt.xlabel("Impact parameter (mm)")
 plt.grid(b=None, which='major')
@@ -104,4 +109,3 @@ plt.clf()
 
 end_time = datetime.now()
 print('Duration: {}'.format(end_time - start_time))
-        
