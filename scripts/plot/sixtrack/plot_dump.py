@@ -15,6 +15,8 @@ from matplotlib import ticker
 
 from util import GetData
 from util import get_bucket
+from util import get_ellipse_coords
+
 # ------------------------------------------------------------------------------
 # COMMAND LINE ARGUMENTS
 # ------------------------------------------------------------------------------
@@ -95,9 +97,23 @@ def plot_2d_hist(coord_1, coord_2, nbins):
     Hmasked = np.ma.masked_where(H == 0, H)  # Mask pixels with a value of zero
     plt.pcolormesh(xedges, yedges, Hmasked, norm=None, vmin=0, vmax=100)
 
-phi, delta, h = get_bucket()
+phi, delta, h = get_bucket()  # Londitudinal contour
 
-# ty = np.asarray(x[1], dtype='float64')
+# Getting and drawing sigma ellipses
+def get_sigma_ellipse(sigma_x, sigma_y, offset_x, offset_y, number):
+    d = {}
+    for n in range(0, number + 1):
+        d[n] = get_ellipse_coords(a=n*sigma_x, b=n*sigma_y, x=offset_x, y=offset_y, k=1)
+    return d
+
+sigma_x_xp = get_sigma_ellipse(7.16610376198e-06, 4.76160858517e-05, -7.5e-4, 0, 10)
+sigma_y_yp = get_sigma_ellipse(7.12405639107e-06, 4.75602973547e-05, 0, 0.3e-3, 10)
+sigma_z_y = get_sigma_ellipse(0.0745803056032, 7.12405639107e-06, 0, 0, 10)
+
+def plot_sigma(my_dict, number):
+    for n in range(0, number + 1):
+        plt.plot(my_dict[n][:,0], my_dict[n][:,1], color='gray', linewidth=0.2)
+    
 for turn in turn_range:
     x_plot = np.asarray(x[turn], dtype='float64') * 1e-3
     xp_plot = np.asarray(xp[turn], dtype='float64') * 1e-3
@@ -108,6 +124,7 @@ for turn in turn_range:
 
     ax1 = fig.add_subplot(221)
     plot_2d_hist(x_plot, xp_plot, nbins)
+    plot_sigma(sigma_x_xp, 10)
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax1.set_xlabel("x [m]")
@@ -117,6 +134,7 @@ for turn in turn_range:
 
     ax2 = fig.add_subplot(222)
     plot_2d_hist(y_plot, yp_plot, nbins)
+    plot_sigma(sigma_y_yp, 10)
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax2.set_xlabel("y [m]")
@@ -126,6 +144,7 @@ for turn in turn_range:
 
     ax3 = fig.add_subplot(223)
     plot_2d_hist(z_plot, y_plot, nbins)
+    plot_sigma(sigma_z_y, 10)
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax3.set_xlabel("z [m]")
@@ -135,7 +154,7 @@ for turn in turn_range:
 
     ax4 = fig.add_subplot(224)
     plot_2d_hist(z_plot, e_plot, nbins)
-    plt.contour(phi, delta, h, 40, linewidths=0.3, cmap='terrain_r')
+    plt.contour(phi, delta, h, 40, linewidths=0.2, cmap='terrain_r')
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax4.set_ylabel(r"$\Delta E / E$")
