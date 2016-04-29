@@ -12,8 +12,9 @@ from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
 from matplotlib import ticker
-from util import GetData
 
+from util import GetData
+from util import get_bucket
 # ------------------------------------------------------------------------------
 # COMMAND LINE ARGUMENTS
 # ------------------------------------------------------------------------------
@@ -94,6 +95,8 @@ def plot_2d_hist(coord_1, coord_2, nbins):
     Hmasked = np.ma.masked_where(H == 0, H)  # Mask pixels with a value of zero
     plt.pcolormesh(xedges, yedges, Hmasked, norm=None, vmin=0, vmax=100)
 
+phi, delta, h = get_bucket()
+
 # ty = np.asarray(x[1], dtype='float64')
 for turn in turn_range:
     x_plot = np.asarray(x[turn], dtype='float64') * 1e-3
@@ -132,6 +135,7 @@ for turn in turn_range:
 
     ax4 = fig.add_subplot(224)
     plot_2d_hist(z_plot, e_plot, nbins)
+    plt.contour(phi, delta, h, 40, linewidths=0.3, cmap='terrain_r')
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax4.set_ylabel(r"$\Delta E / E$")
