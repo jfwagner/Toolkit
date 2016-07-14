@@ -6,6 +6,7 @@
 from __future__ import division
 
 import re
+import math
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -142,7 +143,7 @@ def get_ip1(x, y):
     return x, y
 
 
-def get_bucket():
+def get_bucket(machine, plot=True, z=0, DELTA=0):
     """ Returns the data needed to plot the RF bucket of LHC.
     Adapted from Kyrre Sjobak.
     Usage: plt.contour(PHIp * 0.1, DELTA_E, H, 40, linewidths=0.3, cmap='terrain_r')
@@ -150,36 +151,62 @@ def get_bucket():
     mp = 0.938272046e9                 # proton mass, eV/c^2
     e = 1.60217657e-19                 # C, electron charge
     c = 2.99792485e8                   # m/s, speed of light
-    h = 35640                          # RF harmonic number
-    omegaRF = 400.8e6 * np.pi * 2      # Hz, omegaRF = h*omega0
-    omega0 = omegaRF / h
-    slip = 3.467e-4                    # Slip factor @ collission
-    V = 16e6                           # V, RF voltage @ collissions
-    beta = 1.0                         # Relativistic beta
-    phiS = 0.0                         # Radians, synchronous RF phase
-    E0 = 7e12                          # Beam energy, eV
-    p0 = np.sqrt(E0 ** 2 - mp ** 2)    # Beam momentum, eV/c
+    
+    if machine=='HL_coll':
+        h = 17820                          # RF harmonic number
+        omegaRF = 200.8e6 * np.pi * 2      # Hz, omegaRF = h*omega0
+        omega0 = omegaRF / h
+        slip = 3.467e-4                    # Slip factor @ collission
+        V = 16e6                           # V, RF voltage @ collissions
+        phiS = 0.0                         # Radians, synchronous RF phase
+        E0 = 7e12                          # Beam energy, eV
+        conversion = c/(omegaRF/(np.pi*2))
+    elif machine=='SPS_inj':
+        h = 4636                           # RF harmonic number
+        omegaRF = 200.2644e6 * np.pi * 2   # Hz, omegaRF = h*omega0
+        omega0 = omegaRF / h
+        slip = 5e-4
+        # slip =5.98e-4
+        V = 2e6                            # V, RF voltage @ collissions
+        phiS = 0.0                         # Radians, synchronous RF phase
+        E0 = 26e9                          # Beam energy, eV
+        conversion = c/(omegaRF/(np.pi*2))
 
-    conversion = 299792458 / 400.8e6
-    delta = np.linspace(-1e-3 * conversion, 1e-3 *
-                        conversion, 200)  # delta p / p
-    phi = np.linspace(-3 * np.pi, 1 * np.pi, 200)
-    DELTA, PHI = np.meshgrid(delta, phi)
+    def get_hamiltonian(DELTA, PHI):
+        p = p0 * (1.0 + DELTA)  # eV/c
+        E = np.sqrt(p ** 2 + mp ** 2)
 
-    p = p0 * (1.0 + DELTA)  # eV/c
-    E = np.sqrt(p ** 2 + mp ** 2)
+        DELTA_E = E / E0 - 1
 
-    DELTA_E = E / E0 - 1
+        H1 = 0.5 * omegaRF * slip * DELTA ** 2
+        H2 = omega0 * V / (2 * np.pi * beta ** 2 * E) * (np.cos(PHI) - np.cos(phiS) + (PHI - phiS) * np.sin(phiS))
 
-    H1 = 0.5 * omegaRF * slip * DELTA ** 2
-    H2 = omega0 * V / (2 * np.pi * beta ** 2 * E) * \
-        (np.cos(PHI) - np.cos(phiS) + (PHI - phiS) * np.sin(phiS))
+        H = H1 + H2
 
-    H = H1 + H2
+        PHIp = PHI + np.pi  # above transition energy
 
-    PHIp = PHI + np.pi  # above transition energy
+        return H, PHIp, DELTA_E
 
-    return PHIp * 0.1, DELTA_E, H
+    gamma_rel = E0 / mp
+    beta = np.sqrt(gamma_rel**2 - 1) / gamma_rel
+    p0 = np.sqrt(E0 ** 2 - mp ** 2)       # Beam momentum, eV/c
+
+    if plot==True:
+        delta = np.linspace(-5e-3 * conversion, 5e-3 *conversion, 200)  # delta p / p
+        phi = np.linspace(-3 * np.pi, 1 * np.pi, 200)
+        DELTA, PHI = np.meshgrid(delta, phi)
+
+        H, PHIp, DELTA_E = get_hamiltonian(DELTA, PHI)
+
+        return PHIp * 0.1, DELTA_E, H
+
+    elif plot==False:
+        # print 'util', z
+        PHI = omegaRF*z/(c*beta)-np.pi
+        H, PHIp, DELTA_E = get_hamiltonian(DELTA, PHI)
+
+        return H
+        
 
 
 def get_ir(ir, s, coord):
@@ -383,3 +410,11 @@ def plot_twiss(s, coord, ip, lim):
             coord_final_2.append(e2)
 
     return s_final_2, coord_final_2
+    
+
+def check_twiss(x, xp):
+    term_1 = round(np.mean(np.multiply(x-np.mean(x), x-np.mean(x))) / em, 3)
+    term_2 = round(np.mean(np.multiply(x-np.mean(x), xp-np.mean(xp))) / em, 3)
+    term_3 = round(np.mean(np.multiply(x-np.mean(x), xp-np.mean(xp))) / em, 3)
+    term_4 = round(np.mean(np.multiply(xp-np.mean(xp), xp-np.mean(xp))) / em, 3)
+    return term_1, term_2, term_3, term_4
