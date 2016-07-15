@@ -1,4 +1,12 @@
-# Beam Dynamics Toolkit README
+
+   ___                              ___                                  _              _____               _  _     _  _   
+  / __\  ___   __ _  _ __ ___      /   \ _   _  _ __    __ _  _ __ ___  (_)  ___  ___  /__   \ ___    ___  | || | __(_)| |_ 
+ /__\// / _ \ / _` || '_ ` _ \    / /\ /| | | || '_ \  / _` || '_ ` _ \ | | / __|/ __|   / /\// _ \  / _ \ | || |/ /| || __|
+/ \/  \|  __/| (_| || | | | | |  / /_// | |_| || | | || (_| || | | | | || || (__ \__ \  / /  | (_) || (_) || ||   < | || |_ 
+\_____/ \___| \__,_||_| |_| |_| /___,'   \__, ||_| |_| \__,_||_| |_| |_||_| \___||___/  \/    \___/  \___/ |_||_|\_\|_| \__|
+                                         |___/                                                                              
+
+
 
 These tools have been developed to mainly treat and plot the data you get from running [SixTrack](https://github.com/SixTrack) and [MAD-X](http://mad.web.cern.ch/mad/). There are also some tools to send large amounts of SixTrack jobs to the [CERN computer farm](http://information-technology.web.cern.ch/services/batch) (in **Toolkit/misc/lsf/**).
 
