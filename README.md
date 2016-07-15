@@ -3,7 +3,42 @@
 These tools have been developed to mainly treat and plot the data you get from running [SixTrack](https://github.com/SixTrack) and [MAD-X](http://mad.web.cern.ch/mad/). There are also some tools to send large amounts of SixTrack jobs to the [CERN computer farm](http://information-technology.web.cern.ch/services/batch) (in **Toolkit/misc/lsf/**).
 
 ## How does this work?
-Scripts are divided into plotting and non-plotting. All of them work by using the classes and functions defined in **util.py**, so make sure you add the repository to your python path:
+Scripts are divided into plotting and non-plotting. 
+
+```
+------\plot
+	|---\madx
+	|      |---plot_beams.py
+	|
+	|---\sixtrack
+	       |---plot_cc_voltage.py
+	       |---plot_detuning.py
+	       |---plot_dump.py
+	       |---plot_dynksets.py
+	       |---plot_emittance_tune.py
+	       |---plot_phase_space.py
+	       |---plot_sigma_single.py
+	       |---plot_sigmas.py
+
+------\misc
+        |---calculate_cc_voltage.py
+        |---collimation_post_processing.sh
+        |---copy_distributions.sh
+        |---create_gif.sh
+        |---create_phase_trip.py
+        |---create_voltage_decay.py
+        |---extract_3d_data.py
+        |---generate_distribution.py
+        |---get_losses_turn.py
+        |---populate_folders.sh
+        |---sigma.py
+        |---sigma_dist.py
+        |
+        |---\lsf
+
+```
+
+All of them work by using the classes and functions defined in **util.py**, so make sure you add the repository to your python path:
 ```bash
 export PYTHONPATH="/home/$USER/Toolkit:$PYTHONPATH"
 ```
@@ -33,13 +68,16 @@ For the scripts to work you'll need to install a few libraries. These are gather
 pip install -r requirements.txt
 ```
 
+## Credit
+
+Be cool and refer to this repo if you end up using it! :thumbsup:
+
 ## Some plots from this repo
 
+<a href="https://github.com/KFubuki/Toolkit/blob/master/img/z_e.gif"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/z_e.gif" align="center" width="500" ></a>
 
-<a href="Longitudinal Dynamic after a Crab Cavity Failure"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/z_e.gif" align="center" width="500" ></a>
+<a href="https://github.com/KFubuki/Toolkit/blob/master/img/mean_vs_turns.png"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/mean_vs_turns.png" align="center" width="500" ></a>
 
-<a href="Long Tracking in the SPS"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/mean_vs_turns.png" align="center" width="500" ></a>
+<a href="https://github.com/KFubuki/Toolkit/blob/master/img/loss_maps.png"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/loss_maps.png" align="center" width="500" ></a>
 
-<a href="Loss Maps From a Failure Case"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/loss_maps.png" align="center" width="500" ></a>
-
-<a href="Fast Fourier Transform to get the Fractional Tunes"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/fft.png" align="center" width="500" ></a>
+<a href="https://github.com/KFubuki/Toolkit/blob/master/img/fft.png"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/fft.png" align="center" width="500" ></a>
