@@ -3,39 +3,72 @@
 These tools have been developed to mainly treat and plot the data you get from running [SixTrack](https://github.com/SixTrack) and [MAD-X](http://mad.web.cern.ch/mad/). There are also some tools to send large amounts of SixTrack jobs to the [CERN computer farm](http://information-technology.web.cern.ch/services/batch) (in **Toolkit/misc/lsf/**).
 
 ## How does this work?
-Scripts are divided into plotting and non-plotting. 
+Scripts are divided by the type of output they treat. For example, the scripts in the **sixtrack** folder treat SixTrack output and so on.
+The plotting scripts all start by **plot_**, and the rest define the action they perform.
 
 ```
-------\plot
-	|---\madx
-	|      |---plot_beams.py
-	|
-	|---\sixtrack
-	       |---plot_cc_voltage.py
-	       |---plot_detuning.py
-	       |---plot_dump.py
-	       |---plot_dynksets.py
-	       |---plot_emittance_tune.py
-	       |---plot_phase_space.py
-	       |---plot_sigma_single.py
-	       |---plot_sigmas.py
+\sixtrack\
+    |
+    |------collimation_post_processing.sh
+    |------dynk_dipolar_kick.py
+    |------dynk_phase_trip.py
+    |------dynk_voltage_decay.py
+    |------generate_distribution.py
+    |------plot_dynksets.py
+    |------plot_sigmas.py
+    |------plot_sigma_single.py
+    |
+    |-----------\dump\
+    |		   |
+    |              |------plot_cc_voltage.py
+    |              |------plot_dump.py
+    |              |------plot_emittance_tune.py
+    |              |------plot_phase_space.py
+    |
+    |-----------\impacts_real\
+		   |
+		   |------plot_coll_impacts.py
+		   |------plot_losses_all_cases.py
+		   |------plot_losses_turn.py
+		   |------plot_losses_turn_core_tail.py
+		   |------plot_loss_maps.py
 
-------\misc
-        |---calculate_cc_voltage.py
-        |---collimation_post_processing.sh
-        |---copy_distributions.sh
-        |---create_gif.sh
-        |---create_phase_trip.py
-        |---create_voltage_decay.py
-        |---extract_3d_data.py
-        |---generate_distribution.py
-        |---get_losses_turn.py
-        |---populate_folders.sh
-        |---sigma.py
-        |---sigma_dist.py
-        |
-        |---\lsf
+\madx\
+    |
+    |------plot_beams.py
 
+
+\misc\
+    |
+    |------calculate_cc_voltage.py
+    |------copy_distributions.sh
+    |------extract_3d_data.py
+    |------plot_detuning.py
+    |------populate_folders.sh
+    |------sigma_dist.py
+    |
+    |----------\lsf\
+                  |
+                  |------launch_batches.sh
+                  |------launcher.sh
+                  |------send.sh
+                  |
+		  |-----------\collimation\
+				     |
+		                     |------get_losses_turn.py
+		                     |------job.sh
+				     |
+				     |----------\different_jobs\
+				     |			 |
+				     |			 |------data_extraction.sh
+				     |
+				     |----------\same_jobs\
+				     			 |
+				    			 |------copy.sh
+				    			 |------count.sh
+				     			 |------merge.sh
+				     			 |------post_simulation.sh
+				     			 |------run.sh
 ```
 
 All of them work by using the classes and functions defined in **util.py**, so make sure you add the repository to your python path:
@@ -44,12 +77,15 @@ export PYTHONPATH="/home/$USER/Toolkit:$PYTHONPATH"
 ```
 
 The scripts are thought to be available **globally** in your computer, meaning that you don't have to copy them anywhere. For this to happen, you will also need to add the repository folders to your path:
+
 ```bash
-export PATH="/home/$USER/Toolkit:$PATH"
-export PATH="/home/$USER/Toolkit/plot:$PATH"
-export PATH="/home/$USER/Toolkit/plot/sixtrack:$PATH"
-export PATH="/home/$USER/Toolkit/plot/madx:$PATH"
-export PATH="/home/$USER/Toolkit/misc:$PATH"
+export PATH="/home/$USER/ansantam_toolkit:$PATH"
+export PATH="/home/$USER/ansantam_toolkit/sixtrack:$PATH"
+export PATH="/home/$USER/ansantam_toolkit/sixtrack/dump:$PATH"
+export PATH="/home/$USER/ansantam_toolkit/sixtrack/impacts_real:$PATH"
+export PATH="/home/$USER/ansantam_toolkit/madx:$PATH"
+export PATH="/home/$USER/ansantam_toolkit/misc:$PATH"
+export PATH="/home/$USER/ansantam_toolkit/misc/lsf:$PATH"
 ```
 
 The scripts work with command line arguments, where one inputs the name of the data file and a few other options. Here are some examples:
