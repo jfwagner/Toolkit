@@ -12,6 +12,7 @@ import scipy
 import pylab
 
 from util import GetData
+from util import get_rel_params
 
 # ------------------------------------------------------------------------------
 # Define your input DUMP file
@@ -22,11 +23,7 @@ total_turns = np.int(sys.argv[2])
 # ------------------------------------------------------------------------------
 # Relativistic parameters
 # ------------------------------------------------------------------------------
-c = 2.99792485e8  # m/s
-mp = 0.938272046e9 # eV/c^2
-e_tot = 26e9  # eV
-gamma_rel = e_tot / mp
-beta_rel = np.sqrt(gamma_rel**2 - 1) / gamma_rel
+gamma_rel, beta_rel = get_rel_params(26e9)
 
 # ------------------------------------------------------------------------------
 # Initialization of arrays
