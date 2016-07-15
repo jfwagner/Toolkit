@@ -20,7 +20,7 @@ These tools have been developed to mainly treat and plot the data you get from r
 
 ## How does this work?
 Scripts are divided by the type of output they treat. For example, the scripts in the **sixtrack** folder treat SixTrack output and so on.
-The plotting scripts all start by **"plot_""**, and the rest define the action they perform. To have a look at the directory tree click [here](https://github.com/KFubuki/Toolkit/blob/master/tree.md).
+The plotting scripts all start by **"plot_""**, and the rest define the action they perform. To have a look at the directory tree click [here](https://raw.githubusercontent.com/KFubuki/Toolkit/master/tree.md).
 
 
 
