@@ -128,7 +128,7 @@ print em_y
 # Plot characteristics
 # ------------------------------------------------------------------------------
 DPI = 3000
-textwidth = 3.25
+textwidth = 4
 font_spec = {"font.family": "serif", # use as default font
              "font.serif": ["Computer Modern Roman"], # custom serif font
              # "font.sans-serif": ["helvetica"], # custom sans-serif font
@@ -137,7 +137,7 @@ font_spec = {"font.family": "serif", # use as default font
             }
 rc('text', usetex=True)
 # rc('text.latex', preamble=r'\usepackage{cmbright}')
-rcParams['figure.figsize']=textwidth*1.2, textwidth*1.2
+rcParams['figure.figsize']=textwidth, textwidth/2
 # rcParams['figure.figsize']=3, 1.7
 rcParams.update(font_spec)
 
@@ -146,10 +146,10 @@ fig = plt.figure()
 # ------------------------------------------------------------------------------
 # Plot the emittance
 # ------------------------------------------------------------------------------
-plt.plot(t, em_x, '-o',label='X', markersize=3, linewidth=0.5)
-plt.plot(t, em_y, '-o',label='Y', markersize=3, linewidth=0.5)
+plt.plot(t, em_x, '-o',label='X', markersize=2, linewidth=0.3)
+plt.plot(t, em_y, '-o',label='Y', markersize=2, linewidth=0.3)
 plt.grid(b=None, which='major')
-plt.legend(loc='lower right')
+plt.legend(loc='lower right', prop={'size': 5})
 plt.xlabel('Turns')
 plt.ylabel(r'$\epsilon_n$ [m]')
 plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
@@ -161,14 +161,16 @@ plt.close()
 # ------------------------------------------------------------------------------
 plt.plot(t, mean_x,'-o', label='X', markersize=2, linewidth=0.3)
 plt.plot(t, mean_y,'-o',label='Y', markersize=2, linewidth=0.3)
+plt.axvline(x=10, linewidth=0.7, color='black')
 # plt.grid(b=None, which='major')
 plt.legend(loc='upper left', prop={'size': 5})
 plt.xlabel('Turns')
 plt.ylabel('Mean [m]')
 plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-plt.subplots_adjust(left=0.14, bottom=0.12, right=0.96, top=0.90, wspace=0.18, hspace=0.16)
+plt.subplots_adjust(left=0.17, bottom=0.2, right=0.96, top=0.90, wspace=0.18, hspace=0.16)
 # plt.show()
 plt.savefig('mean_vs_turns.eps', format='eps', dpi=1500)
+plt.savefig('mean_vs_turns.png', dpi=1500)
 plt.close()
 
 # ---------------
@@ -214,10 +216,11 @@ plt.plot(xx, xy, '-o', label='X', markersize=3, linewidth=0.5)
 # plt.title('Absolute value of FFT of the means')
 plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
 plt.annotate("Fractional tune X = " + str(tune_x), xy=(-0.2, max(FFT_x)*0.8), xytext=(-0.2, max(FFT_x)*0.8), rotation='horizontal', size='5')
-plt.annotate("Fractional tune Y = " + str(tune_y), xy=(-0.2, max(FFT_x)*0.78), xytext=(-0.2, max(FFT_x)*0.77), rotation='horizontal', size='5')
+plt.annotate("Fractional tune Y = " + str(tune_y), xy=(-0.2, max(FFT_x)*0.78), xytext=(-0.2, max(FFT_x)*0.75), rotation='horizontal', size='5')
 # plt.grid(b=None, which='major')
 plt.legend(loc='upper left',prop={'size': 5})
 plt.xlabel('Tune')
 plt.ylabel('Amplitude')
 plt.savefig('fft.eps', format='eps', dpi=1500)
+plt.savefig('fft.png', dpi=1500)
 plt.close()
