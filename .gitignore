@@ -58,5 +58,5 @@ doc/*.madx
 doc/*.py
 test
 
-inputs/madx/tests
-inputs/sixtrack/1_0/collimation
+# My recheck folder
+to_recheck/*
