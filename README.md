@@ -35,10 +35,11 @@ pip install -r requirements.txt
 
 ## Some plots from this repo
 
-![alt text](https://github.com/KFubuki/Toolkit/blob/master/img/z_e.gif "Longitudinal Dynamic after a Crab Cavity Failure")
 
-![alt text](https://github.com/KFubuki/Toolkit/blob/master/img/mean_vs_turns.png "Long Tracking in the SPS")
+<a href="Longitudinal Dynamic after a Crab Cavity Failure"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/z_e.gif" align="center" width="48" ></a>
 
-![alt text](https://github.com/KFubuki/Toolkit/blob/master/img/loss_maps.png "Loss Maps From a Failure Case")
+<a href="Long Tracking in the SPS"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/mean_vs_turns.png" align="center" width="48" ></a>
 
-![alt text](https://github.com/KFubuki/Toolkit/blob/master/img/fft.png "Fast Fourier Transform to get the Fractional Tunes")
+<a href="Loss Maps From a Failure Case"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/loss_maps.png" align="center" width="48" ></a>
+
+<a href="Fast Fourier Transform to get the Fractional Tunes"><img src="https://github.com/KFubuki/Toolkit/blob/master/img/fft.png" align="center" width="48" ></a>
