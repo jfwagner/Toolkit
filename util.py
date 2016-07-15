@@ -118,6 +118,18 @@ class PlotData(GetData):
         plt.clf()
 
 
+def get_rel_params(energy, mass=0.938272046e9):
+    """
+    Returns the relativistic beta and gamma.
+    The energy has to be input in [eV] and the particle mass in [eV/c^2].
+    If no mass is input, the proton mass will be taken by default.
+    """
+    c = 2.99792485e8  # m/s
+    gamma_rel = energy / mass
+    beta_rel = np.sqrt(gamma_rel**2 - 1) / gamma_rel
+    return gamma_rel, beta_rel
+
+
 def get_ip1(x, y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
     around IP1 (i.e. convert s coordinate of 26900 m to -100 m).
