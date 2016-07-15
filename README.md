@@ -1,84 +1,28 @@
 
 ```
-   ___                              ___                                  _              _____               _  _     _  _   
-  / __\  ___   __ _  _ __ ___      /   \ _   _  _ __    __ _  _ __ ___  (_)  ___  ___  /__   \ ___    ___  | || | __(_)| |_ 
- /__\// / _ \ / _` || '_ ` _ \    / /\ /| | | || '_ \  / _` || '_ ` _ \ | | / __|/ __|   / /\// _ \  / _ \ | || |/ /| || __|
-/ \/  \|  __/| (_| || | | | | |  / /_// | |_| || | | || (_| || | | | | || || (__ \__ \  / /  | (_) || (_) || ||   < | || |_ 
-\_____/ \___| \__,_||_| |_| |_| /___,'   \__, ||_| |_| \__,_||_| |_| |_||_| \___||___/  \/    \___/  \___/ |_||_|\_\|_| \__|
-                                         |___/                                                                              
-
+██████╗ ███████╗ █████╗ ███╗   ███╗    ██████╗ ██╗   ██╗███╗   ██╗ █████╗ ███╗   ███╗██╗ ██████╗███████╗
+██╔══██╗██╔════╝██╔══██╗████╗ ████║    ██╔══██╗╚██╗ ██╔╝████╗  ██║██╔══██╗████╗ ████║██║██╔════╝██╔════╝
+██████╔╝█████╗  ███████║██╔████╔██║    ██║  ██║ ╚████╔╝ ██╔██╗ ██║███████║██╔████╔██║██║██║     ███████╗
+██╔══██╗██╔══╝  ██╔══██║██║╚██╔╝██║    ██║  ██║  ╚██╔╝  ██║╚██╗██║██╔══██║██║╚██╔╝██║██║██║     ╚════██║
+██████╔╝███████╗██║  ██║██║ ╚═╝ ██║    ██████╔╝   ██║   ██║ ╚████║██║  ██║██║ ╚═╝ ██║██║╚██████╗███████║
+╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝    ╚═════╝    ╚═╝   ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝ ╚═════╝╚══════╝
+                                                                                                        
+████████╗ ██████╗  ██████╗ ██╗     ██╗  ██╗██╗████████╗
+╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██║ ██╔╝██║╚══██╔══╝
+   ██║   ██║   ██║██║   ██║██║     █████╔╝ ██║   ██║   
+   ██║   ██║   ██║██║   ██║██║     ██╔═██╗ ██║   ██║   
+   ██║   ╚██████╔╝╚██████╔╝███████╗██║  ██╗██║   ██║   
+   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝   
+                                                       
 ```
 
 These tools have been developed to mainly treat and plot the data you get from running [SixTrack](https://github.com/SixTrack) and [MAD-X](http://mad.web.cern.ch/mad/). There are also some tools to send large amounts of SixTrack jobs to the [CERN computer farm](http://information-technology.web.cern.ch/services/batch) (in **Toolkit/misc/lsf/**).
 
 ## How does this work?
 Scripts are divided by the type of output they treat. For example, the scripts in the **sixtrack** folder treat SixTrack output and so on.
-The plotting scripts all start by **plot_**, and the rest define the action they perform.
-
-```
-\sixtrack\
-    |
-    |------collimation_post_processing.sh
-    |------dynk_dipolar_kick.py
-    |------dynk_phase_trip.py
-    |------dynk_voltage_decay.py
-    |------generate_distribution.py
-    |------plot_dynksets.py
-    |------plot_sigmas.py
-    |------plot_sigma_single.py
-    |
-    |-----------\dump\
-    |		   |
-    |              |------plot_cc_voltage.py
-    |              |------plot_dump.py
-    |              |------plot_emittance_tune.py
-    |              |------plot_phase_space.py
-    |
-    |-----------\impacts_real\
-		   |
-		   |------plot_coll_impacts.py
-		   |------plot_losses_all_cases.py
-		   |------plot_losses_turn.py
-		   |------plot_losses_turn_core_tail.py
-		   |------plot_loss_maps.py
-
-\madx\
-    |
-    |------plot_beams.py
+The plotting scripts all start by **"plot_""**, and the rest define the action they perform. To have a look at the directory tree click [here](https://github.com/KFubuki/Toolkit/blob/master/tree.md).
 
 
-\misc\
-    |
-    |------calculate_cc_voltage.py
-    |------copy_distributions.sh
-    |------extract_3d_data.py
-    |------plot_detuning.py
-    |------populate_folders.sh
-    |------sigma_dist.py
-    |
-    |----------\lsf\
-                  |
-                  |------launch_batches.sh
-                  |------launcher.sh
-                  |------send.sh
-                  |
-		  |-----------\collimation\
-				     |
-		                     |------get_losses_turn.py
-		                     |------job.sh
-				     |
-				     |----------\different_jobs\
-				     |			 |
-				     |			 |------data_extraction.sh
-				     |
-				     |----------\same_jobs\
-				     			 |
-				    			 |------copy.sh
-				    			 |------count.sh
-				     			 |------merge.sh
-				     			 |------post_simulation.sh
-				     			 |------run.sh
-```
 
 All of them work by using the classes and functions defined in **util.py**, so make sure you add the repository to your python path:
 ```bash
