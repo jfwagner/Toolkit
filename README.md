@@ -32,3 +32,13 @@ For the scripts to work you'll need to install a few libraries. These are gather
 ```bash
 pip install -r requirements.txt
 ```
+
+## Some plots from this repo
+
+![alt text](https://github.com/KFubuki/Toolkit/blob/master/img/z_e.gif "Longitudinal Dynamic after a Crab Cavity Failure")
+
+![alt text](https://github.com/KFubuki/Toolkit/blob/master/img/mean_vs_turns.png "Long Tracking in the SPS")
+
+![alt text](https://github.com/KFubuki/Toolkit/blob/master/img/loss_maps.png "Loss Maps From a Failure Case")
+
+![alt text](https://github.com/KFubuki/Toolkit/blob/master/img/fft.png "Fast Fourier Transform to get the Fractional Tunes")
