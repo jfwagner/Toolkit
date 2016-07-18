@@ -118,16 +118,29 @@ class PlotData(GetData):
         plt.clf()
 
 
+def get_sigmas(alpha, beta, emittance, dispersion, spread, beta_rel, gamma_rel):
+        """
+    Returns the phase space amplitudes from the twiss parameters
+    Input is in meters.
+    """
+    gamma = (1 + alpha**2) / beta
+    sigma = np.sqrt((emittance * beta + dispersion**2 *
+                     spread**2) / (beta_rel * gamma_rel))
+    sigma_p = np.sqrt((emittance * gamma) / (beta_rel * gamma_rel))
+    return sigma, sigma_p
+
+
 def get_rel_params(energy, mass=0.938272046e9):
     """
-    Returns the relativistic beta and gamma.
+    Returns the relativistic beta and gamma, the momenta and mass used.
     The energy has to be input in [eV] and the particle mass in [eV/c^2].
     If no mass is input, the proton mass will be taken by default.
     """
     c = 2.99792485e8  # m/s
     gamma_rel = energy / mass
     beta_rel = np.sqrt(gamma_rel**2 - 1) / gamma_rel
-    return gamma_rel, beta_rel
+    p0 = np.sqrt((energy - mass) * (energy + mass))
+    return gamma_rel, beta_rel, p0, mass
 
 
 def get_ip1(x, y):
@@ -163,8 +176,8 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
     mp = 0.938272046e9                 # proton mass, eV/c^2
     e = 1.60217657e-19                 # C, electron charge
     c = 2.99792485e8                   # m/s, speed of light
-    
-    if machine=='HL_coll':
+
+    if machine == 'HL_coll':
         h = 17820                          # RF harmonic number
         omegaRF = 200.8e6 * np.pi * 2      # Hz, omegaRF = h*omega0
         omega0 = omegaRF / h
@@ -172,8 +185,8 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
         V = 16e6                           # V, RF voltage @ collissions
         phiS = 0.0                         # Radians, synchronous RF phase
         E0 = 7e12                          # Beam energy, eV
-        conversion = c/(omegaRF/(np.pi*2))
-    elif machine=='SPS_inj':
+        conversion = c / (omegaRF / (np.pi * 2))
+    elif machine == 'SPS_inj':
         h = 4636                           # RF harmonic number
         omegaRF = 200.2644e6 * np.pi * 2   # Hz, omegaRF = h*omega0
         omega0 = omegaRF / h
@@ -182,7 +195,7 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
         V = 2e6                            # V, RF voltage @ collissions
         phiS = 0.0                         # Radians, synchronous RF phase
         E0 = 26e9                          # Beam energy, eV
-        conversion = c/(omegaRF/(np.pi*2))
+        conversion = c / (omegaRF / (np.pi * 2))
 
     def get_hamiltonian(DELTA, PHI):
         p = p0 * (1.0 + DELTA)  # eV/c
@@ -191,7 +204,8 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
         DELTA_E = E / E0 - 1
 
         H1 = 0.5 * omegaRF * slip * DELTA ** 2
-        H2 = omega0 * V / (2 * np.pi * beta ** 2 * E) * (np.cos(PHI) - np.cos(phiS) + (PHI - phiS) * np.sin(phiS))
+        H2 = omega0 * V / (2 * np.pi * beta ** 2 * E) * \
+            (np.cos(PHI) - np.cos(phiS) + (PHI - phiS) * np.sin(phiS))
 
         H = H1 + H2
 
@@ -203,8 +217,9 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
     beta = np.sqrt(gamma_rel**2 - 1) / gamma_rel
     p0 = np.sqrt(E0 ** 2 - mp ** 2)       # Beam momentum, eV/c
 
-    if plot==True:
-        delta = np.linspace(-5e-3 * conversion, 5e-3 *conversion, 200)  # delta p / p
+    if plot == True:
+        delta = np.linspace(-5e-3 * conversion, 5e-3 *
+                            conversion, 200)  # delta p / p
         phi = np.linspace(-3 * np.pi, 1 * np.pi, 200)
         DELTA, PHI = np.meshgrid(delta, phi)
 
@@ -212,13 +227,12 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
 
         return PHIp * 0.1, DELTA_E, H
 
-    elif plot==False:
+    elif plot == False:
         # print 'util', z
-        PHI = omegaRF*z/(c*beta)-np.pi
+        PHI = omegaRF * z / (c * beta) - np.pi
         H, PHIp, DELTA_E = get_hamiltonian(DELTA, PHI)
 
         return H
-        
 
 
 def get_ir(ir, s, coord):
@@ -422,11 +436,15 @@ def plot_twiss(s, coord, ip, lim):
             coord_final_2.append(e2)
 
     return s_final_2, coord_final_2
-    
+
 
 def check_twiss(x, xp):
-    term_1 = round(np.mean(np.multiply(x-np.mean(x), x-np.mean(x))) / em, 3)
-    term_2 = round(np.mean(np.multiply(x-np.mean(x), xp-np.mean(xp))) / em, 3)
-    term_3 = round(np.mean(np.multiply(x-np.mean(x), xp-np.mean(xp))) / em, 3)
-    term_4 = round(np.mean(np.multiply(xp-np.mean(xp), xp-np.mean(xp))) / em, 3)
+    term_1 = round(
+        np.mean(np.multiply(x - np.mean(x), x - np.mean(x))) / em, 3)
+    term_2 = round(
+        np.mean(np.multiply(x - np.mean(x), xp - np.mean(xp))) / em, 3)
+    term_3 = round(
+        np.mean(np.multiply(x - np.mean(x), xp - np.mean(xp))) / em, 3)
+    term_4 = round(
+        np.mean(np.multiply(xp - np.mean(xp), xp - np.mean(xp))) / em, 3)
     return term_1, term_2, term_3, term_4
