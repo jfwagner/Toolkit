@@ -3,6 +3,8 @@
 # Function to generate a particle distribution as input for the collimation routine in SixTrack (round beams at symmetry point)
 # Example for SPS:
 # generate_distribution.py 64 26e9 'SPS_inj' True 1 1 0.9e-6 3.0e-6 1.50895801 -1.392739114 51.8375213 46.54197726 0 0 0.2 14e-4
+# Example for HL-LHC:
+# generate_distribution.py 64 7e12 'HL_coll' True 1 1 2.5e-6 2.5e-6 0.003485 -0.000764 0.150739 0.150235 0.003652 0.000517 0.0755 1.13e-4
 # ----------------------------------------------------------------------------------------------------------------------------
 import datetime
 import sys
@@ -89,7 +91,10 @@ def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x
         dPP     = (trial_p - p0) / p0
         h       = get_bucket(machine, plot=False, z=trial_z, DELTA=dPP)  # Longitudinal contour
 
-        Hmargin = -1
+        if machine=='HL_coll':
+            Hmargin = -0.01
+        elif machine=='SPS_inj':
+            Hmargin = -1
         if h <= Hmargin:
             z.append(float(trial_z))
             E.append(float(trial_e))
