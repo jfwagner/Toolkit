@@ -50,12 +50,14 @@ plot_emittance_tune.py dist_21459.txt 50
  There is not an exhaustive documentation of this for now, so you'll have to open the script and look at what the command line arguments are.
 
 ## Requirements
-For the scripts to work you'll need to install a few libraries. These are gathered in the **requirements.txt** file. To install them, just type:
-
+For the scripts to work you'll need to install a few Python libraries. These are gathered in the **requirements.txt** file. To install them, just type:
 
 ```bash
 pip install -r requirements.txt
 ```
+If you don't use these libraries often, the cleanest way of working would be to create a [virtual environment](https://docs.python.org/3/library/venv.html) and install them there.
+
+Make sure you are using at least **Python 2.7.8**. One day, hopefully, we will all switch to Python 3.0...
 
 ## Credit
 
