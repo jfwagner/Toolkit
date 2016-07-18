@@ -119,7 +119,7 @@ class PlotData(GetData):
 
 
 def get_sigmas(alpha, beta, emittance, dispersion, spread, beta_rel, gamma_rel):
-        """
+    """
     Returns the phase space amplitudes from the twiss parameters
     Input is in meters.
     """
