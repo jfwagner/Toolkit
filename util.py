@@ -129,6 +129,15 @@ def get_sigmas(alpha, beta, emittance, dispersion, spread, beta_rel, gamma_rel):
     sigma_p = np.sqrt((emittance * gamma) / (beta_rel * gamma_rel))
     return sigma, sigma_p
 
+def get_sigma_ellipse(sigma_x, sigma_y, offset_x, offset_y, number):
+    """
+    Getting and drawing sigma ellipses.
+    """
+    d = {}
+    for n in range(0, number + 1):
+        d[n] = get_ellipse_coords(a=n*sigma_x, b=n*sigma_y, x=offset_x, y=offset_y, k=1)
+    return d
+
 
 def get_rel_params(energy, mass=0.938272046e9):
     """
@@ -173,64 +182,63 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
     Adapted from Kyrre Sjobak.
     Usage: plt.contour(PHIp * 0.1, DELTA_E, H, 40, linewidths=0.3, cmap='terrain_r')
     """
-    mp = 0.938272046e9                 # proton mass, eV/c^2
-    e = 1.60217657e-19                 # C, electron charge
-    c = 2.99792485e8                   # m/s, speed of light
+    mp = 0.938272046e9                     # proton mass, eV/c^2
+    e  = 1.60217657e-19                    # C, electron charge
+    c  = 2.99792485e8                      # m/s, speed of light
 
     if machine == 'HL_coll':
-        h = 17820                          # RF harmonic number
-        omegaRF = 200.8e6 * np.pi * 2      # Hz, omegaRF = h*omega0
-        omega0 = omegaRF / h
+        h = 35640                          # RF harmonic number
+        omegaRF = 400.8e6 * np.pi * 2      # Hz, omegaRF = h*omega0
         slip = 3.467e-4                    # Slip factor @ collission
         V = 16e6                           # V, RF voltage @ collissions
         phiS = 0.0                         # Radians, synchronous RF phase
         E0 = 7e12                          # Beam energy, eV
-        conversion = c / (omegaRF / (np.pi * 2))
+        bunch = 0.0755
+        limit = 8e-4
     elif machine == 'SPS_inj':
         h = 4636                           # RF harmonic number
         omegaRF = 200.2644e6 * np.pi * 2   # Hz, omegaRF = h*omega0
-        omega0 = omegaRF / h
-        slip = 5e-4
+        slip = 5.55e-4
         # slip =5.98e-4
         V = 2e6                            # V, RF voltage @ collissions
         phiS = 0.0                         # Radians, synchronous RF phase
         E0 = 26e9                          # Beam energy, eV
-        conversion = c / (omegaRF / (np.pi * 2))
+        bunch = 0.3
+        limit = 6e-3
+    else:
+        print '>> Please input "HL_coll" or "SPS_inj" as first argument.'
 
-    def get_hamiltonian(DELTA, PHI):
+    def get_hamiltonian(DELTA, PHI, omegaRF, E0, slip, p0, beta, h, V, phiS):
         p = p0 * (1.0 + DELTA)  # eV/c
         E = np.sqrt(p ** 2 + mp ** 2)
-
         DELTA_E = E / E0 - 1
-
+        omega0 = omegaRF / h
         H1 = 0.5 * omegaRF * slip * DELTA ** 2
         H2 = omega0 * V / (2 * np.pi * beta ** 2 * E) * \
             (np.cos(PHI) - np.cos(phiS) + (PHI - phiS) * np.sin(phiS))
+        H = H1 + H2  # Given in action-angle variables
 
-        H = H1 + H2
-
-        PHIp = PHI + np.pi  # above transition energy
+        PHIp = np.pi - PHI  # Unstable fixed point (end of bucket)
 
         return H, PHIp, DELTA_E
 
-    gamma_rel = E0 / mp
-    beta = np.sqrt(gamma_rel**2 - 1) / gamma_rel
-    p0 = np.sqrt(E0 ** 2 - mp ** 2)       # Beam momentum, eV/c
+    gamma_rel, beta, p0, mass = get_rel_params(E0)
 
     if plot == True:
-        delta = np.linspace(-5e-3 * conversion, 5e-3 *
-                            conversion, 200)  # delta p / p
-        phi = np.linspace(-3 * np.pi, 1 * np.pi, 200)
-        DELTA, PHI = np.meshgrid(delta, phi)
+        conversion = c / (omegaRF / (np.pi * 2))
+        bucket = (np.pi * beta * c) / omegaRF
+        print '>> Half bucket length = ', bucket
+        print beta
+        delta = np.linspace(-limit * conversion, limit * conversion, 300)  # delta p / p
+        phi = np.linspace(-3 * np.pi, 3 *np.pi, 300)
+        DELTA, PHI   = np.meshgrid(delta, phi)
+        H, PHIp, DELTA_E = get_hamiltonian(DELTA, PHI, omegaRF, E0, slip, p0, beta, h, V, phiS)
 
-        H, PHIp, DELTA_E = get_hamiltonian(DELTA, PHI)
-
-        return PHIp * 0.1, DELTA_E, H
+        return PHIp * ((beta * c) / omegaRF), DELTA_E, H
 
     elif plot == False:
-        # print 'util', z
         PHI = omegaRF * z / (c * beta) - np.pi
-        H, PHIp, DELTA_E = get_hamiltonian(DELTA, PHI)
+        H, PHIp, DELTA_E = get_hamiltonian(DELTA, PHI, omegaRF, E0, slip, p0, beta, h, V, phiS)
 
         return H
 
@@ -257,6 +265,12 @@ def get_ir(ir, s, coord):
     s_new, coord_new = get_ip1(s_temp, coord_temp)
     return s_new, coord_new
 
+def plot_2d_hist(coord_1, coord_2, nbins):
+    H, xedges, yedges = np.histogram2d(coord_1, coord_2, bins=nbins)
+    H = np.rot90(H)   # H needs to be rotated and flipped
+    H = np.flipud(H)
+    Hmasked = np.ma.masked_where(H == 0, H)  # Mask pixels with a value of zero (they will appear in white)
+    plt.pcolormesh(xedges, yedges, Hmasked, norm=None, vmin=0, vmax=100)
 
 def plot_elem(color, height, bottom, name_in=[], s_in=[], l_in=[], *args):
     """
@@ -281,6 +295,10 @@ def plot_elem(color, height, bottom, name_in=[], s_in=[], l_in=[], *args):
         f = s - l
         # left, height, width, bottom
         plt.bar(f, height, l, bottom, color=color, alpha=0.7)
+
+def plot_sigma(my_dict, number):
+    for n in range(0, number + 1):
+        plt.plot(my_dict[n][:,0], my_dict[n][:,1], color='gray', linewidth=0.2)
 
 
 def load_data_coll(infile, coll_id):
