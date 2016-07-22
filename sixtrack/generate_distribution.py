@@ -2,9 +2,9 @@
 # ----------------------------------------------------------------------------------------------------------------------------
 # Function to generate a particle distribution as input for the collimation routine in SixTrack (round beams at symmetry point)
 # Example for SPS:
-# generate_distribution.py 64 26e9 'SPS_inj' True 1 1 0.9e-6 3.0e-6 1.50895801 -1.392739114 51.8375213 46.54197726 0 0 0.2 14e-4
+# generate_distribution.py 64 26e9 'SPS_inj' True 1 1 0.9e-6 3.0e-6 1.50895801 -1.392739114 51.8375213 46.54197726 0 0 0 0 0 0 0.3 10.7e-4
 # Example for HL-LHC:
-# generate_distribution.py 64 7e12 'HL_coll' True 1 1 2.5e-6 2.5e-6 0.003485 -0.000764 0.150739 0.150235 0.003652 0.000517 0.0755 1.13e-4
+# generate_distribution.py 64 7e12 'HL_coll' True 1 1 2.5e-6 2.5e-6 0.003485 -0.000764 0.150739 0.150235 -7.5e-4 0 0 0.3e-3 0.003652 0.000517 0.0755 1.13e-4
 # ----------------------------------------------------------------------------------------------------------------------------
 import datetime
 import sys
@@ -30,13 +30,17 @@ alpha_x      = float(sys.argv[9])
 alpha_y      = float(sys.argv[10])
 beta_x       = float(sys.argv[11])
 beta_y       = float(sys.argv[12])
-dispersion_x = float(sys.argv[13])
-dispersion_y = float(sys.argv[14])
-bunch        = float(sys.argv[15])
-spread       = float(sys.argv[16])
+offset_x     = float(sys.argv[13])
+offset_xp    = float(sys.argv[14])
+offset_y     = float(sys.argv[15])
+offset_yp    = float(sys.argv[16])
+dispersion_x = float(sys.argv[17])
+dispersion_y = float(sys.argv[18])
+bunch        = float(sys.argv[19])
+spread       = float(sys.argv[20])
 
 
-def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, dispersion_x, dispersion_y, bunch, spread, seed=0):
+def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, offset_x, offset_xp, offset_y, offset_yp, dispersion_x, dispersion_y, bunch, spread, seed=0):
 
     job_str = '%s'%jobs
     
@@ -95,6 +99,7 @@ def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x
             Hmargin = -0.01
         elif machine=='SPS_inj':
             Hmargin = -1
+
         if h <= Hmargin:
             z.append(float(trial_z))
             E.append(float(trial_e))
@@ -109,23 +114,23 @@ def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x
     if fort13=='False':
         outfile = 'init_dist_' + job_str + '.txt'
         with open(outfile, 'w') as f:
-            for e1, e2, e3, e4, e5, e6 in zip(x, xp, y, yp, z, E):
+            for e1, e2, e3, e4, e5, e6 in zip(x, xp, y, yp, zz*1e3, EE*1e-6):
                 f.write('%8.6e %8.6e %8.6e %8.6e %8.6e %8.6e\n' % (e1, e2, e3, e4, e5, e6))
     elif fort13=='True':
         outfile = 'fort.13'
         with open(outfile, 'w') as f:
             for i in xrange(0, particles, 2):
-                f.write(str(x[i]*1e3) + "\n") #mm
-                f.write(str(xp[i]*1e3) + "\n") #mrad
-                f.write(str(y[i]*1e3) + "\n") #mm
-                f.write(str(yp[i]*1e3) + "\n") #mrad
+                f.write(str((x[i] + offset_x)*1e3) + "\n") #mm
+                f.write(str((xp[i] + offset_xp)*1e3) + "\n") #mrad
+                f.write(str((y[i] + offset_y)*1e3) + "\n") #mm
+                f.write(str((yp[i] + offset_yp)*1e3) + "\n") #mrad
                 f.write(str(zz[i]*1e3) + "\n") #mm
                 f.write(str(ddp[i]) + "\n") #-
 
-                f.write(str(x[i+1]*1e3) + "\n") #mm
-                f.write(str(xp[i+1]*1e3) + "\n") #mrad
-                f.write(str(y[i+1]*1e3) + "\n") #mm
-                f.write(str(yp[i+1]*1e3) + "\n") #mrad
+                f.write(str((x[i+1] + offset_x)*1e3) + "\n") #mm
+                f.write(str((xp[i+1] + offset_xp)*1e3) + "\n") #mrad
+                f.write(str((y[i+1] + offset_y)*1e3) + "\n") #mm
+                f.write(str((yp[i+1] + offset_yp)*1e3) + "\n") #mrad
                 f.write(str(zz[i+1]*1e3) + "\n") #mm
                 f.write(str(ddp[i+1]) + "\n") #-
 
@@ -142,7 +147,7 @@ with open('seed.txt', 'a') as g:
     print >> g, datetime.datetime.now()
 for n in job_range:
     j = '%s'%n
-    dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, dispersion_x, dispersion_y, bunch, spread)
+    dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, offset_x, offset_xp, offset_y, offset_yp, dispersion_x, dispersion_y, bunch, spread)
     
 
 
