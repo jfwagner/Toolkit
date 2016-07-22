@@ -23,7 +23,7 @@ total_turns = np.int(sys.argv[2])
 # ------------------------------------------------------------------------------
 # Relativistic parameters
 # ------------------------------------------------------------------------------
-gamma_rel, beta_rel = get_rel_params(26e9)
+gamma_rel, beta_rel, p0, mass = get_rel_params(26e9)
 
 # ------------------------------------------------------------------------------
 # Initialization of arrays
