@@ -117,7 +117,18 @@ class PlotData(GetData):
         plt.savefig(filename + '.png', dpi=DPI)
         plt.clf()
 
-
+def check_simplecticity(matrix):
+    omega = np.zeros((2, 2))
+    omega[0,0] = 0
+    omega[0,1] = 1
+    omega[1,0] = -1
+    omega[1,1] = 0
+    new_matrix = np.dot(np.dot(np.transpose(matrix), omega), matrix)
+    if np.array_equal(new_matrix, omega) is True:
+        print ">> Is symplectic"
+    else:
+        print ">> Is not symplectic"
+        
 def get_sigmas(alpha, beta, emittance, dispersion, spread, beta_rel, gamma_rel):
     """
     Returns the phase space amplitudes from the twiss parameters
