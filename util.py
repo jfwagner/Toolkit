@@ -61,11 +61,12 @@ class GetData:
         for line in self.data_line(column, regex):
             for count, item in enumerate(line):
                 if type(item) is str:
-                # if dtype == 'string':
                     # Strip needed for MAD-X output
                     data_dict[count].append(item.strip('"'))
                 elif type(item) is int or type(item) is float:
                     data_dict[count].append(float(item))  # Fill in the lists
+                else:
+                    print ">> Check the type of the data in your column"
         return data_dict
 
 
@@ -256,7 +257,7 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
 
 def replace_column(infile, str_in, col_in, str_out, col_out):
     """This function takes a data file organized in columns as input.
-    It replaces the data of the selected columns following conditions on other columns.
+    It replaces the data of the selected column following conditions on another column.
     For column number [arg_2], if it matches [arg_1], column [arg_4] will be substituted by
     [arg 3].
     """
