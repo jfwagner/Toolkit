@@ -60,10 +60,11 @@ class GetData:
             start_line)}  # Create keys and empty lists
         for line in self.data_line(column, regex):
             for count, item in enumerate(line):
-                if dtype == 'string':
+                if type(item) is str:
+                # if dtype == 'string':
                     # Strip needed for MAD-X output
                     data_dict[count].append(item.strip('"'))
-                elif dtype == 'number':
+                elif type(item) is int or type(item) is float:
                     data_dict[count].append(float(item))  # Fill in the lists
         return data_dict
 
@@ -252,6 +253,21 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
         H, PHIp, DELTA_E = get_hamiltonian(DELTA, PHI, omegaRF, E0, slip, p0, beta, h, V, phiS)
 
         return H
+
+def replace_column(infile, str_in, col_in, str_out, col_out):
+    """This function takes a data file organized in columns as input.
+    It replaces the data of the selected columns following conditions on other columns.
+    For column number [arg_2], if it matches [arg_1], column [arg_4] will be substituted by
+    [arg 3].
+    """
+    outfile = infile.replace('.txt','') + '_modified.txt'
+    with open(infile, 'r') as data:
+        with open(outfile, 'wt') as out:
+            for line in data:
+                line_list = line.strip('\n').split()
+                if str_in in line_list[col_in]:
+                     line_list[col_out] = str_out
+                out.write(' '.join( line_list) + '\n')
 
 
 def get_ir(ir, s, coord):
