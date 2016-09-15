@@ -1,172 +1,183 @@
 #!/usr/bin/env python
-# plot_loss_maps.py LPI_test.s impacts_real.dat coll_summary.dat
-# CollPositionsHL.b1.dat 19968
 import os
-import sys
+import re
+
 import numpy as np
-from datetime import datetime
+
+from collections import Counter
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
 
-# ------------------------------------------------------------------------------
-# Plot characteristics
-# ------------------------------------------------------------------------------
-# DPI = 300
-# textwidth = 6
-# rc('font',**{'family':'serif','serif':['Computer Modern Roman'], 'size':10})
-# rc('text', usetex=True)
-# rcParams['figure.figsize']=textwidth, textwidth/1.618
-DPI = 600
-textwidth = 3.25
-font_spec = {"font.family": "serif",  # use as default font
-             # "font.serif": ["New Century Schoolbook"], # custom serif font
-             # "font.sans-serif": ["helvetica"], # custom sans-serif font
-             "font.size": 8,
-             "font.weight": "bold",
-             }
-rc('text', usetex=True)
-# rc('text.latex', preamble=r'\usepackage{cmbright}')
-rcParams['figure.figsize'] = textwidth, textwidth / 1.9
-rcParams.update(font_spec)
-fig = plt.figure(dpi=DPI)
-ax2 = fig.add_subplot(111)
-# ------------------------------------------------------------------------------
-# Feed the input to the script by command line
-# ------------------------------------------------------------------------------
-infile_lpi = sys.argv[1]
-infile_impacts = sys.argv[2]
-infile_collsum = sys.argv[3]
-infile_collpos = sys.argv[4]
-total_particles = float(sys.argv[5])
+from util import GetData
 
-start_time = datetime.now()
 # ------------------------------------------------------------------------------
-# ################################## APERTURE ############################
+# Associating name with collimator ID
 # ------------------------------------------------------------------------------
-if os.stat(infile_lpi).st_size == 0:
+infile_2 = 'coll_summary.dat'
+get_2 = GetData(infile_2)
+data_2 = get_2.data_column(dtype='string')
+
+names_2 = data_2[1]
+numbers = data_2[0]
+
+numbers_dict = {}
+for i in range(len(names_2)):
+    numbers_dict[float(numbers[i])] = names_2[i]
+
+# ------------------------------------------------------------------------------
+# Associating name with position
+# ------------------------------------------------------------------------------
+infile_3 = 'CollPositionsHL.b1.dat'
+get_3 = GetData(infile_3)
+data_3 = get_3.data_column(dtype='string')
+
+names = data_3[1]
+position = data_3[2]
+
+translator_dict = {}
+for i in range(len(names)):
+    translator_dict[names[i]] = float(position[i])
+
+# Usage: translator_dict[numbers_dict[29]]
+
+# ------------------------------------------------------------------------------
+# Curating impacts real
+# ------------------------------------------------------------------------------
+infile = 'impacts_real.dat'
+
+
+def is_header(line):
+    return re.search(r'#|@|\*|%|\$|&', line) is not None
+
+
+def get_impacts(infile):
+    with open(infile, 'r') as data:
+        for line in data:
+            if is_header(line):
+                continue
+            line_list = line.strip('\n').split()
+            if line_list[7] != 4:
+                yield line_list[0]
+
+
+coll_data = []
+start_line = get_impacts(infile)
+for line in start_line:
+    coll_data.append(translator_dict[numbers_dict[float(line)]])
+
+impacts_dict = Counter(coll_data)
+
+particles_per_bunch = 2.2 * 1e11
+simulated_particles = 19968.0
+normalization_factor = particles_per_bunch / simulated_particles
+
+values = np.asarray(impacts_dict.values())
+
+# ------------------------------------------------------------------------------
+# Extracting losses in the aperture
+# ------------------------------------------------------------------------------
+
+
+def get_lpi(infile):
+    with open(infile, 'r') as data:
+        for line in data:
+            if is_header(line):
+                continue
+            line_list = line.strip('\n').split()
+            yield line_list[2]
+
+
+infile_4 = 'LPI_test.s'
+if os.stat(infile_4).st_size == 0:
     print '>> No losses in the aperture'
 else:
-    g = open(infile_lpi, 'r')
-    pos_lpi = []
-    for line in g.xreadlines():
-        columns = line.strip('\n').split()
-        if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind' or float(columns[9]) > 8:
-            continue
-        pos_lpi.append(float(columns[2]))
-    g.close()
-    pos_ap = np.asarray(pos_lpi)
-    ap_per = str(round((len(pos_ap) * 100) / total_particles, 5))
-    weights_ap = np.ones_like(pos_ap) / total_particles
-    plt.hist(pos_lpi, 500, color='#F03C02', alpha=0.8, linewidth=0.1,
-             weights=weights_ap, log=True, label='Aperture ')
-    # plt.hist(pos_lpi, 500, color='green', alpha=0.8, linewidth=0.1, weights=weights_ap, log=True, label='Aperture ' + ap_per + '%')
-
+    ap_data = []
+    start_line = get_lpi(infile_4)
+    for line in start_line:
+        ap_data.append(float(line))
+    lpi_dict = Counter(ap_data)
+    lpi_values = np.asarray(lpi_dict.values())
+    aperture_losses = sum(lpi_dict.values()) / simulated_particles
 
 # ------------------------------------------------------------------------------
-# ############################### COLLIMATION ############################
+# Calculation of some parameters
 # ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
-# Extract ID and name from coll_summary.dat
-# ------------------------------------------------------------------------------
-collsum_data = np.loadtxt(infile_collsum, str)
+bunches = 2748
+beam_energy = 700
+bunch_energy = beam_energy / bunches
 
-name_collsum = []
-id_collsum = []
+percentage_lost_tcp = float(impacts_dict[translator_dict[numbers_dict[29]]]) \
+    / simulated_particles
 
-for line in collsum_data:
-    name_collsum.append(line[1])
-    id_collsum.append(float(line[0]))
+total_losses = sum(impacts_dict.values()) / simulated_particles
+tct4h_losses = float(impacts_dict[translator_dict[
+                     'TCTPH.4L1.B1']]) / simulated_particles
+tct4v_losses = float(impacts_dict[translator_dict[
+                     'TCTPV.4L1.B1']]) / simulated_particles
 
-# ------------------------------------------------------------------------------
-# Extract name and position from CollPositions
-# ------------------------------------------------------------------------------
-collpos_data = np.loadtxt(infile_collpos, str, "%Ind")
-
-name_collpos = []
-position_collpos = []
-
-for line in collpos_data:
-    name_collpos.append(line[1])
-    position_collpos.append(float(line[2]))
-
-# ------------------------------------------------------------------------------
-# Associate name with ID via coll_summary, then extract correct position
-# ------------------------------------------------------------------------------
-name = []
-for e1, e2 in zip(id_collsum, name_collsum):
-    for e3 in id_collsum:
-        if e3 == e1:
-            name.append(e2)
-
-position = []
-for e1, e2 in zip(name_collpos, position_collpos):
-    for e3 in name:
-        if e3 == e1:
-            position.append(e2)
+print ' '
+print '>> Total losses:'
+print '>> ' + str(round(total_losses * 100, 2)) + ' % lost in the collimation system'
+if os.stat(infile_4).st_size != 0:
+    print '>> ' + '{:.2e}'.format(float((aperture_losses * 100))) + ' % lost in the aperture'
+print ' '
+print '>> Primary:'
+print '>> ' + str(round(percentage_lost_tcp * 100, 2)) + ' % lost in the ' + str(numbers_dict[29]) + \
+    ', ' + '{:.2e}'.format(float((percentage_lost_tcp *
+                                  particles_per_bunch * bunches))) + ' particles for the whole beam'
+print '>> Corresponding to ' + str(round(percentage_lost_tcp * beam_energy, 2)) + ' MJ for the whole beam'
+print '>> Can withstand 9.2e+11 direct proton impacts or 8 full bunches'
+print ' '
+print '>> Tertiaries:'
+print '>> ' + str(tct4h_losses * 100) + ' % lost in TCTPH.4L1.B1, ' + \
+    '{:.2e}'.format(float((tct4h_losses * particles_per_bunch *
+                           bunches))) + ' particles for the whole beam'
+print '>> ' + str(tct4v_losses * 100) + ' % lost in TCTPV.4L1.B1, ' + \
+    '{:.2e}'.format(float((tct4v_losses * particles_per_bunch *
+                           bunches))) + ' particles for the whole beam'
+print '>> Damage limit is at 1.2e+11 secondary protons impacts'
 
 # ------------------------------------------------------------------------------
-# Create a frigging dictionary with the correct sh*t
+# Plotting
 # ------------------------------------------------------------------------------
-my_tuple = zip(id_collsum, position)
-d = {}
-for k, v in my_tuple:
-    d[k] = v
-
-# ------------------------------------------------------------------------------
-# Loop >ONCE< through impacts real to extract the coll ID's (no way around it)
-# ------------------------------------------------------------------------------
-f = open(infile_impacts, 'r')
-pos = []
-for line in f.xreadlines():
-    columns = line.strip('\n').split()
-    if columns[0] == '#' or columns[0] == '@' or columns[0] == '*' or columns[0] == '$' or columns[0] == '%' or columns[0] == '%1=s' or columns[0] == '%Ind' or float(columns[9]) > 8:
-        # print columns[9]
-        continue
-    if columns[7] == '1':
-        pos.append(d[int(columns[0])])
-f.close()
-
-# ------------------------------------------------------------------------------
-# ################################### PLOT ###############################
-# ------------------------------------------------------------------------------
-pos_coll = np.asarray(pos)
-
-# Percentages
-coll_per = str(round((len(pos_coll) * 100) / total_particles, 2))
-print '>>', coll_per, '% lost'
-
-# Weights
-weights_coll = np.ones_like(pos_coll) / total_particles
-
-plt.hist(pos, 500, color='#3732bb', alpha=0.8, linewidth=0.1,
-         weights=weights_coll, log=True, label='Collimators')
-# plt.hist(pos, 500, color='black', alpha=0.8, linewidth=0.1, weights=weights_coll, log=True, label='Collimation ' + coll_per + '%')
-plt.xlabel("s (m)")
+font_spec = {"font.size": 10, }
+rcParams.update(font_spec)
+rcParams['figure.figsize'] = 4, 3
+fig = plt.figure()
+ax2 = fig.add_subplot(111)
+plt.bar(impacts_dict.keys(), values * normalization_factor, align="center",
+        linewidth=0, width=60, color="black", label="Collimation")
+if os.stat(infile_4).st_size != 0:
+    plt.bar(lpi_dict.keys(), lpi_values * normalization_factor, color="green",
+            align="center", linewidth=0, width=60, label="Aperture")
+plt.title("Losses from a single bunch, HL-LHC 1.2")
+plt.xlabel("Position (m)")
 plt.ylabel("Number of protons lost")
-plt.ylim([0, 1e12])
 plt.xlim([0, 26658.883])
-# plt.grid(b=None, which='major')
-# plt.title('Loss Maps')
-height = 1e8
-ax2.annotate('IP2', xy=(1, height), xytext=(3332.4, height),
-             weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IR3', xy=(1, height), xytext=(6664.721, height),
-             weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IR4', xy=(1, height), xytext=(9997, height),
-             weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IP5', xy=(1, height), xytext=(13329.28, height),
-             weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IR6', xy=(1, height), xytext=(16661.7, height),
-             weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IR7', xy=(1, height), xytext=(20000, height),
-             weight='bold', va='bottom', ha='center', size=7, color='black')
-ax2.annotate('IP8', xy=(1, height), xytext=(23315.4, height),
-             weight='bold', va='bottom', ha='center', size=7, color='black')
 plt.legend(loc='upper left', prop={'size': 6})
-plt.subplots_adjust(left=0.16, bottom=0.21, right=0.94, top=0.88)
-plt.savefig('loss_maps.png', dpi=DPI)
-plt.clf()
+ax2.set_yscale('log')
+ax2.set_axisbelow(True)
+ax2.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.3)
 
-end_time = datetime.now()
-print('Duration: {}'.format(end_time - start_time))
+height = max(values * normalization_factor) / 10
+text_size = 10
+ax2.annotate('IP2', xy=(1, height), xytext=(3332.4, height),
+             weight='bold', va='bottom', ha='center', size=text_size, color='red')
+ax2.annotate('IR3', xy=(1, height), xytext=(6664.721, height),
+             weight='bold', va='bottom', ha='center', size=text_size, color='red')
+ax2.annotate('IR4', xy=(1, height), xytext=(9997, height),
+             weight='bold', va='bottom', ha='center', size=text_size, color='red')
+ax2.annotate('IP5', xy=(1, height), xytext=(13329.28, height),
+             weight='bold', va='bottom', ha='center', size=text_size, color='red')
+ax2.annotate('IR6', xy=(1, height), xytext=(16661.7, height),
+             weight='bold', va='bottom', ha='center', size=text_size, color='red')
+ax2.annotate('IR7', xy=(1, height), xytext=(20000, height),
+             weight='bold', va='bottom', ha='center', size=text_size, color='red')
+ax2.annotate('IP8', xy=(1, height), xytext=(23315.4, height),
+             weight='bold', va='bottom', ha='center', size=text_size, color='red')
+
+plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+plt.savefig('loss_map.png', dpi=1000)
+plt.savefig('loss_map.eps', format='eps', dpi=1000)
+plt.clf()
