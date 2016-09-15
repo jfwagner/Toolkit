@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import re
+import sys
 
 import numpy as np
 
@@ -10,6 +11,8 @@ from matplotlib import rc
 from matplotlib import rcParams
 
 from util import GetData
+
+simulated_particles = float(sys.argv[1])
 
 # ------------------------------------------------------------------------------
 # Associating name with collimator ID
@@ -69,7 +72,6 @@ for line in start_line:
 impacts_dict = Counter(coll_data)
 
 particles_per_bunch = 2.2 * 1e11
-simulated_particles = 19968.0
 normalization_factor = particles_per_bunch / simulated_particles
 
 values = np.asarray(impacts_dict.values())
