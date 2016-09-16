@@ -223,7 +223,7 @@ print '>> Damage limit is at 1.2e+11 secondary protons impacts'
 # ------------------------------------------------------------------------------
 font_spec = {"font.size": 10, }
 rcParams.update(font_spec)
-rcParams['figure.figsize'] = 4, 3
+rcParams['figure.figsize'] = 4, 2
 fig = plt.figure()
 ax2 = fig.add_subplot(111)
 plt.bar(impacts_dict.keys(), values * normalization_factor, align="center",
@@ -240,7 +240,7 @@ ax2.set_yscale('log')
 ax2.set_axisbelow(True)
 ax2.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.3)
 
-height = max(values * normalization_factor) / 10
+height = max(values * normalization_factor) / 30
 text_size = 10
 ax2.annotate('IP2', xy=(1, height), xytext=(3332.4, height),
              weight='bold', va='bottom', ha='center', size=text_size, color='red')
