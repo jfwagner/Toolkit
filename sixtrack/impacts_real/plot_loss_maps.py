@@ -3,6 +3,7 @@ import os
 import re
 import sys
 
+import collections
 import numpy as np
 
 from collections import Counter
@@ -13,6 +14,9 @@ from matplotlib import rcParams
 from util import GetData
 
 simulated_particles = float(sys.argv[1])
+bunches = 2748
+beam_energy = 700
+bunch_energy = beam_energy / bunches
 
 # ------------------------------------------------------------------------------
 # Associating name with collimator ID
@@ -54,27 +58,104 @@ def is_header(line):
     return re.search(r'#|@|\*|%|\$|&', line) is not None
 
 
-def get_impacts(infile):
+def get_impacts(infile, column):
     with open(infile, 'r') as data:
         for line in data:
             if is_header(line):
                 continue
             line_list = line.strip('\n').split()
             if line_list[7] != 4:
-                yield line_list[0]
+                yield line_list[column]
 
 
 coll_data = []
-start_line = get_impacts(infile)
+start_line = get_impacts(infile, 0)
 for line in start_line:
     coll_data.append(translator_dict[numbers_dict[float(line)]])
 
 impacts_dict = Counter(coll_data)
 
+turn_data = []
+start_line_t = get_impacts(infile, 9)
+for line in start_line_t:
+    turn_data.append(line)
+
+turns_dict = Counter(turn_data)
+
+# for i, j in zip(turns_dict.keys(), turns_dict.values()):
+#     print i,j
+
 particles_per_bunch = 2.2 * 1e11
 normalization_factor = particles_per_bunch / simulated_particles
 
 values = np.asarray(impacts_dict.values())
+
+def get_tcp(infile, column):
+    with open(infile, 'r') as data:
+        for line in data:
+            if is_header(line):
+                continue
+            line_list = line.strip('\n').split()
+            if line_list[7] != 4:
+                yield line_list[0], line_list[9]
+
+
+tcp_data = []
+start_line = get_tcp(infile, 0)
+for line in start_line:
+    tcp_data.append(line)
+
+tcp_losses = []
+for i, j in tcp_data:
+    if i == '29':
+        tcp_losses.append(j)
+
+tcp_dict = collections.OrderedDict(sorted(Counter(tcp_losses).items()))
+
+print ' '
+print '>> Losses in the TCP per turn, non cumulative:'
+for i, j in zip(tcp_dict.keys(), tcp_dict.values()):
+    print i, round(float(j)*100 / simulated_particles,2), \
+    '{:.2e}'.format((float(j)/ simulated_particles)*particles_per_bunch*bunches)
+
+print ' '
+print '>> Losses in the TCP per turn, cumulative:'
+percentage_tcp = 0
+protons_tcp = 0
+for i, j in zip(tcp_dict.keys(), tcp_dict.values()):
+    percentage_tcp += float(j)*100 / simulated_particles
+    protons_tcp += float(j)/ simulated_particles*particles_per_bunch*bunches
+    print i, round(percentage_tcp, 2),'{:.2e}'.format(protons_tcp), \
+        round(percentage_tcp*1e-2 * beam_energy, 2)
+
+
+# tct_data = []
+# start_line = get_tct(infile, 0)
+# for line in start_line:
+#     tct_data.append(line)
+
+tct_losses = []
+for i, j in tcp_data:
+    if i == '54':
+        tct_losses.append(j)
+
+tct_dict = collections.OrderedDict(sorted(Counter(tct_losses).items()))
+
+print ' '
+print '>> Losses in the TCT per turn, non cumulative:'
+for i, j in zip(tct_dict.keys(), tct_dict.values()):
+    print i, round(float(j)*100 / simulated_particles,2), \
+    '{:.2e}'.format((float(j)/ simulated_particles)*particles_per_bunch*bunches)
+
+print ' '
+print '>> Losses in the TCT per turn, cumulative:'
+percentage_tct = 0
+protons_tct = 0
+for i, j in zip(tct_dict.keys(), tct_dict.values()):
+    percentage_tct += float(j)*100 / simulated_particles
+    protons_tct += float(j)/ simulated_particles*particles_per_bunch*bunches
+    print i, round(percentage_tct, 2),'{:.2e}'.format(protons_tct)
+
 
 # ------------------------------------------------------------------------------
 # Extracting losses in the aperture
@@ -105,9 +186,6 @@ else:
 # ------------------------------------------------------------------------------
 # Calculation of some parameters
 # ------------------------------------------------------------------------------
-bunches = 2748
-beam_energy = 700
-bunch_energy = beam_energy / bunches
 
 percentage_lost_tcp = float(impacts_dict[translator_dict[numbers_dict[29]]]) \
     / simulated_particles
