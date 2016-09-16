@@ -65,18 +65,30 @@ def get_radius(x, xp, y, yp):
     return np.sqrt(em_x), np.sqrt(em_y)
 
 
-x1, xp1, y1, yp1 = do_floquet(infile,1)
-rx1, ry1 = get_radius(x1, xp1, y1, yp1)
-
 x2, xp2, y2, yp2 = do_floquet(infile,2)
 rx2, ry2 = get_radius(x2, xp2, y2, yp2)
+y2m = np.mean(y2)
+yp2m = np.mean(yp2)
 
-print '>> Phase space radius for first turn: ' + str(rx1) + ' ' + str(ry1)
-print '>> Phase space radius for second turn, crabs on: ' + str(rx2) + ' ' + str(ry2)
+a = y2m - ry2
+b = yp2m - ry2
 
-print '>> Phase space radius normalized with the second turn values:'
+sigma = 7.0887*1e-6
+# print '>> Phase space radius for first turn: ' + str(rx1) + ' ' + str(ry1)
+# print '>> Phase space radius for second turn, crabs on: ' + str(rx2) + ' ' + str(ry2)
 
-for turn in range(2, turns + 1):
+# print '>> Phase space radius normalized with the second turn values:'
+
+# for turn in range(2, turns + 1):
+#     x, xp, y, yp = do_floquet(infile, turn)
+#     rx, ry = get_radius(x, xp, y, yp)
+#     print turn, round(abs(1 - (rx/rx2)),3), round(abs(1 - (ry/ry2)),3)
+
+for turn in range(1, turns + 1):
     x, xp, y, yp = do_floquet(infile, turn)
+    ym = np.mean(y)
+    ypm = np.mean(yp)
     rx, ry = get_radius(x, xp, y, yp)
-    print turn, round(abs(1 - (rx/rx2)),3), round(abs(1 - (ry/ry2)),3)
+    c = ym - ry
+    d = ypm - ry
+    print turn, np.sqrt((a-c)**2 + (b-d)**2)/sigma
