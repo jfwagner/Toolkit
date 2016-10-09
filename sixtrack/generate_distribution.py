@@ -20,7 +20,7 @@ from util import get_sigmas
 # --------------------------------------------------------------------------------------------------------------
 particles    = int(sys.argv[1])
 energy       = float(sys.argv[2])
-machine      = sys.argv[3]
+machine      = str(sys.argv[3])
 fort13       = sys.argv[4]
 jobs         = int(sys.argv[5])
 factor       = float(sys.argv[6])
@@ -38,12 +38,11 @@ dispersion_x = float(sys.argv[17])
 dispersion_y = float(sys.argv[18])
 bunch        = float(sys.argv[19])
 spread       = float(sys.argv[20])
+seed         = int(sys.argv[21])
 
-
-def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, offset_x, offset_xp, offset_y, offset_yp, dispersion_x, dispersion_y, bunch, spread, seed=0):
+def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, offset_x, offset_xp, offset_y, offset_yp, dispersion_x, dispersion_y, bunch, spread, seed):
 
     job_str = '%s'%jobs
-    
     # Getting the Transverse sigmas (amplitudes of phase space ellipse)
     # --------------------------------------------------------------------------------------------------------------
     gamma_rel, beta_rel, p0, mass = get_rel_params(energy)
@@ -63,10 +62,10 @@ def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x
     
     # Generating the Transverse Distribution
     # --------------------------------------------------------------------------------------------------------------
-    x_t  = np.asarray(np.random.normal(0, factor * tx_max, particles))
-    xp_t = np.asarray(np.random.normal(0, factor * txp_max, particles))
-    y_t  = np.asarray(np.random.normal(0, factor * ty_max, particles))
-    yp_t = np.asarray(np.random.normal(0, factor * typ_max, particles))
+    x_t  = np.asarray(np.random.normal(0, factor * tx_max, round(particles)))
+    xp_t = np.asarray(np.random.normal(0, factor * txp_max, round(particles)))
+    y_t  = np.asarray(np.random.normal(0, factor * ty_max, round(particles)))
+    yp_t = np.asarray(np.random.normal(0, factor * typ_max, round(particles)))
 
     # Rotating the Transverse Distribution
     # --------------------------------------------------------------------------------------------------------------
@@ -95,7 +94,7 @@ def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x
         dPP     = (trial_p - p0) / p0
         h       = get_bucket(machine, plot=False, z=trial_z, DELTA=dPP)  # Longitudinal contour
 
-        if machine=='HL_coll':
+        if machine=='HL_coll' or  machine=='HL_coll_200' or machine=='HL_coll_tcp'  or machine=='HL_coll_tcp_200':
             Hmargin = -0.01
         elif machine=='SPS_inj':
             Hmargin = -1
@@ -145,9 +144,9 @@ def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x
 job_range = range(1, int(jobs) + 1)
 with open('seed.txt', 'a') as g:
     print >> g, datetime.datetime.now()
-for n in job_range:
-    j = '%s'%n
-    dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, offset_x, offset_xp, offset_y, offset_yp, dispersion_x, dispersion_y, bunch, spread)
+    for n in job_range:
+        j = '%s'%n
+        dist_generator(particles, energy, machine, fort13, n, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, offset_x, offset_xp, offset_y, offset_yp, dispersion_x, dispersion_y, bunch, spread, seed)
     
 
 
