@@ -1,18 +1,35 @@
 #!/usr/bin/env python
+import heapq
+import random
 import re
 import sys
 
 import numpy as np
 
+from matplotlib import pyplot as plt
+from matplotlib import rc
+from matplotlib import rcParams
+
+
 from util import get_rel_params
 
 turns = int(sys.argv[1])
+failure_turn = int(sys.argv[2])
+thetitle = sys.argv[3]
 infile = 'dump.txt'
 
-alpha_x = 0.003485
-alpha_y = -0.000764
-beta_x  = 0.150739
-beta_y  = 0.150235
+sigma = np.sqrt(3.35e-10)
+
+# TCP MARKER
+alpha_x = 2.1177081
+alpha_y = -1.0986181
+beta_x  = 158.417774
+beta_y  = 78.495404
+# # IP3
+# alpha_x = 2.315986
+# alpha_y = -2.635533
+# beta_x  = 122.173726
+# beta_y  = 217.616330
 
 def is_header(line):
     return re.search(r'#|@|\*|%|\$|&', line) is not None
@@ -28,20 +45,26 @@ def get_turn(infile, turn):
 
 def do_floquet(infile, turn):
     start_line = get_turn(infile, turn)
-    x =  []
+    x  = []
     xp = []
     y  = []
     yp = []
+    z  = []
+    pid = []
     for line in start_line:
+        idf = int(line[0])
         xf  = float(line[3])*1e-3
         xpf = float(line[4])*1e-3
         yf  = float(line[5])*1e-3
         ypf = float(line[6])*1e-3
+        zf = float(line[7])*1e-3
         x.append(xf/np.sqrt(beta_x))
         y.append(yf/np.sqrt(beta_y))
         xp.append((xf*alpha_x)/np.sqrt(beta_x) + xpf*np.sqrt(beta_x))
         yp.append((yf*alpha_y)/np.sqrt(beta_y) + ypf*np.sqrt(beta_y))
-    return x, xp, y, yp
+        z.append(zf)
+        pid.append(idf)
+    return pid, x, xp, y, yp, z
 
 def get_radius(x, xp, y, yp):
     gamma_rel, beta_rel, p0, mass = get_rel_params(7e12)
@@ -65,30 +88,65 @@ def get_radius(x, xp, y, yp):
     return np.sqrt(em_x), np.sqrt(em_y)
 
 
-x2, xp2, y2, yp2 = do_floquet(infile,2)
-rx2, ry2 = get_radius(x2, xp2, y2, yp2)
-y2m = np.mean(y2)
-yp2m = np.mean(yp2)
+n = 0
+o = 0
 
-a = y2m - ry2
-b = yp2m - ry2
 
-sigma = 7.0887*1e-6
-# print '>> Phase space radius for first turn: ' + str(rx1) + ' ' + str(ry1)
-# print '>> Phase space radius for second turn, crabs on: ' + str(rx2) + ' ' + str(ry2)
+x2 = []
+y2 = []
+outfile = 'sigma.txt'
+with open(outfile, 'w') as f:
+    for turn in range(0, turns + 1):
+        pid, x, xp, y, yp, z = do_floquet(infile, turn)
+        for i, j, k, l in zip(pid, y, yp, z):
+            # if i == the_particle:
+            if i == 1:
+                x2.append(turn)
+                y2.append(np.sqrt((n-j)**2 + (o-k)**2)/sigma)
+                print >> f, turn, round(np.sqrt((n-j)**2 + (o-k)**2)/sigma,6), l
 
-# print '>> Phase space radius normalized with the second turn values:'
+font_spec = {"font.size": 10, }
+rcParams.update(font_spec)
+rcParams['legend.frameon'] = 'True'
+rcParams['figure.figsize'] = 4, 2
+fig = plt.figure()
+plt.plot(x2, y2,color='blue')
+plt.xlabel('Turns')
+plt.ylabel(r'Displacement ($\sigma_y$)')
+plt.title(thetitle)
+plt.xlim([0, turns])
+plt.axvline(x=failure_turn, linewidth=0.7, color='black')
+plt.annotate('Failure', xy=(failure_turn - 1.5,  (max(y2) + max(y2)* 0.7) / 2), rotation='vertical', size='6', verticalalignment='center')
+if y2[turns-1] < 0.0999:
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+plt.savefig('sigma.png', dpi=1000)
+plt.savefig('sigma.eps', format='eps', dpi=1000)
+plt.clf()
 
-# for turn in range(2, turns + 1):
-#     x, xp, y, yp = do_floquet(infile, turn)
-#     rx, ry = get_radius(x, xp, y, yp)
-#     print turn, round(abs(1 - (rx/rx2)),3), round(abs(1 - (ry/ry2)),3)
 
-for turn in range(1, turns + 1):
-    x, xp, y, yp = do_floquet(infile, turn)
-    ym = np.mean(y)
-    ypm = np.mean(yp)
-    rx, ry = get_radius(x, xp, y, yp)
-    c = ym - ry
-    d = ypm - ry
-    print turn, np.sqrt((a-c)**2 + (b-d)**2)/sigma
+
+yf = np.fft.fft(y2)
+freqs = np.fft.fftfreq(len(y2))
+plt.plot(abs(freqs),abs(yf))
+plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+plt.xlim([0.30, 0.37])
+# plt.ylim([0, 3])
+plt.ylim([0, 1500])
+plt.savefig('fft.png', dpi=1000)
+plt.savefig('fft.eps', format='eps', dpi=1000)
+plt.clf()
+
+sel_freqs = []
+sel_amp = []
+d = {}
+for i, j in zip(abs(freqs), abs(yf)):
+    if i > 0 and i < 1:
+        d[j] = i
+        sel_freqs.append(i)
+        sel_amp.append(j)
+
+
+maximums = heapq.nlargest(20, sel_amp)
+for i in maximums:
+    print d[i], i
