@@ -53,7 +53,7 @@ for key, group in itertools.groupby(sorted_attribute, key=itemgetter('attribute'
     plt.xlabel('Turns')
     plt.ylabel(key.capitalize())
     plt.subplots_adjust(left=0.13, bottom=0.2, right=0.94, top=0.93)
-    plt.legend(loc='lower right')
+    plt.legend(loc='lower right', fontsize=4)
     plt.savefig('dynksets_' + key + '.png',  dpi=1000)
     plt.savefig('dynksets_' + key + '.eps', format='eps', dpi=1000)
     plt.clf()
