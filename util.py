@@ -9,6 +9,7 @@ import re
 import math
 
 import numpy as np
+import math
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
@@ -50,6 +51,25 @@ class GetData:
                 else:
                     print 'Column or regex missing from arguments'
 
+    # def data_column(self, column=None, regex=None, dtype='number'):
+    #     """
+    #     Returns a dictionary of lists, containing the columns of the data file.
+    #     The dictionary keys are the number of the columns.
+    #     """
+    #     start_line = self.data_line(column, regex).next()
+    #     data_dict = {key: [] for key, item in enumerate(
+    #         start_line)}  # Create keys and empty lists
+    #     for line in self.data_line(column, regex):
+    #         for count, item in enumerate(line):
+    #             if type(item) is str:
+    #                 # Strip needed for MAD-X output
+    #                 data_dict[count].append(item.strip('"'))
+    #             elif type(item) is int or type(item) is float:
+    #                 data_dict[count].append(float(item))  # Fill in the lists
+    #             else:
+    #                 print ">> Check the type of the data in your column"
+    #     return data_dict
+
     def data_column(self, column=None, regex=None, dtype='number'):
         """
         Returns a dictionary of lists, containing the columns of the data file.
@@ -60,13 +80,11 @@ class GetData:
             start_line)}  # Create keys and empty lists
         for line in self.data_line(column, regex):
             for count, item in enumerate(line):
-                if type(item) is str:
+                if dtype == 'string':
                     # Strip needed for MAD-X output
                     data_dict[count].append(item.strip('"'))
-                elif type(item) is int or type(item) is float:
+                elif dtype == 'number':
                     data_dict[count].append(float(item))  # Fill in the lists
-                else:
-                    print ">> Check the type of the data in your column"
         return data_dict
 
 
@@ -142,13 +160,16 @@ def get_sigmas(alpha, beta, emittance, dispersion, spread, beta_rel, gamma_rel):
     sigma_p = np.sqrt((emittance * gamma) / (beta_rel * gamma_rel))
     return sigma, sigma_p
 
-def get_sigma_ellipse(sigma_x, sigma_y, offset_x, offset_y, number):
+def get_sigma_ellipse(sigma_x, sigma_y, offset_x, offset_y, number, alpha, beta):
     """
     Getting and drawing sigma ellipses.
     """
     d = {}
     for n in range(0, number + 1):
-        d[n] = get_ellipse_coords(a=n*sigma_x, b=n*sigma_y, x=offset_x, y=offset_y, k=1)
+        if beta == 0 and alpha == 0:
+            d[n] = get_ellipse_coords(a=n*sigma_x, b=n*sigma_y, x=offset_x, y=offset_y, k=1)
+        else:
+            d[n] = get_ellipse_coords(a=n*sigma_x, b=n*sigma_y, x=offset_x, y=offset_y, angle=math.degrees(math.atan(-alpha/beta)),k=1)
     return d
 
 
@@ -199,7 +220,7 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
     e  = 1.60217657e-19                    # C, electron charge
     c  = 2.99792485e8                      # m/s, speed of light
 
-    if machine == 'HL_coll':
+    if machine == 'HL_coll' or machine == 'HL_coll_tcp':
         h = 35640                          # RF harmonic number
         omegaRF = 400.8e6 * np.pi * 2      # Hz, omegaRF = h*omega0
         slip = 3.467e-4                    # Slip factor @ collission
@@ -207,6 +228,15 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
         phiS = 0.0                         # Radians, synchronous RF phase
         E0 = 7e12                          # Beam energy, eV
         bunch = 0.0755
+        limit = 8e-4
+    elif machine == 'HL_coll_200' or machine == 'HL_coll_tcp_200':
+        h = 17820                          # RF harmonic number
+        omegaRF = 200.8e6 * np.pi * 2      # Hz, omegaRF = h*omega0
+        slip = 3.467e-4                    # Slip factor @ collission
+        V = 16e6                           # V, RF voltage @ collissions
+        phiS = 0.0                         # Radians, synchronous RF phase
+        E0 = 7e12                          # Beam energy, eV
+        bunch = 2*0.0755
         limit = 8e-4
     elif machine == 'SPS_inj':
         h = 4636                           # RF harmonic number
@@ -255,11 +285,12 @@ def get_bucket(machine, plot=True, z=0, DELTA=0):
 
         return H
 
-def replace_column(infile, str_in, col_in, str_out, col_out):
+def replace_column(infile, str_in, col_in, str_out, col_out, col_length=20):
     """This function takes a data file organized in columns as input.
     It replaces the data of the selected column following conditions on another column.
     For column number [arg_2], if it matches [arg_1], column [arg_4] will be substituted by
     [arg 3].
+    TO DO: set a fixed column length
     """
     outfile = infile.replace('.txt','') + '_modified.txt'
     with open(infile, 'r') as data:
@@ -267,8 +298,11 @@ def replace_column(infile, str_in, col_in, str_out, col_out):
             for line in data:
                 line_list = line.strip('\n').split()
                 if str_in in line_list[col_in]:
-                     line_list[col_out] = str_out
-                out.write(' '.join( line_list) + '\n')
+                    line_list[col_out] = str_out
+                    spacing = '      '
+                    out.write(spacing.join( line_list) + '\n')
+                else:
+                    out.write(line)
 
 
 def get_ir(ir, s, coord):
