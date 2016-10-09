@@ -112,11 +112,14 @@ for i, j in tcp_data:
 
 tcp_dict = collections.OrderedDict(sorted(Counter(tcp_losses).items()))
 
+outfile = 'tcp.txt'
 print ' '
 print '>> Losses in the TCP per turn, non cumulative:'
-for i, j in zip(tcp_dict.keys(), tcp_dict.values()):
-    print i, round(float(j)*100 / simulated_particles,2), \
-    '{:.2e}'.format((float(j)/ simulated_particles)*particles_per_bunch*bunches)
+with open(outfile, 'w') as f:
+    for i, j in zip(tcp_dict.keys(), tcp_dict.values()):
+        print i, round(float(j)*100 / simulated_particles,2), \
+        '{:.2e}'.format((float(j)/ simulated_particles)*particles_per_bunch*bunches)
+        print >> f, i,  round(float(j)*100 / simulated_particles,2)
 
 print ' '
 print '>> Losses in the TCP per turn, cumulative:'
@@ -127,6 +130,7 @@ for i, j in zip(tcp_dict.keys(), tcp_dict.values()):
     protons_tcp += float(j)/ simulated_particles*particles_per_bunch*bunches
     print i, round(percentage_tcp, 2),'{:.2e}'.format(protons_tcp), \
         round(percentage_tcp*1e-2 * beam_energy, 2)
+
 
 
 # tct_data = []
