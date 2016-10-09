@@ -3,7 +3,7 @@ import re
 
 import numpy as np
 
-infile = 'dump.txt'
+infile = 'dump_ip1.txt'
 
 def is_header(line):
     return re.search(r'#|@|\*|%|\$|&', line) is not None
@@ -27,4 +27,4 @@ def get_tilt(infile, turn):
 turns = 20
 
 for i in range(1, turns + 1):
-    print 'Turn ' + str(i) + ', Angle = ' + str(round( get_tilt(infile, str(i)),2))  + ' urad'
+    print  i, round( get_tilt(infile, str(i)),2)
