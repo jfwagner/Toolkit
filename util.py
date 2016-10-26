@@ -148,7 +148,7 @@ def check_simplecticity(matrix):
         print ">> Is symplectic"
     else:
         print ">> Is not symplectic"
-        
+
 def get_sigmas(alpha, beta, emittance, dispersion, spread, beta_rel, gamma_rel):
     """
     Returns the phase space amplitudes from the twiss parameters
@@ -189,7 +189,7 @@ def get_rel_params(energy, mass=0.938272046e9):
 def get_ip1(x, y):
     """Treats the x and y coordinates already extracted from the data in order to easily plot
     around IP1 (i.e. convert s coordinate of 26900 m to -100 m).
-    The function arguments' are the variables x and y that you want to treat, respectively . 
+    The function arguments' are the variables x and y that you want to treat, respectively .
     Example:
     var_x, var_y = get_ip1(var_x, var_y)
     """
@@ -197,12 +197,12 @@ def get_ip1(x, y):
     x_temp = []
     y_temp = []
     for e1, e2 in zipped:
-        if e1 < (26658.8832 / 2):
-            x_temp.append(e1)
-            y_temp.append(e2)
-        if e1 >= (26658.8832 / 2):
-            x_temp.append(e1 - 26658.8832)
-            y_temp.append(e2)
+        if float(e1) < (26658.8832 / 2):
+            x_temp.append(float(e1))
+            y_temp.append(float(e2))
+        if float(e1) >= (26658.8832 / 2):
+            x_temp.append(float(e1) - 26658.8832)
+            y_temp.append(float(e2))
     x = []
     y = []
     for e1, e2 in sorted(zip(x_temp, y_temp), key=lambda t: t[0]):
@@ -306,7 +306,7 @@ def replace_column(infile, str_in, col_in, str_out, col_out, col_length=20):
 
 
 def get_ir(ir, s, coord):
-    """This function stores the information relevant to the plotting of a specific Interaction Region (IR), 
+    """This function stores the information relevant to the plotting of a specific Interaction Region (IR),
     i.e. the position of the IR in the accelerator and the limit of the vertical coordinate.
 
     The function arguments' are (in order):
