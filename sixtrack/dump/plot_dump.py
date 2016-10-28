@@ -75,6 +75,7 @@ yp = get_turns(yp_tot, turns)
 z  = get_turns(z_tot, turns)
 e  = get_turns(e_tot, turns)
 
+
 # ------------------------------------------------------------------------------
 # PLOTTING
 # ------------------------------------------------------------------------------
@@ -308,7 +309,11 @@ for turn in turn_range:
     # plt.clf()
 
     # ------------------------------------------------------------------------------
-    rcParams['figure.figsize'] = 3,1
+    font_spec = {"font.size": 5, }
+    rcParams['figure.figsize'] = 4,2
+    # params = {'text.latex.preamble': [r'\mathchardef\mhyphen="2D']}
+    # rcParams['text.latex.unicode']=True
+    plt.rcParams.update(font_spec)
     fig = plt.figure()
     ax7 = fig.add_subplot(121)
     halfgap = 0.1093825692E-02
