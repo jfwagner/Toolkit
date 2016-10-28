@@ -83,6 +83,7 @@ class GetData:
         The dictionary keys are the number of the columns.
         """
         start_line = self.data_line(column, regex).next()
+        data_dict = {key: [] for key, item in enumerate(start_line)}
         for line in self.data_line(column, regex):
             if line[0] == '*':
                 line.pop(0)
@@ -98,7 +99,6 @@ class GetData:
                     elif dtype == 'number':
                         data_dict[count].append(float(item))  # Fill in the lists
             else:
-                data_dict = {key: [] for key, item in enumerate(start_line)}  # Create keys and empty lists
                 for count, item in enumerate(line):
                     if dtype == 'string':
                         # Strip needed for MAD-X output
