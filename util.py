@@ -26,7 +26,8 @@ class GetData:
         --> Useful to skip lines that contain any of these symbols at any position.
         --> Used in the data_line function.
         """
-        return re.search(r'#|@|\*|%|\$|&', line) is not None
+        return re.search(r'#|@|%|\$|&', line) is not None
+        
 
     def data_line(self, column=None, regex=None):
         """
@@ -70,21 +71,40 @@ class GetData:
     #                 print ">> Check the type of the data in your column"
     #     return data_dict
 
+    def my_enumerate(self, sequence, keys, start=0):
+        n = start
+        for elem in sequence:
+            yield keys[n], elem
+            n += 1
+
     def data_column(self, column=None, regex=None, dtype='number'):
         """
         Returns a dictionary of lists, containing the columns of the data file.
         The dictionary keys are the number of the columns.
         """
         start_line = self.data_line(column, regex).next()
-        data_dict = {key: [] for key, item in enumerate(
-            start_line)}  # Create keys and empty lists
         for line in self.data_line(column, regex):
-            for count, item in enumerate(line):
-                if dtype == 'string':
-                    # Strip needed for MAD-X output
-                    data_dict[count].append(item.strip('"'))
-                elif dtype == 'number':
-                    data_dict[count].append(float(item))  # Fill in the lists
+            if line[0] == '*':
+                line.pop(0)
+                keys = line
+                data_dict = {key: [] for key, item in self.my_enumerate(line, keys)}
+            if 'keys' in locals():
+                if line == keys:
+                    continue
+                for count, item in self.my_enumerate(line, keys):
+                    if dtype == 'string':
+                        # Strip needed for MAD-X output
+                        data_dict[count].append(item.strip('"'))
+                    elif dtype == 'number':
+                        data_dict[count].append(float(item))  # Fill in the lists
+            else:
+                data_dict = {key: [] for key, item in enumerate(start_line)}  # Create keys and empty lists
+                for count, item in enumerate(line):
+                    if dtype == 'string':
+                        # Strip needed for MAD-X output
+                        data_dict[count].append(item.strip('"'))
+                    elif dtype == 'number':
+                        data_dict[count].append(float(item))  # Fill in the lists
         return data_dict
 
 
