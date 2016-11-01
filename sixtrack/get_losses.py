@@ -174,27 +174,30 @@ def get_coll(name, turn_data):
     except KeyError:
         print 'Collimator', name,  'not found or without losses'
 
-# ------------------------------------------------------------------------------
-# Primaries
-# ------------------------------------------------------------------------------
-get_coll('TCP.D6L7.B1', turn_data)
-get_coll('TCP.B6L7.B1', turn_data)
+for col in translator_dict.keys():
+    get_coll(col, turn_data)
+    
+# # ------------------------------------------------------------------------------
+# # Primaries
+# # ------------------------------------------------------------------------------
+# get_coll('TCP.D6L7.B1', turn_data)
+# get_coll('TCP.B6L7.B1', turn_data)
 
-# ------------------------------------------------------------------------------
-# TCTs IP1
-# ------------------------------------------------------------------------------
-get_coll('TCTPH.4L1.B1', turn_data)
-get_coll('TCTPV.4L1.B1', turn_data)
-get_coll('TCTH.6L1.B1', turn_data)
-get_coll('TCTV.6L1.B1', turn_data)
+# # ------------------------------------------------------------------------------
+# # TCTs IP1
+# # ------------------------------------------------------------------------------
+# get_coll('TCTPH.4L1.B1', turn_data)
+# get_coll('TCTPV.4L1.B1', turn_data)
+# get_coll('TCTH.6L1.B1', turn_data)
+# get_coll('TCTV.6L1.B1', turn_data)
 
-# ------------------------------------------------------------------------------
-# TCTs IP5
-# ------------------------------------------------------------------------------
-get_coll('TCTPH.4L5.B1', turn_data)
-get_coll('TCTPV.4L5.B1', turn_data)
-get_coll('TCTH.6L5.B1', turn_data)
-get_coll('TCTV.6L5.B1', turn_data)
+# # ------------------------------------------------------------------------------
+# # TCTs IP5
+# # ------------------------------------------------------------------------------
+# get_coll('TCTPH.4L5.B1', turn_data)
+# get_coll('TCTPV.4L5.B1', turn_data)
+# get_coll('TCTH.6L5.B1', turn_data)
+# get_coll('TCTV.6L5.B1', turn_data)
 
 # ------------------------------------------------------------------------------
 # Extracting losses in the aperture
@@ -213,7 +216,6 @@ print ' '
 infile_4 = 'LPI_test.s'
 outfile_ap = 'aperture.txt'
 if os.stat(infile_4).st_size == 0:
-    open(outfile_ap, 'a').close()
     print '>> No losses in the aperture'
 else:
     ap_data = []
