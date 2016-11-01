@@ -12,6 +12,7 @@ from matplotlib import rcParams
 
 
 from util import get_rel_params
+from util import plot_2d_hist
 
 turns = int(sys.argv[1])
 failure_turn = int(sys.argv[2])
@@ -94,15 +95,19 @@ o = 0
 
 x2 = []
 y2 = []
+x1 = []
+y1 = []
 outfile = 'sigma.txt'
 with open(outfile, 'w') as f:
     for turn in range(0, turns + 1):
         pid, x, xp, y, yp, z = do_floquet(infile, turn)
-        for i, j, k, l in zip(pid, y, yp, z):
+        for i, j, k, l, u, p in zip(pid, y, yp, z, x, xp):
             # if i == the_particle:
             if i == 1:
                 x2.append(turn)
                 y2.append(np.sqrt((n-j)**2 + (o-k)**2)/sigma)
+                x1.append(turn)
+                y1.append(np.sqrt((n-u)**2 + (o-p)**2)/sigma)
                 print >> f, turn, round(np.sqrt((n-j)**2 + (o-k)**2)/sigma,6), l
 
 font_spec = {"font.size": 10, }
@@ -117,20 +122,35 @@ plt.title(thetitle)
 plt.xlim([0, turns])
 plt.axvline(x=failure_turn, linewidth=0.7, color='black')
 plt.annotate('Failure', xy=(failure_turn - 1.5,  (max(y2) + max(y2)* 0.7) / 2), rotation='vertical', size='6', verticalalignment='center')
-if y2[turns-1] < 0.0999:
-    plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+# if y2[turns-1] < 0.0999:
+#     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
 plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
 plt.savefig('sigma.png', dpi=1000)
 plt.savefig('sigma.eps', format='eps', dpi=1000)
 plt.clf()
 
+plt.plot(x1, y1,color='blue')
+plt.xlabel('Turns')
+plt.ylabel(r'Displacement ($\sigma_x$)')
+plt.title(thetitle)
+plt.xlim([0, turns])
+plt.axvline(x=failure_turn, linewidth=0.7, color='black')
+plt.annotate('Failure', xy=(failure_turn - 1.5,  (max(y2) + max(y2)* 0.7) / 2), rotation='vertical', size='6', verticalalignment='center')
+# if y2[turns-1] < 0.0999:
+#     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+plt.savefig('sigmax.png', dpi=1000)
+plt.savefig('sigmax.eps', format='eps', dpi=1000)
+plt.clf()
+
 
 
 yf = np.fft.fft(y2)
-freqs = np.fft.fftfreq(len(y2))
-plt.plot(abs(freqs),abs(yf))
+freqs2 = np.fft.fftfreq(len(y2))
+plt.plot(abs(freqs2),abs(yf))
 plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-plt.xlim([0.30, 0.37])
+# plt.xlim([0.25, 0.45])
+plt.xlim([0.3, 0.34])
 # plt.ylim([0, 3])
 plt.ylim([0, 1500])
 plt.savefig('fft.png', dpi=1000)
@@ -140,13 +160,54 @@ plt.clf()
 sel_freqs = []
 sel_amp = []
 d = {}
-for i, j in zip(abs(freqs), abs(yf)):
+for i, j in zip(abs(freqs2), abs(yf)):
     if i > 0 and i < 1:
         d[j] = i
         sel_freqs.append(i)
         sel_amp.append(j)
 
 
-maximums = heapq.nlargest(20, sel_amp)
+maximums = heapq.nlargest(100, sel_amp)
 for i in maximums:
     print d[i], i
+
+yf = np.fft.fft(y1)
+freqs1 = np.fft.fftfreq(len(y1))
+plt.plot(abs(freqs1),abs(yf))
+plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+# plt.xlim([0.25, 0.45])
+plt.xlim([0.3, 0.32])
+plt.ylim([0, 10])
+# plt.ylim([0, 1500])
+plt.savefig('fftx.png', dpi=1000)
+plt.savefig('fftx.eps', format='eps', dpi=1000)
+plt.clf()
+
+print "    "
+sel_freqs = []
+sel_amp = []
+d = {}
+for i, j in zip(abs(freqs1), abs(yf)):
+    if i > 0 and i < 1:
+        d[j] = i
+        sel_freqs.append(i)
+        sel_amp.append(j)
+
+
+maximums = heapq.nlargest(40, sel_amp)
+for i in maximums:
+    print d[i], i
+
+# z = np.polyfit(freqs1, freqs2, 1)
+# print z
+# plot_2d_hist(freqs1, freqs2, 5)
+plt.scatter(freqs1, freqs2,linewidth=0, s=0.5)
+plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+plt.xlabel(r"$Q_x$")
+plt.ylabel(r"$Q_y$")
+# plt.xlim([0.25, 0.45])
+# plt.ylim([0, 10])
+# plt.ylim([0, 1500])
+plt.savefig('tunes.png', dpi=1000)
+plt.savefig('tunes.eps', format='eps', dpi=1000)
+plt.clf()
