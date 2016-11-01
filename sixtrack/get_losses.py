@@ -12,9 +12,6 @@ import sys
 from collections import Counter
 
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import rc
-from matplotlib import rcParams
 
 from util import GetData
 
