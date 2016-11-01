@@ -101,7 +101,7 @@ for line in start_line:
 
 coll_dict = Counter(coll_data)
 print ' '
-coll_out = 'data_coll.txt'
+coll_out = 'loss_maps.txt'
 with open(coll_out, 'w') as g:
     print >> g, '# Name Position Absorptions Percentage'
     for i, j in zip(coll_dict.keys(), coll_dict.values()):
@@ -119,100 +119,80 @@ for line in start_line_t:
 
 turns_dict = Counter(turn_data)
 turns_out = 'data_turn.txt'
+tt = []
+vv = []
 with open(turns_out, 'w') as h:
-    for i, j in zip(turns_dict.keys(), turns_dict.values()):
-         print >> h, i, j, (float(j)/simulated_particles)*100
+    for t in range(1, max(np.asarray(turn_data, dtype='int')) + 2):
+        try:
+            turns_dict[str(t)]
+            tt.append(t)
+            vv.append(turns_dict[str(t)])
+        except KeyError:
+            tt.append(t)
+            vv.append(0)
+    for i, j in zip(tt, np.cumsum(vv[:0]+vv[:-1]).tolist()):
+        print >> h, i, j, (float(j)/simulated_particles)*100
 
+# -----------------------------------------------------------------------------
+# Creating a dict of dicts in order to access the losses per turn for each
+# collimator.
+# -----------------------------------------------------------------------------
+d = {}
 for name in translator_dict.keys():
     coll_name = []
     for i, j in zip(coll_data, turn_data):
         if i == name:
             coll_name.append(j)
     if len(coll_name) > 0:
-        print name, Counter(coll_name)
+        c = Counter(coll_name)
+        d[name] = dict(c)
 
 
+print ' '
+print '>> Getting losses per turn for each collimator:'
 
-# a = sorted(a, key=lambda x: x.modified, reverse=True)
+def get_coll(name, turn_data):
+    turn  = []
+    value = []
+    try:
+        d[name]
+        outfile = name.translate(None, '.').lower() + '.txt'
+        with open(outfile, 'w') as g:
+            for t in range(1, max(np.asarray(turn_data, dtype='int')) + 2):
+                try:
+                   d[name][str(t)]
+                   turn.append(t)
+                   value.append(d[name][str(t)])
+                except KeyError:
+                   turn.append(t)
+                   value.append(0)
+            for i, j in zip(turn, np.cumsum(value[:0]+value[:-1]).tolist()):
+                print >> g, i, j, (float(j)/simulated_particles)*100
+            print 'File', outfile, 'created'
+    except KeyError:
+       print 'Collimator', name,  'not found or without losses'
 
-# def get_tcp(infile, column):
-#     with open(infile, 'r') as data:
-#         for line in data:
-#             if is_header(line):
-#                 continue
-#             line_list = line.strip('\n').split()
-#             if line_list[7] != 4:
-#                 yield line_list[0], line_list[9]
+# ------------------------------------------------------------------------------
+# Primaries
+# ------------------------------------------------------------------------------
+get_coll('TCP.D6L7.B1', turn_data)
+get_coll('TCP.B6L7.B1', turn_data)
 
+# ------------------------------------------------------------------------------
+# TCTs IP1
+# ------------------------------------------------------------------------------
+get_coll('TCTPH.4L1.B1', turn_data)
+get_coll('TCTPV.4L1.B1', turn_data)
+get_coll('TCTH.6L1.B1', turn_data)
+get_coll('TCTV.6L1.B1', turn_data)
 
-# tcp_data = []
-# start_line = get_tcp(infile, 0)
-# for line in start_line:
-#     tcp_data.append(line)
-
-# collsys_data = []
-# start_line = get_impacts(infile, 9)
-# for line in start_line:
-#     collsys_data.append(line)
-    
-# collsystem_dict = collections.OrderedDict(sorted(Counter(collsys_data).items()))
-
-# outfile = 'collsys.txt'
-# print ' '
-# print '>> Losses in the collimation system per turn, non cumulative:'
-# with open(outfile, 'w') as f:
-#     for i, j in zip(collsystem_dict.keys(), collsystem_dict.values()):
-#         print i, round(float(j)*100 / simulated_particles,6), \
-#         '{:.2e}'.format((float(j)/ simulated_particles)*particles_per_bunch*bunches)
-#         print >> f, i,  round(float(j)*100 / simulated_particles,8)
-
-# tcp_losses = []
-# for i, j in tcp_data:
-#     if i == '29':
-#         tcp_losses.append(j)
-
-# tcp_dict = collections.OrderedDict(sorted(Counter(tcp_losses).items()))
-
-# outfile = 'tcp.txt'
-# print ' '
-# print '>> Losses in the TCP per turn, non cumulative:'
-# with open(outfile, 'w') as f:
-#     for i, j in zip(tcp_dict.keys(), tcp_dict.values()):
-#         print i, round(float(j)*100 / simulated_particles,2), \
-#         '{:.2e}'.format((float(j)/ simulated_particles)*particles_per_bunch*bunches)
-#         print >> f, i,  round(float(j)*100 / simulated_particles,8)
-
-# print ' '
-# print '>> Losses in the TCP per turn, cumulative:'
-# percentage_tcp = 0
-# protons_tcp = 0
-# for i, j in zip(tcp_dict.keys(), tcp_dict.values()):
-#     percentage_tcp += float(j)*100 / simulated_particles
-#     protons_tcp += float(j)/ simulated_particles*particles_per_bunch*bunches
-#     print i, round(percentage_tcp, 2),'{:.2e}'.format(protons_tcp), \
-#         round(percentage_tcp*1e-2 * beam_energy, 2)
-
-# tct_losses = []
-# for i, j in tcp_data:
-#     if i == '54':
-#         tct_losses.append(j)
-
-# tct_dict = collections.OrderedDict(sorted(Counter(tct_losses).items()))
-
-# print ' '
-# print '>> Losses in the TCT per turn, non cumulative:'
-# for i, j in zip(tct_dict.keys(), tct_dict.values()):
-#     print i, round(float(j)*100 / simulated_particles,5), \
-#     '{:.2e}'.format((float(j)/ simulated_particles)*particles_per_bunch*bunches)
-
-# print ' '
-# print '>> Losses in the TCT per turn, cumulative:'
-# percentage_tct = 0
-# protons_tct = 0
-# for i, j in zip(tct_dict.keys(), tct_dict.values()):
-#     percentage_tct += float(j)*100 / simulated_particles
-#     protons_tct += float(j)/ simulated_particles*particles_per_bunch*bunches
-#     print i, round(percentage_tct, 5),'{:.2e}'.format(protons_tct)
+# ------------------------------------------------------------------------------
+# TCTs IP5
+# ------------------------------------------------------------------------------
+get_coll('TCTPH.4L5.B1', turn_data)
+get_coll('TCTPV.4L5.B1', turn_data)
+get_coll('TCTH.6L5.B1', turn_data)
+get_coll('TCTV.6L5.B1', turn_data)
 
 # # ------------------------------------------------------------------------------
 # # Extracting losses in the aperture
