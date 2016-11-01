@@ -42,8 +42,9 @@ for txt in files:
 ax1 = fig.add_subplot(111)
 plt.bar(x_coll, y_coll, align="center",
         linewidth=0, width=60, color="black", label="Collimation: " + str(round(np.sum(y_coll), 2)) + " \%")
-plt.bar(x_ap, y_ap, color="green",
-        align="center", linewidth=0, width=60, label="Aperture: " + str(round(np.sum(y_ap), 2)) + " \%")
+if os.path.exists('aperture.txt'):
+        plt.bar(x_ap, y_ap, color="green",
+                align="center", linewidth=0, width=60, label="Aperture: " + str(round(np.sum(y_ap), 2)) + " \%")
 plt.xlabel("Position (m)")
 plt.ylabel("Number of Protons Lost")
 plt.xlim([0, 26658.883])
