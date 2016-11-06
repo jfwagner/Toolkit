@@ -1,5 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 import glob
+import operator
 import os
 import re
 import sys
@@ -78,7 +79,7 @@ plt.clf()
 # ------------------------------------------------------------------------------
 # Losses per turn
 # ------------------------------------------------------------------------------
-
+ax2 = fig.add_subplot(111)
 
 def get_turns(infile):
     get = GetData(infile)
@@ -99,21 +100,45 @@ for txt in files_coll:
     x, y, name = get_turns(txt)
     d[name] = y
 
+# ------------------------------------------------------------------------------
+# Sort the created dictionary by number of losses
+# ------------------------------------------------------------------------------
+sorted_d = sorted(d.items(), key=lambda x: sum(x[1]), reverse=True)
+
 x_t, y_t, name_t = get_turns('data_turn.txt')
 
-cmap = matplotlib.cm.autumn
-plt.bar(x_t, y_t, align='center', label=name_t, linewidth=0.5)
-counter = 0
-for name_col, value_col in zip(d.keys(), d.values()):
-    counter += 1
-    plt.bar(x_t, value_col, align='center', label=name_col,
-            linewidth=0.5, color=cmap(counter / float(len(files_coll))))
-plt.xlabel('Turns')
-plt.ylabel(r'Percentage of Beam Lost (\%)')
-plt.xlim([0, max(x_t)])
-plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-plt.legend(loc='upper left', prop={'size': 6})
-plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-plt.savefig('losses_turn.png', dpi=1000)
-plt.savefig('losses_turn.eps', format='eps', dpi=1000)
-plt.clf()
+def plot_coll(coll_name, x_t, y_t):
+    if coll_name == 'TCP':
+        my_map = matplotlib.cm.autumn
+        number = 4.0
+    elif coll_name == 'TCS':
+        my_map = matplotlib.cm.winter
+        number = 17.0
+    elif coll_name == 'TCT':
+        my_map = matplotlib.cm.spring
+        number = 17.0
+    counter = 0
+    for i in range(0, int(len(sorted_d))):
+        if sorted_d[i][0].startswith(coll_name):
+            counter += 1
+            print counter
+            cmap = my_map
+            plt.plot(x_t, sorted_d[i][1], label=str(sorted_d[i][0]),
+                     color=cmap(counter / number))
+            plt.fill_between(x,0,y,color=cmap(counter / number))
+            plt.legend(loc='upper left', prop={'size': 5})
+            plt.xlabel('Turns')
+            plt.ylabel(r'Percentage of Beam Lost (\%)')
+            plt.xlim([0, max(x_t)])
+            plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+            plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+            plt.savefig(coll_name + '.png', dpi=1000)
+            plt.savefig(coll_name + '.eps', format='eps', dpi=1000)
+    plt.clf()
+
+
+plot_coll('TCP', x_t, y_t)
+plot_coll('TCS', x_t, y_t)
+plot_coll('TCT', x_t, y_t)
+
+
