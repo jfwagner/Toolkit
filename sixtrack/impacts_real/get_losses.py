@@ -21,6 +21,7 @@ from util import GetData
 # ------------------------------------------------------------------------------
 sixtrack_particle_limit = 19968
 simulated_particles = int(sys.argv[1]) * sixtrack_particle_limit
+beam = sys.argv[2]
 
 print ' '
 print 'Number of simulated particles: ', simulated_particles, '(100 %)'
@@ -43,7 +44,11 @@ for i in range(len(names_2)):
 # ------------------------------------------------------------------------------
 # Associating name with position
 # ------------------------------------------------------------------------------
-infile_3 = 'CollPositionsHL.b1.dat'
+if beam == 'B1': 
+    infile_3 = 'CollPositionsHL.b1.dat'
+elif beam == 'B2':
+    infile_3 = 'CollPositions.b2.dat'
+
 get_3 = GetData(infile_3)
 data_3 = get_3.data_column(dtype='string')
 
@@ -104,8 +109,7 @@ with open(coll_out, 'w') as g:
     print >> g, '# Name Position Absorptions Percentage'
     for i, j in zip(coll_dict.keys(), coll_dict.values()):
         print 'Absorptions in collimator ' + str(i) + ': ', j,  '(' + str(round((float(j) / simulated_particles) * 100, rounding)) + ' %)'
-        print >> g, i, translator_dict[
-            str(i)], j, (float(j) / simulated_particles) * 100
+        print >> g, i, translator_dict[str(i)], j, (float(j) / simulated_particles) * 100
 
 
 # ------------------------------------------------------------------------------
@@ -177,27 +181,27 @@ def get_coll(name, turn_data):
 for col in translator_dict.keys():
     get_coll(col, turn_data)
     
-# # ------------------------------------------------------------------------------
-# # Primaries
-# # ------------------------------------------------------------------------------
-# get_coll('TCP.D6L7.B1', turn_data)
-# get_coll('TCP.B6L7.B1', turn_data)
+# ------------------------------------------------------------------------------
+# Primaries
+# ------------------------------------------------------------------------------
+get_coll('TCP.D6L7.B1', turn_data)
+get_coll('TCP.B6L7.B1', turn_data)
 
-# # ------------------------------------------------------------------------------
-# # TCTs IP1
-# # ------------------------------------------------------------------------------
-# get_coll('TCTPH.4L1.B1', turn_data)
-# get_coll('TCTPV.4L1.B1', turn_data)
-# get_coll('TCTH.6L1.B1', turn_data)
-# get_coll('TCTV.6L1.B1', turn_data)
+# ------------------------------------------------------------------------------
+# TCTs IP1
+# ------------------------------------------------------------------------------
+get_coll('TCTPH.4L1.B1', turn_data)
+get_coll('TCTPV.4L1.B1', turn_data)
+get_coll('TCTH.6L1.B1', turn_data)
+get_coll('TCTV.6L1.B1', turn_data)
 
-# # ------------------------------------------------------------------------------
-# # TCTs IP5
-# # ------------------------------------------------------------------------------
-# get_coll('TCTPH.4L5.B1', turn_data)
-# get_coll('TCTPV.4L5.B1', turn_data)
-# get_coll('TCTH.6L5.B1', turn_data)
-# get_coll('TCTV.6L5.B1', turn_data)
+# ------------------------------------------------------------------------------
+# TCTs IP5
+# ------------------------------------------------------------------------------
+get_coll('TCTPH.4L5.B1', turn_data)
+get_coll('TCTPV.4L5.B1', turn_data)
+get_coll('TCTH.6L5.B1', turn_data)
+get_coll('TCTV.6L5.B1', turn_data)
 
 # ------------------------------------------------------------------------------
 # Extracting losses in the aperture
