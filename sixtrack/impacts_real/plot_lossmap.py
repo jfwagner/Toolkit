@@ -9,17 +9,20 @@ import numpy as np
 import matplotlib
 
 from collections import defaultdict
+from decimal import Decimal
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
 
 from util import GetData
 
+beam = sys.argv[1]
+
 # ------------------------------------------------------------------------------
 # Plot characteristics
 # ------------------------------------------------------------------------------
-font = {'family':'serif', 'serif': ['computer modern roman']}
-plt.rc('font',**font)
+# font = {'family':'serif', 'serif': ['computer modern roman']}
+# plt.rc('font',**font)
 rcParams['figure.figsize'] = 4, 2
 params = {'text.latex.preamble': [r'\usepackage{siunitx}',r'\usepackage{mathrsfs}']}
 plt.rcParams.update(params)
@@ -50,32 +53,45 @@ plt.bar(x_coll, y_coll, align="center",
         linewidth=0, width=60, color="black", label="Collimation: " + str(round(np.sum(y_coll), 2)) + " \%")
 if os.path.exists('aperture.txt'):
         plt.bar(x_ap, y_ap, color="green",
-                align="center", linewidth=0, width=60, label="Aperture: " + str(round(np.sum(y_ap), 2)) + " \%")
+                align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
 plt.xlabel("Position (m)")
 plt.ylabel("Number of Protons Lost")
 plt.xlim([0, 26658.883])
-plt.legend(loc='upper left', prop={'size': 6})
+plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
 ax1.set_yscale('log')
 ax1.set_axisbelow(True)
-ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.3)
+ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
 
-height = max(y_coll) / 500
+
+b1 = {}
+b2 = {}
+ips = np.linspace(1,8,8)
+
+b1_pos = [800, 3332.436584, 6664.7208, 9997.005016, 13329.28923, 16661.72582, 19994.1624,  23315.37898]
+for i, j in zip(ips, b1_pos):
+    b1[i] = j
+
+b2_pos = [800, 23326.59898,  19994.1624, 16661.72582, 13329.28923,  9997.005016,  6664.7208,  3343.656584]
+for i, j in zip(ips, b2_pos):
+    b2[i] = j
+
+def plot_ip_labels(thedict, height, size):
+    for i, j in zip(thedict.keys(), thedict.values()):
+        if i==1 or i==2 or i==5 or i==8:
+            my_ip='IP'
+        if i==3 or i==4 or i==6 or i==7:
+             my_ip='IR'
+        ax1.annotate(my_ip + str(int(i)), xy=(1, height), xytext=(j, height),
+                     weight='bold', va='bottom', ha='center', size=size, color='red')
+
+height = max(y_coll) / 200
 text_size = 5
-ax1.annotate('IP2', xy=(1, height), xytext=(3332.4, height),
-             weight='bold', va='bottom', ha='center', size=text_size, color='red')
-ax1.annotate('IR3', xy=(1, height), xytext=(6664.721, height),
-             weight='bold', va='bottom', ha='center', size=text_size, color='red')
-ax1.annotate('IR4', xy=(1, height), xytext=(9997, height),
-             weight='bold', va='bottom', ha='center', size=text_size, color='red')
-ax1.annotate('IP5', xy=(1, height), xytext=(13329.28, height),
-             weight='bold', va='bottom', ha='center', size=text_size, color='red')
-ax1.annotate('IR6', xy=(1, height), xytext=(16661.7, height),
-             weight='bold', va='bottom', ha='center', size=text_size, color='red')
-ax1.annotate('IR7', xy=(1, height), xytext=(20000, height),
-             weight='bold', va='bottom', ha='center', size=text_size, color='red')
-ax1.annotate('IP8', xy=(1, height), xytext=(23315.4, height),
-             weight='bold', va='bottom', ha='center', size=text_size, color='red')
-
+if beam == 'B1':
+    plot_ip_labels(b1, height, text_size)
+elif beam == 'B2':
+    plot_ip_labels(b2, height, text_size)
+else:
+    print '>> Please input B1 or B2 as first argument'
 plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
 plt.savefig('loss_map.png', dpi=1000)
 plt.savefig('loss_map.eps', format='eps', dpi=1000)
@@ -176,7 +192,7 @@ ax.bar(x_t, tcl, label='TCL',
 ax.bar(x_t, tct, label='TCT',
     color=themap((step * 3.0)/length), linewidth=0)
 
-lgd = ax.legend(bbox_to_anchor=(1, 0.5),loc='center left', prop={'size':2.5}).get_frame().set_linewidth(0.5)
+lgd = ax.legend(bbox_to_anchor=(1, 0.5),loc='center left', prop={'size':3}).get_frame().set_linewidth(0.5)
 plt.xlabel('Turns')
 plt.ylabel(r'Percentage of Beam Lost (\%)')
 plt.xlim([0, max(x_t)])
