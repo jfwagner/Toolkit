@@ -8,6 +8,7 @@ import sys
 import numpy as np
 import matplotlib
 
+from collections import defaultdict
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib import rcParams
@@ -110,7 +111,6 @@ for txt in files_coll:
 sorted_d = sorted(d.items(), key=lambda x: sum(x[1]), reverse=True)
 
 x_t, y_t, name_t = get_turns('data_turn.txt')
-
 def plot_coll(coll_name, x_t, y_t):
     number = 0
     for name in d.keys():
@@ -129,21 +129,59 @@ def plot_coll(coll_name, x_t, y_t):
             cmap = my_map
             plt.bar(x_t, sorted_d[i][1], label=str(sorted_d[i][0]),
                      color=cmap(float(counter) / float(number)), linewidth=0)
-            # print counter
-            # print number
             plt.legend(loc='upper left', prop={'size': 3}).get_frame().set_linewidth(0.5)
             plt.xlabel('Turns')
             plt.ylabel(r'Percentage of Beam Lost (\%)')
             plt.xlim([0, max(x_t)])
-            plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+            # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
             plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
             plt.savefig(coll_name + '.png', dpi=1000)
             plt.savefig(coll_name + '.eps', format='eps', dpi=1000)
     plt.clf()
 
 
-plot_coll('TCP', x_t, y_t)
-plot_coll('TCS', x_t, y_t)
-plot_coll('TCT', x_t, y_t)
+# plot_coll('TCP', x_t, y_t)
+# plot_coll('TCS', x_t, y_t)
+# plot_coll('TCT', x_t, y_t)
 
+# ------------------------------------------------------------------------------
+# Losses per collimator group
+# ------------------------------------------------------------------------------
+def get_cumulative_loss(sorted_d, name):
+    cumulated = []
+    d = defaultdict(list)
+    for i in range(0, int(len(sorted_d))):
+        if sorted_d[i][0].startswith(name):
+            for t in range(0,len(sorted_d[i][1])):
+                d[t].append(sorted_d[i][1][t])
+    for t in range(0, len(sorted_d[i][1])):
+            cumulated.append(sum(d[t]))
+    return cumulated
 
+tcp = get_cumulative_loss(sorted_d, 'TCP')
+tcs = get_cumulative_loss(sorted_d, 'TCS')
+tct = get_cumulative_loss(sorted_d, 'TCT')
+tcl = get_cumulative_loss(sorted_d, 'TCL')
+
+step = 4
+length = 20
+ax = fig.add_subplot(111)
+themap = matplotlib.cm.terrain
+ax.bar(x_t, tcp, label='TCP',
+    color=themap((step * 1.0)/length), linewidth=0)
+ax.bar(x_t, tcs, label='TCS',
+    color=themap((step * 2.0)/length), linewidth=0)
+ax.bar(x_t, tcl, label='TCL',
+    color=themap((step * 4.0)/length), linewidth=0)
+ax.bar(x_t, tct, label='TCT',
+    color=themap((step * 3.0)/length), linewidth=0)
+
+lgd = ax.legend(bbox_to_anchor=(1, 0.5),loc='center left', prop={'size':2.5}).get_frame().set_linewidth(0.5)
+plt.xlabel('Turns')
+plt.ylabel(r'Percentage of Beam Lost (\%)')
+plt.xlim([0, max(x_t)])
+plt.yscale('log')
+fig.savefig('all_colls.png', dpi=1000, bbox_inches='tight')
+plt.savefig('all_colls.eps', format='eps', dpi=1000)
+
+plt.clf()
