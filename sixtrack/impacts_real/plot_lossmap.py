@@ -17,8 +17,12 @@ from util import GetData
 # ------------------------------------------------------------------------------
 # Plot characteristics
 # ------------------------------------------------------------------------------
-rcParams['legend.frameon'] = 'True'
+font = {'family':'serif', 'serif': ['computer modern roman']}
+plt.rc('font',**font)
 rcParams['figure.figsize'] = 4, 2
+params = {'text.latex.preamble': [r'\usepackage{siunitx}',r'\usepackage{mathrsfs}']}
+plt.rcParams.update(params)
+rcParams['legend.frameon'] = 'True'
 fig = plt.figure()
 
 # ------------------------------------------------------------------------------
@@ -108,25 +112,26 @@ sorted_d = sorted(d.items(), key=lambda x: sum(x[1]), reverse=True)
 x_t, y_t, name_t = get_turns('data_turn.txt')
 
 def plot_coll(coll_name, x_t, y_t):
+    number = 0
+    for name in d.keys():
+        if name.startswith(coll_name):
+            number += 1
     if coll_name == 'TCP':
         my_map = matplotlib.cm.autumn
-        number = 4.0
     elif coll_name == 'TCS':
-        my_map = matplotlib.cm.winter
-        number = 17.0
+        my_map = matplotlib.cm.terrain
     elif coll_name == 'TCT':
         my_map = matplotlib.cm.spring
-        number = 17.0
     counter = 0
     for i in range(0, int(len(sorted_d))):
         if sorted_d[i][0].startswith(coll_name):
             counter += 1
-            print counter
             cmap = my_map
-            plt.plot(x_t, sorted_d[i][1], label=str(sorted_d[i][0]),
-                     color=cmap(counter / number))
-            plt.fill_between(x,0,y,color=cmap(counter / number))
-            plt.legend(loc='upper left', prop={'size': 5})
+            plt.bar(x_t, sorted_d[i][1], label=str(sorted_d[i][0]),
+                     color=cmap(float(counter) / float(number)), linewidth=0)
+            # print counter
+            # print number
+            plt.legend(loc='upper left', prop={'size': 3}).get_frame().set_linewidth(0.5)
             plt.xlabel('Turns')
             plt.ylabel(r'Percentage of Beam Lost (\%)')
             plt.xlim([0, max(x_t)])
