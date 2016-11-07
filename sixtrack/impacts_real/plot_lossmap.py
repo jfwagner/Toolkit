@@ -133,32 +133,34 @@ def plot_coll(coll_name, x_t, y_t):
         if name.startswith(coll_name):
             number += 1
     if coll_name == 'TCP':
-        my_map = matplotlib.cm.autumn
+        my_map = matplotlib.cm.terrain
     elif coll_name == 'TCS':
         my_map = matplotlib.cm.terrain
     elif coll_name == 'TCT':
-        my_map = matplotlib.cm.spring
+        my_map = matplotlib.cm.terrain
     counter = 0
     for i in range(0, int(len(sorted_d))):
         if sorted_d[i][0].startswith(coll_name):
             counter += 1
             cmap = my_map
             plt.bar(x_t, sorted_d[i][1], label=str(sorted_d[i][0]),
-                     color=cmap(float(counter) / float(number)), linewidth=0)
-            plt.legend(loc='upper left', prop={'size': 3}).get_frame().set_linewidth(0.5)
+                     color=cmap((float(counter)) / (1.7*float(number))), linewidth=0)
+            plt.legend(bbox_to_anchor=(1, 0.5),loc='center left', prop={'size': 4}).get_frame().set_linewidth(0.5)
             plt.xlabel('Turns')
             plt.ylabel(r'Percentage of Beam Lost (\%)')
             plt.xlim([0, max(x_t)])
+            plt.yscale('log')
             # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
             plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-            plt.savefig(coll_name + '.png', dpi=1000)
+            # plt.savefig(coll_name + '.png', dpi=1000)
+            fig.savefig(coll_name + '.png', dpi=1000, bbox_inches='tight')
             plt.savefig(coll_name + '.eps', format='eps', dpi=1000)
     plt.clf()
 
 
-# plot_coll('TCP', x_t, y_t)
+plot_coll('TCP', x_t, y_t)
 # plot_coll('TCS', x_t, y_t)
-# plot_coll('TCT', x_t, y_t)
+plot_coll('TCT', x_t, y_t)
 
 # ------------------------------------------------------------------------------
 # Losses per collimator group
