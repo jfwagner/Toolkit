@@ -1,4 +1,8 @@
 #!/usr/bin/python
+# ------------------------------------------------------------------------------
+# USAGE: plot_lossmap.py B2 core tail
+# or: plot_lossmap.py B2 to analyze in place without weights
+# ------------------------------------------------------------------------------
 import glob
 import operator
 import os
@@ -338,5 +342,4 @@ plt.xlim([0, max(x_t)])
 plt.yscale('log')
 fig.savefig('all_colls.png', dpi=1000, bbox_inches='tight')
 plt.savefig('all_colls.eps', format='eps', dpi=1000)
-
-# plt.clf()
+plt.clf()
