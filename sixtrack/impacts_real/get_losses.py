@@ -94,7 +94,8 @@ def get_impacts(infile, column):
 
 
 num_lines = sum(1 for line in open('impacts_real.dat'))
-print 'Number of recorded impacts: ', num_lines - int(sys.argv[1]),  '(' + str(round((float(num_lines - 1) / simulated_particles) * 100, rounding)) + ' %)'
+
+print 'Number of recorded impacts: ', num_lines - int(sys.argv[1]),  '(' + str(round((float(num_lines - int(sys.argv[1])) / simulated_particles) * 100, rounding)) + ' %)'
 
 
 # ------------------------------------------------------------------------------
@@ -107,13 +108,15 @@ for line in start_line:
 
 coll_dict = Counter(coll_data)
 print ' '
-coll_out = 'loss_maps.txt'
-with open(coll_out, 'w') as g:
-    print >> g, '# Name Position Absorptions Percentage'
-    for i, j in zip(coll_dict.keys(), coll_dict.values()):
-        print 'Absorptions in collimator ' + str(i) + ': ', j,  '(' + str(round((float(j) / simulated_particles) * 100, rounding)) + ' %)'
-        print >> g, i, translator_dict[
-            str(i)], j, (float(j) / simulated_particles) * 100
+
+if len(coll_dict) != 0:
+    coll_out = 'loss_maps.txt'
+    with open(coll_out, 'w') as g:
+        print >> g, '# Name Position Absorptions Percentage'
+        for i, j in zip(coll_dict.keys(), coll_dict.values()):
+            print 'Absorptions in collimator ' + str(i) + ': ', j,  '(' + str(round((float(j) / simulated_particles) * 100, rounding)) + ' %)'
+            print >> g, i, translator_dict[
+                str(i)], j, (float(j) / simulated_particles) * 100
 
 
 # ------------------------------------------------------------------------------
