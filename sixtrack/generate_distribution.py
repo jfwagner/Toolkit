@@ -117,7 +117,8 @@ def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x
             E.append(float(trial_e))
             dp.append(dPP)
         else:
-            print 'Outside margin, trying again,', h
+            #print 'Outside margin, trying again,', h
+            pass
   
     zz  = np.asarray(z)
     EE  = np.asarray(E)
@@ -157,7 +158,9 @@ def dist_generator(particles, energy, machine, fort13, jobs, factor, emittance_x
 job_range = range(1, int(jobs) + 1)
 with open('seed.txt', 'a') as g:
     print >> g, datetime.datetime.now()
+    print >> g, "# ARGUMENTS = ", sys.argv
     for n in job_range:
+        print "job", n
         j = '%s'%n
         dist_generator(particles, energy, machine, fort13, n, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, offset_x, offset_xp, offset_y, offset_yp, dispersion_x, dispersion_y, bunch, spread, seed)
     
