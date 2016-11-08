@@ -6,6 +6,8 @@
 # Header of "impacts_real.dat":
 # 1=icoll 2=c_rotation 3=s 4=x 5=xp 6=y 7=yp 8=nabs 9=np 10=ntu
 # ------------------------------------------------------------------------------
+# USAGE: get_losses.py 100 200 B2
+# -----------------------------------------------------------------------------
 import os
 import re
 import sys
@@ -110,7 +112,8 @@ with open(coll_out, 'w') as g:
     print >> g, '# Name Position Absorptions Percentage'
     for i, j in zip(coll_dict.keys(), coll_dict.values()):
         print 'Absorptions in collimator ' + str(i) + ': ', j,  '(' + str(round((float(j) / simulated_particles) * 100, rounding)) + ' %)'
-        print >> g, i, translator_dict[str(i)], j, (float(j) / simulated_particles) * 100
+        print >> g, i, translator_dict[
+            str(i)], j, (float(j) / simulated_particles) * 100
 
 
 # ------------------------------------------------------------------------------
@@ -151,7 +154,6 @@ for name in translator_dict.keys():
     if len(coll_name) > 0:
         c = Counter(coll_name)
         d[name] = dict(c)
-print d
 
 print ' '
 print '>> Getting losses per turn for each collimator:'
