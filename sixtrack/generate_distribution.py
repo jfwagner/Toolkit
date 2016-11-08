@@ -16,6 +16,19 @@ from util import get_bucket
 from util import get_rel_params
 from util import get_sigmas
 
+if len(sys.argv) != 22:
+    print "Function to generate a particle distribution as input for the collimation routine in SixTrack (round beams at symmetry point)"
+    print "Expected 21 arguments, got", len(sys.argv)-1
+    print
+    print "Example for SPS:"
+    print " generate_distribution.py 64 26e9 'SPS_inj' True 1 1 0.9e-6 3.0e-6 1.50895801 -1.392739114 51.8375213 46.54197726 0 0 0 0 0 0 0.3 10.7e-4 42"
+    print "Example for HL-LHC:"
+    print " generate_distribution.py 64 7e12 'HL_coll' True 1 1 2.5e-6 2.5e-6 0.003485 -0.000764 0.150739 0.150235 -7.5e-4 0 0 0.3e-3 0.003652 0.000517 0.0755 1.13e-4 42"
+    print "Arguments:"
+    print " particles, energy, machine, fort13, jobs, factor, emittance_x, emittance_y, alpha_x, alpha_y, beta_x, beta_y, offset_x, offset_xp, offset_y, offset_yp, dispersion_x, dispersion_y, bunch, spread, seed"
+
+    exit(1)
+
 # Pass the Command Line Arguments
 # --------------------------------------------------------------------------------------------------------------
 particles    = int(sys.argv[1])
