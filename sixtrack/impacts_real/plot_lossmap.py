@@ -148,56 +148,81 @@ elif len(sys.argv) == 2:
 # Plotting lossmaps
 # ------------------------------------------------------------------------------
 ax1 = fig.add_subplot(111)
-plt.bar(x_coll, y_coll, align="center",
-        linewidth=0, width=60, color="black", label="Collimation: " + str(round(np.sum(y_coll), 2)) + " \%")
-if os.path.exists('aperture.txt'):
-    plt.bar(x_ap, y_ap, color="green",
-            align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
-plt.xlabel("Position (m)")
-plt.ylabel("Number of Protons Lost")
-plt.xlim([0, 26658.883])
-plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
-ax1.set_yscale('log')
-ax1.set_axisbelow(True)
-ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
 
-
-b1 = {}
-b2 = {}
-ips = np.linspace(1, 8, 8)
-
-b1_pos = [800, 3332.436584, 6664.7208, 9997.005016,
-          13329.28923, 16661.72582, 19994.1624,  23315.37898]
-for i, j in zip(ips, b1_pos):
-    b1[i] = j
-
-b2_pos = [800, 23326.59898,  19994.1624, 16661.72582,
-          13329.28923,  9997.005016,  6664.7208,  3343.656584]
-for i, j in zip(ips, b2_pos):
-    b2[i] = j
-
-
-def plot_ip_labels(thedict, height, size):
-    for i, j in zip(thedict.keys(), thedict.values()):
-        if i == 1 or i == 2 or i == 5 or i == 8:
-            my_ip = 'IP'
-        if i == 3 or i == 4 or i == 6 or i == 7:
-            my_ip = 'IR'
-        ax1.annotate(my_ip + str(int(i)), xy=(1, height), xytext=(j, height),
-                     weight='bold', va='bottom', ha='center', size=size, color='red')
-
-height = max(y_coll) / 200
-text_size = 5
-if beam == 'B1':
-    plot_ip_labels(b1, height, text_size)
-elif beam == 'B2':
-    plot_ip_labels(b2, height, text_size)
+if os.path.exists('loss_maps.txt') == False and os.path.exists('aperture.txt') == False:
+    sys.exit('>> No losses')
 else:
-    print '>> Please input B1 or B2 as first argument'
-plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-plt.savefig('loss_map.png', dpi=1000)
-plt.savefig('loss_map.eps', format='eps', dpi=1000)
-plt.clf()
+    if os.path.exists('loss_maps.txt') and os.path.exists('aperture.txt') == False:
+        plt.bar(x_coll, y_coll, align="center",
+                linewidth=0, width=60, color="black", label="Collimation: " + str(round(np.sum(y_coll), 2)) + " \%")
+        plt.xlabel("Position (m)")
+        plt.ylabel("Number of Protons Lost")
+        plt.xlim([0, 26658.883])
+        plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
+        ax1.set_yscale('log')
+        ax1.set_axisbelow(True)
+        ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
+    elif os.path.exists('aperture.txt') and os.path.exists('loss_maps.txt') == False:
+        plt.bar(x_ap, y_ap, color="green",
+                    align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
+        plt.xlabel("Position (m)")
+        plt.ylabel("Number of Protons Lost")
+        plt.xlim([0, 26658.883])
+        plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
+        ax1.set_yscale('log')
+        ax1.set_axisbelow(True)
+        ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
+    elif os.path.exists('aperture.txt') and os.path.exists('loss_maps.txt'):
+        plt.bar(x_coll, y_coll, align="center",
+                linewidth=0, width=60, color="black", label="Collimation: " + str(round(np.sum(y_coll), 2)) + " \%")
+        plt.bar(x_ap, y_ap, color="green",
+                    align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
+        plt.xlabel("Position (m)")
+        plt.ylabel("Number of Protons Lost")
+        plt.xlim([0, 26658.883])
+        plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
+        ax1.set_yscale('log')
+        ax1.set_axisbelow(True)
+        ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
+
+        b1 = {}
+        b2 = {}
+        ips = np.linspace(1, 8, 8)
+
+        b1_pos = [800, 3332.436584, 6664.7208, 9997.005016,
+                  13329.28923, 16661.72582, 19994.1624,  23315.37898]
+        for i, j in zip(ips, b1_pos):
+            b1[i] = j
+
+        b2_pos = [800, 23326.59898,  19994.1624, 16661.72582,
+                  13329.28923,  9997.005016,  6664.7208,  3343.656584]
+        for i, j in zip(ips, b2_pos):
+            b2[i] = j
+
+
+        def plot_ip_labels(thedict, height, size):
+            for i, j in zip(thedict.keys(), thedict.values()):
+                if i == 1 or i == 2 or i == 5 or i == 8:
+                    my_ip = 'IP'
+                if i == 3 or i == 4 or i == 6 or i == 7:
+                    my_ip = 'IR'
+                ax1.annotate(my_ip + str(int(i)), xy=(1, height), xytext=(j, height),
+                             weight='bold', va='bottom', ha='center', size=size, color='red')
+
+        height = max(y_coll) / 200
+        text_size = 5
+        if beam == 'B1':
+            plot_ip_labels(b1, height, text_size)
+        elif beam == 'B2':
+            plot_ip_labels(b2, height, text_size)
+        else:
+            print '>> Please input B1 or B2 as first argument'
+        plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+        plt.savefig('loss_map.png', dpi=1000)
+        plt.savefig('loss_map.eps', format='eps', dpi=1000)
+        plt.clf()
+    
+
 
 # ------------------------------------------------------------------------------
 # Losses per turn
@@ -253,13 +278,15 @@ if len(sys.argv) == 4:
             if i != k:
                 d[k] = np.asarray(l) * 0.05
 
-
 elif len(sys.argv) == 2:
     files_coll = glob.glob('t*.txt')
     d = {}
     for txt in files_coll:
         x, y, name = get_turns(txt)
         d[name] = y
+
+
+print d
 
 # After this part, a dictionary named "d" must contain the information of losses
 #  per turn for each collimator.
