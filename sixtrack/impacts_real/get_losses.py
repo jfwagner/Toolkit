@@ -95,97 +95,102 @@ def get_impacts(infile, column):
 
 num_lines = sum(1 for line in open('impacts_real.dat'))
 
-print 'Number of recorded impacts: ', num_lines - int(sys.argv[1]),  '(' + str(round((float(num_lines - int(sys.argv[1])) / simulated_particles) * 100, rounding)) + ' %)'
+print 'Number of recorded impacts: ', float(num_lines) - float(sys.argv[1]),  '(' + str(round((float(num_lines - int(sys.argv[1])) / simulated_particles) * 100, rounding)) + ' %)'
+
+if num_lines - int(sys.argv[1]) != 0.0:
+    
+    # ------------------------------------------------------------------------------
+    # Impacts per collimator
+    # ------------------------------------------------------------------------------
+    coll_data = []
+    start_line = get_impacts(infile, 0)
+    for line in start_line:
+        coll_data.append(numbers_dict[float(line)])
+
+    coll_dict = Counter(coll_data)
+    print ' '
+
+    if len(coll_dict) != 0:
+        coll_out = 'loss_maps.txt'
+        with open(coll_out, 'w') as g:
+            print >> g, '# Name Position Absorptions Percentage'
+            for i, j in zip(coll_dict.keys(), coll_dict.values()):
+                print 'Absorptions in collimator ' + str(i) + ': ', j,  '(' + str(round((float(j) / simulated_particles) * 100, rounding)) + ' %)'
+                print >> g, i, translator_dict[
+                    str(i)], j, (float(j) / simulated_particles) * 100
 
 
-# ------------------------------------------------------------------------------
-# Impacts per collimator
-# ------------------------------------------------------------------------------
-coll_data = []
-start_line = get_impacts(infile, 0)
-for line in start_line:
-    coll_data.append(numbers_dict[float(line)])
+    # ------------------------------------------------------------------------------
+    # Losses per turn
+    # ------------------------------------------------------------------------------
+    turn_data = []
+    start_line_t = get_impacts(infile, 9)
+    for line in start_line_t:
+        turn_data.append(line)
 
-coll_dict = Counter(coll_data)
-print ' '
+    turns_dict = Counter(turn_data)
+    turns_out = 'data_turn.txt'
+    tt = []
+    vv = []
+    with open(turns_out, 'w') as h:
+        print >> h, '# Position Absorptions Percentage'
+        for t in range(1, turns + 2):
+            try:
+                turns_dict[str(t)]
+                tt.append(t)
+                vv.append(turns_dict[str(t)])
+            except KeyError:
+                tt.append(t)
+                vv.append(0)
+        for i, j in zip(tt, np.cumsum(vv[:0] + vv[:-1]).tolist()):
+            print >> h, i, j, (float(j) / simulated_particles) * 100
 
-if len(coll_dict) != 0:
-    coll_out = 'loss_maps.txt'
-    with open(coll_out, 'w') as g:
-        print >> g, '# Name Position Absorptions Percentage'
-        for i, j in zip(coll_dict.keys(), coll_dict.values()):
-            print 'Absorptions in collimator ' + str(i) + ': ', j,  '(' + str(round((float(j) / simulated_particles) * 100, rounding)) + ' %)'
-            print >> g, i, translator_dict[
-                str(i)], j, (float(j) / simulated_particles) * 100
+    # -----------------------------------------------------------------------------
+    # Creating a dict of dicts in order to access the losses per turn for each
+    # collimator. Dict contains name of coll, turn number and losses in that turn.
+    # -----------------------------------------------------------------------------
+    d = {}
+    for name in translator_dict.keys():
+        coll_name = []
+        for i, j in zip(coll_data, turn_data):
+            if i == name:
+                coll_name.append(j)
+        if len(coll_name) > 0:
+            c = Counter(coll_name)
+            d[name] = dict(c)
+
+    print ' '
+    print '>> Getting losses per turn for each collimator:'
 
 
-# ------------------------------------------------------------------------------
-# Losses per turn
-# ------------------------------------------------------------------------------
-turn_data = []
-start_line_t = get_impacts(infile, 9)
-for line in start_line_t:
-    turn_data.append(line)
-
-turns_dict = Counter(turn_data)
-turns_out = 'data_turn.txt'
-tt = []
-vv = []
-with open(turns_out, 'w') as h:
-    print >> h, '# Position Absorptions Percentage'
-    for t in range(1, turns + 2):
+    def get_coll(name, turn_data):
+        turn = []
+        value = []
         try:
-            turns_dict[str(t)]
-            tt.append(t)
-            vv.append(turns_dict[str(t)])
+            d[name]
+            outfile = name.translate(None, '.').lower() + '.txt'
+            with open(outfile, 'w') as g:
+                print >> g, '# Position Absorptions Percentage'
+                for t in range(1, turns + 2):
+                    try:
+                        d[name][str(t)]
+                        turn.append(t)
+                        value.append(d[name][str(t)])
+                    except KeyError:
+                        turn.append(t)
+                        value.append(0)
+                for i, j in zip(turn, np.cumsum(value[:0] + value[:-1]).tolist()):
+                    print >> g, i, j, (float(j) / simulated_particles) * 100
+                print 'File', outfile, 'created'
         except KeyError:
-            tt.append(t)
-            vv.append(0)
-    for i, j in zip(tt, np.cumsum(vv[:0] + vv[:-1]).tolist()):
-        print >> h, i, j, (float(j) / simulated_particles) * 100
+            print 'Collimator', name,  'not found or without losses'
 
-# -----------------------------------------------------------------------------
-# Creating a dict of dicts in order to access the losses per turn for each
-# collimator. Dict contains name of coll, turn number and losses in that turn.
-# -----------------------------------------------------------------------------
-d = {}
-for name in translator_dict.keys():
-    coll_name = []
-    for i, j in zip(coll_data, turn_data):
-        if i == name:
-            coll_name.append(j)
-    if len(coll_name) > 0:
-        c = Counter(coll_name)
-        d[name] = dict(c)
+    for col in translator_dict.keys():
+        get_coll(col, turn_data)
 
-print ' '
-print '>> Getting losses per turn for each collimator:'
-
-
-def get_coll(name, turn_data):
-    turn = []
-    value = []
-    try:
-        d[name]
-        outfile = name.translate(None, '.').lower() + '.txt'
-        with open(outfile, 'w') as g:
-            print >> g, '# Position Absorptions Percentage'
-            for t in range(1, turns + 2):
-                try:
-                    d[name][str(t)]
-                    turn.append(t)
-                    value.append(d[name][str(t)])
-                except KeyError:
-                    turn.append(t)
-                    value.append(0)
-            for i, j in zip(turn, np.cumsum(value[:0] + value[:-1]).tolist()):
-                print >> g, i, j, (float(j) / simulated_particles) * 100
-            print 'File', outfile, 'created'
-    except KeyError:
-        print 'Collimator', name,  'not found or without losses'
-
-for col in translator_dict.keys():
-    get_coll(col, turn_data)
+else:
+    print ' '
+    print '>> No losses in the collimation system'
 
 
 # ------------------------------------------------------------------------------
@@ -205,7 +210,7 @@ print ' '
 infile_4 = 'LPI_test.s'
 outfile_ap = 'aperture.txt'
 if os.stat(infile_4).st_size == 0:
-    print '>> No losses in the aperture'
+    sys.exit('>> No losses in the aperture')
 else:
     ap_data = []
     start_line = get_lpi(infile_4)
