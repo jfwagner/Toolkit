@@ -20,8 +20,9 @@ from util import GetData
 # contained in your "impacts_real.dat" (>1 if concatenated file)
 # ------------------------------------------------------------------------------
 sixtrack_particle_limit = 19968
+turns = int(sys.argv[2])
 simulated_particles = int(sys.argv[1]) * sixtrack_particle_limit
-beam = sys.argv[2]
+beam = sys.argv[3]
 
 print ' '
 print 'Number of simulated particles: ', simulated_particles, '(100 %)'
@@ -44,7 +45,7 @@ for i in range(len(names_2)):
 # ------------------------------------------------------------------------------
 # Associating name with position
 # ------------------------------------------------------------------------------
-if beam == 'B1': 
+if beam == 'B1':
     infile_3 = 'CollPositionsHL.b1.dat'
 elif beam == 'B2':
     infile_3 = 'CollPositions.b2.dat'
@@ -126,7 +127,7 @@ tt = []
 vv = []
 with open(turns_out, 'w') as h:
     print >> h, '# Position Absorptions Percentage'
-    for t in range(1, max(np.asarray(turn_data, dtype='int')) + 2):
+    for t in range(1, turns + 2):
         try:
             turns_dict[str(t)]
             tt.append(t)
@@ -139,7 +140,7 @@ with open(turns_out, 'w') as h:
 
 # -----------------------------------------------------------------------------
 # Creating a dict of dicts in order to access the losses per turn for each
-# collimator.
+# collimator. Dict contains name of coll, turn number and losses in that turn.
 # -----------------------------------------------------------------------------
 d = {}
 for name in translator_dict.keys():
@@ -150,7 +151,7 @@ for name in translator_dict.keys():
     if len(coll_name) > 0:
         c = Counter(coll_name)
         d[name] = dict(c)
-
+print d
 
 print ' '
 print '>> Getting losses per turn for each collimator:'
@@ -164,7 +165,7 @@ def get_coll(name, turn_data):
         outfile = name.translate(None, '.').lower() + '.txt'
         with open(outfile, 'w') as g:
             print >> g, '# Position Absorptions Percentage'
-            for t in range(1, max(np.asarray(turn_data, dtype='int')) + 2):
+            for t in range(1, turns + 2):
                 try:
                     d[name][str(t)]
                     turn.append(t)
@@ -180,28 +181,7 @@ def get_coll(name, turn_data):
 
 for col in translator_dict.keys():
     get_coll(col, turn_data)
-    
-# ------------------------------------------------------------------------------
-# Primaries
-# ------------------------------------------------------------------------------
-get_coll('TCP.D6L7.B1', turn_data)
-get_coll('TCP.B6L7.B1', turn_data)
 
-# ------------------------------------------------------------------------------
-# TCTs IP1
-# ------------------------------------------------------------------------------
-get_coll('TCTPH.4L1.B1', turn_data)
-get_coll('TCTPV.4L1.B1', turn_data)
-get_coll('TCTH.6L1.B1', turn_data)
-get_coll('TCTV.6L1.B1', turn_data)
-
-# ------------------------------------------------------------------------------
-# TCTs IP5
-# ------------------------------------------------------------------------------
-get_coll('TCTPH.4L5.B1', turn_data)
-get_coll('TCTPV.4L5.B1', turn_data)
-get_coll('TCTH.6L5.B1', turn_data)
-get_coll('TCTV.6L5.B1', turn_data)
 
 # ------------------------------------------------------------------------------
 # Extracting losses in the aperture
