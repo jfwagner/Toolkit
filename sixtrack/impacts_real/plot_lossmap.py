@@ -341,8 +341,13 @@ sorted_d = sorted(d.items(), key=lambda x: sum(x[1]), reverse=True)
 x_t = np.linspace(1, len(d[d.keys()[0]]), len(d[d.keys()[0]]))  # turns
 
 
-def plot_coll(coll_name, d, sorted_d, x_t):
-    print ">> Plotting '"+coll_name+"'"
+def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
+    print ">> Plotting '"+coll_name+"'",
+    if doStack:
+        print "(stacking)"
+    else:
+        print
+        
     number = 0
     for name in d.keys():
         if name.startswith(coll_name):
@@ -353,34 +358,49 @@ def plot_coll(coll_name, d, sorted_d, x_t):
         my_map = matplotlib.cm.terrain
     elif coll_name == 'TCT':
         my_map = matplotlib.cm.terrain
+    
     counter = 0
+    loss_cumulative = np.zeros_like(x_t)
     for i in range(0, int(len(sorted_d))):
         if sorted_d[i][0].startswith(coll_name):
             counter += 1
             cmap = my_map
-            plt.bar(x_t, sorted_d[i][1], label=str(sorted_d[i][0]),
+
+            plt.bar(x_t, sorted_d[i][1], bottom=loss_cumulative, label=str(sorted_d[i][0]),
                     color=cmap((float(counter)) / (1.7 * float(number))), linewidth=0)
-            plt.legend(bbox_to_anchor=(1, 0.5), loc='center left',
-                       prop={'size': 4}).get_frame().set_linewidth(0.5)
-            plt.xlabel('Turns')
-            plt.ylabel(r'Percentage of bunch lost')
-            plt.xlim([0, max(x_t)])
-            plt.title(title)
-            plt.yscale('log')
-            # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-            plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-            # plt.savefig(coll_name + '.png', dpi=1000)
-            fig.savefig(coll_name + '_log.png', dpi=DPI, bbox_inches='tight')
-            plt.savefig(coll_name + '_log.eps', format='eps', dpi=DPI)
-            plt.yscale('linear')
-            fig.savefig(coll_name + '_lin.png', dpi=DPI, bbox_inches='tight')
-            plt.savefig(coll_name + '_lin.eps', format='eps', dpi=DPI)
+
+            if doStack:
+                loss_cumulative += np.asarray(sorted_d[i][1])
+            
+    plt.legend(bbox_to_anchor=(1, 0.5), loc='center left',
+               prop={'size': 4}).get_frame().set_linewidth(0.5)
+    plt.xlabel('Turns')
+    plt.ylabel(r'Percentage of bunch lost')
+    plt.xlim([0, max(x_t)])
+    plt.title(title)
+    
+    basename = coll_name
+    if doStack:
+        basename += "_stack"
+        
+    plt.yscale('log')
+    # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+    # plt.savefig(coll_name + '.png', dpi=1000)
+    fig.savefig(basename + '_log.png', dpi=DPI, bbox_inches='tight')
+    plt.savefig(basename + '_log.eps', format='eps', dpi=DPI)
+    plt.yscale('linear')
+    fig.savefig(basename + '_lin.png', dpi=DPI, bbox_inches='tight')
+    plt.savefig(basename + '_lin.eps', format='eps', dpi=DPI)
     plt.clf()
 
 
-#plot_coll('TCP', d, sorted_d, x_t)
-#plot_coll('TCS', d, sorted_d, x_t)
-#plot_coll('TCT', d, sorted_d, x_t)
+plot_coll('TCP', d, sorted_d, x_t)
+plot_coll('TCP', d, sorted_d, x_t, True)
+plot_coll('TCS', d, sorted_d, x_t)
+plot_coll('TCS', d, sorted_d, x_t, True)
+plot_coll('TCT', d, sorted_d, x_t)
+plot_coll('TCT', d, sorted_d, x_t, True)
 
 
 # ------------------------------------------------------------------------------
@@ -445,7 +465,7 @@ for n in names:
 lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                 prop={'size': 4}).get_frame().set_linewidth(0.5)
 plt.xlabel('Turns')
-plt.ylabel(r'Percentage of bunch Lost')
+plt.ylabel(r'Percentage of bunch lost')
 plt.xlim([0, max(x_t)])
 plt.title(title)
 
