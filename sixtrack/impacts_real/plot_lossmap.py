@@ -55,8 +55,6 @@ fig = plt.figure()
 # ------------------------------------------------------------------------------
 # Function to deal with core and tail data files
 # ------------------------------------------------------------------------------
-
-
 def get_dist(data_file, dir_core, dir_tail, core_weight, tail_weight):
 
     if data_file == 'loss_maps.txt':
@@ -154,7 +152,7 @@ def plot_ip_labels(thedict, height, size):
                      weight='bold', va='bottom', ha='center', size=size, color='red')
 
 
-if len(sys.argv) == 5:
+if len(sys.argv) == 5: #core & tail
     x_coll, y_coll = get_dist('loss_maps.txt', dir_core, dir_tail, 0.95, 0.05)
     x_ap, y_ap = get_dist('aperture.txt', dir_core, dir_tail, 0.95, 0.05)
     plt.bar(x_coll, y_coll, align="center",
@@ -185,7 +183,7 @@ if len(sys.argv) == 5:
     plt.clf()
 
 
-elif len(sys.argv) == 3:
+elif len(sys.argv) == 3: #This folder
     files = glob.glob('*.txt')
     for txt in files:
         if txt == 'loss_maps.txt':
@@ -340,7 +338,6 @@ elif len(sys.argv) == 3:
 sorted_d = sorted(d.items(), key=lambda x: sum(x[1]), reverse=True)
 x_t = np.linspace(1, len(d[d.keys()[0]]), len(d[d.keys()[0]]))  # turns
 
-
 def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
     print ">> Plotting '"+coll_name+"'",
     if doStack:
@@ -371,7 +368,9 @@ def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
 
             if doStack:
                 loss_cumulative += np.asarray(sorted_d[i][1])
-            
+    if counter==0:
+        return
+    
     plt.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                prop={'size': 4}).get_frame().set_linewidth(0.5)
     plt.xlabel('Turns')
@@ -394,7 +393,6 @@ def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
     plt.savefig(basename + '_lin.eps', format='eps', dpi=DPI)
     plt.clf()
 
-
 plot_coll('TCP', d, sorted_d, x_t)
 plot_coll('TCP', d, sorted_d, x_t, True)
 plot_coll('TCS', d, sorted_d, x_t)
@@ -408,6 +406,7 @@ plot_coll('TCT', d, sorted_d, x_t, True)
 # ------------------------------------------------------------------------------
 print ">> Plotting all_colls"
 def get_cumulative_loss(sorted_d, name):
+    "Sum of the collimators starting with 'name'"
     cumulated = []
     d = defaultdict(list)
     for i in range(0, int(len(sorted_d))):
