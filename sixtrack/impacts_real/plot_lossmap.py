@@ -20,6 +20,9 @@ from matplotlib import rcParams
 
 from util import GetData
 
+DPI = 300
+#DPI = 1000
+
 if len(sys.argv) == 4:
     print ' '
     print '>> Working with core and tail'
@@ -175,8 +178,8 @@ if len(sys.argv) == 4:
         print '>> Please input B1 or B2 as first argument'
 
     plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-    plt.savefig('loss_map.png', dpi=1000)
-    plt.savefig('loss_map.eps', format='eps', dpi=1000)
+    plt.savefig('loss_map.png', dpi=DPI)
+    plt.savefig('loss_map.eps', format='eps', dpi=DPI)
     plt.clf()
 
 
@@ -246,8 +249,8 @@ elif len(sys.argv) == 2:
                 print '>> Please input B1 or B2 as first argument'
 
             plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
-            plt.savefig('loss_map.png', dpi=1000)
-            plt.savefig('loss_map.eps', format='eps', dpi=1000)
+            plt.savefig('loss_map.png', dpi=DPI)
+            plt.savefig('loss_map.eps', format='eps', dpi=DPI)
             plt.clf()
     
 
@@ -334,6 +337,7 @@ x_t = np.linspace(1, len(d[d.keys()[0]]), len(d[d.keys()[0]]))  # turns
 
 
 def plot_coll(coll_name, d, sorted_d, x_t):
+    print ">> Plotting '"+coll_name+"'"
     number = 0
     for name in d.keys():
         if name.startswith(coll_name):
@@ -360,19 +364,23 @@ def plot_coll(coll_name, d, sorted_d, x_t):
             # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
             plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
             # plt.savefig(coll_name + '.png', dpi=1000)
-            fig.savefig(coll_name + '.png', dpi=1000, bbox_inches='tight')
-            plt.savefig(coll_name + '.eps', format='eps', dpi=1000)
+            fig.savefig(coll_name + '_log.png', dpi=DPI, bbox_inches='tight')
+            plt.savefig(coll_name + '_log.eps', format='eps', dpi=DPI)
+            plt.yscale('linear')
+            fig.savefig(coll_name + '_lin.png', dpi=DPI, bbox_inches='tight')
+            plt.savefig(coll_name + '_lin.eps', format='eps', dpi=DPI)
     plt.clf()
 
 
-plot_coll('TCP', d, sorted_d, x_t)
-plot_coll('TCS', d, sorted_d, x_t)
-plot_coll('TCT', d, sorted_d, x_t)
+#plot_coll('TCP', d, sorted_d, x_t)
+#plot_coll('TCS', d, sorted_d, x_t)
+#plot_coll('TCT', d, sorted_d, x_t)
 
 
 # ------------------------------------------------------------------------------
 # Losses per collimator group
 # ------------------------------------------------------------------------------
+print ">> Plotting all_colls"
 def get_cumulative_loss(sorted_d, name):
     cumulated = []
     d = defaultdict(list)
@@ -384,6 +392,7 @@ def get_cumulative_loss(sorted_d, name):
         cumulated.append(sum(d[t]))
     return cumulated
 
+## all_colls
 names = ['tcp', 'tcs', 'tct', 'tcl']
 ax = fig.add_subplot(111)
 themap = matplotlib.cm.terrain
@@ -402,6 +411,38 @@ plt.xlabel('Turns')
 plt.ylabel(r'Percentage of Beam Lost (\%)')
 plt.xlim([0, max(x_t)])
 plt.yscale('log')
-fig.savefig('all_colls.png', dpi=1000, bbox_inches='tight')
-plt.savefig('all_colls.eps', format='eps', dpi=1000)
+fig.savefig('all_colls_log.png', dpi=DPI, bbox_inches='tight')
+plt.savefig('all_colls_log.eps', format='eps', dpi=DPI)
+plt.yscale('linear')
+fig.savefig('all_colls_lin.png', dpi=DPI, bbox_inches='tight')
+plt.savefig('all_colls_lin.eps', format='eps', dpi=DPI)
+plt.clf()
+
+## all_colls (STACKED)
+names = ['tcl', 'tct', 'tcs', 'tcp']
+ax = fig.add_subplot(111)
+themap = matplotlib.cm.terrain
+
+number = 0
+all_colls_cumulative = np.zeros_like(x_t)
+for n in names:
+    number += 1
+    tc = np.asarray(get_cumulative_loss(sorted_d, n.upper()))
+    if sum(tc) != 0:
+        ax.bar(x_t, tc, bottom=all_colls_cumulative, label=n.upper(),
+               color=themap(float(number) / (1.5 * float(len(names)))),
+               linewidth=0, width=1.0)
+        all_colls_cumulative += np.asarray(tc)
+        
+lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
+                prop={'size': 4}).get_frame().set_linewidth(0.5)
+plt.xlabel('Turns')
+plt.ylabel(r'Percentage of Beam Lost (\%)')
+plt.xlim([0, max(x_t)])
+plt.yscale('log')
+fig.savefig('all_colls_cumulative_log.png', dpi=DPI, bbox_inches='tight')
+plt.savefig('all_colls_cumulative_log.eps', format='eps', dpi=DPI)
+plt.yscale('linear')
+fig.savefig('all_colls_cumulative_lin.png', dpi=DPI, bbox_inches='tight')
+plt.savefig('all_colls_cumulative_lin.eps', format='eps', dpi=DPI)
 plt.clf()
