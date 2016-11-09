@@ -148,16 +148,17 @@ def plot_ip_labels(thedict, height, size):
                      weight='bold', va='bottom', ha='center', size=size, color='red')
 
 
-if len(sys.argv) == 4:
+if len(sys.argv) == 5:
     x_coll, y_coll = get_dist('loss_maps.txt', dir_core, dir_tail, 0.95, 0.05)
     x_ap, y_ap = get_dist('aperture.txt', dir_core, dir_tail, 0.95, 0.05)
     plt.bar(x_coll, y_coll, align="center",
-            linewidth=0, width=60, color="black", label="Collimation: " + str(round(np.sum(y_coll), 2)) + " \%")
+            linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(np.sum(y_coll))) + " \%")
     plt.bar(x_ap, y_ap, color="green",
                 align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
     plt.xlabel("Position (m)")
-    plt.ylabel("Number of Protons Lost")
+    plt.ylabel(r'Percentage of bunch lost (\%)')
     plt.xlim([0, 26658.883])
+    plt.title(title)
     plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
     ax1.set_yscale('log')
     ax1.set_axisbelow(True)
@@ -178,7 +179,7 @@ if len(sys.argv) == 4:
     plt.clf()
 
 
-elif len(sys.argv) == 2:
+elif len(sys.argv) == 4:
     files = glob.glob('*.txt')
     for txt in files:
         if txt == 'loss_maps.txt':
@@ -203,32 +204,35 @@ elif len(sys.argv) == 2:
     else:
         if os.path.exists('loss_maps.txt') and os.path.exists('aperture.txt') == False:
             plt.bar(x_coll, y_coll, align="center",
-                    linewidth=0, width=60, color="black", label="Collimation: " + str(round(np.sum(y_coll), 2)) + " \%")
+                    linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(np.sum(y_coll)))  + " \%")
             plt.xlabel("Position (m)")
-            plt.ylabel("Number of Protons Lost")
+            plt.ylabel(r'Percentage of bunch lost (\%)')
             plt.xlim([0, 26658.883])
             plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
             ax1.set_yscale('log')
+            plt.title(title)
             ax1.set_axisbelow(True)
             ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
         elif os.path.exists('aperture.txt') and os.path.exists('loss_maps.txt') == False:
             plt.bar(x_ap, y_ap, color="green",
                         align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
             plt.xlabel("Position (m)")
-            plt.ylabel("Number of Protons Lost")
+            plt.ylabel(r'Percentage of bunch lost (\%)')
             plt.xlim([0, 26658.883])
+            plt.title(title)
             plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
             ax1.set_yscale('log')
             ax1.set_axisbelow(True)
             ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
         elif os.path.exists('aperture.txt') and os.path.exists('loss_maps.txt'):
             plt.bar(x_coll, y_coll, align="center",
-                    linewidth=0, width=60, color="black", label="Collimation: " + str(round(np.sum(y_coll), 2)) + " \%")
+                    linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(np.sum(y_coll)))  + " \%")
             plt.bar(x_ap, y_ap, color="green",
                         align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
             plt.xlabel("Position (m)")
-            plt.ylabel("Number of Protons Lost")
+            plt.ylabel(r'Percentage of bunch lost (\%)')
             plt.xlim([0, 26658.883])
+            plt.title(title)
             plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
             ax1.set_yscale('log')
             ax1.set_axisbelow(True)
@@ -268,7 +272,7 @@ def get_turns(infile):
         name = 'Collimation system'
     return x, y, name
 
-if len(sys.argv) == 4:
+if len(sys.argv) == 5:
     files_ccoll = glob.glob(dir_core + '/t*.txt')
     print ' '
     print '>>', len(files_ccoll), 'collimator files have been found in ' + dir_core
@@ -314,7 +318,7 @@ if len(sys.argv) == 4:
             d[k] = np.asarray(l) * 0.05
 
 
-elif len(sys.argv) == 2:
+elif len(sys.argv) == 4:
     files_coll = glob.glob('t*.txt')
     d = {}
     for txt in files_coll:
@@ -352,8 +356,9 @@ def plot_coll(coll_name, d, sorted_d, x_t):
             plt.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                        prop={'size': 4}).get_frame().set_linewidth(0.5)
             plt.xlabel('Turns')
-            plt.ylabel(r'Percentage of Beam Lost (\%)')
+            plt.ylabel(r'Percentage of bunch lost (\%)')
             plt.xlim([0, max(x_t)])
+            plt.title(title)
             plt.yscale('log')
             # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
             plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
@@ -397,9 +402,10 @@ for n in names:
 lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                 prop={'size': 4}).get_frame().set_linewidth(0.5)
 plt.xlabel('Turns')
-plt.ylabel(r'Percentage of Beam Lost (\%)')
+plt.ylabel(r'Percentage of bunch lost (\%)')
 plt.xlim([0, max(x_t)])
 plt.yscale('log')
+plt.title(title)
 fig.savefig('all_colls.png', dpi=1000, bbox_inches='tight')
 plt.savefig('all_colls.eps', format='eps', dpi=1000)
 plt.clf()
