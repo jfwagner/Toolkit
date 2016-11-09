@@ -232,3 +232,22 @@ else:
 
 num_lines_ap = sum(1 for line in open('LPI_test.s'))
 print '>> Number of losses in the aperture: ', num_lines_ap,  '(' + str(round((float(num_lines_ap - 1) / simulated_particles) * 100, rounding)) + ' %)'
+
+### Aperture losses as function of turn
+turns_ap_out = 'data_turn_aperture.txt'
+turns_ap_losses = np.zeros(turns+1)
+turns_ap_inf = open(infile_4,'r')
+for line in turns_ap_inf.xreadlines():
+    if is_header(line):
+        continue
+    ls = line.strip('\n').split()
+    turns_ap_losses[int(ls[1])]+=1
+turns_ap_inf.close()
+
+turns_ap_outf = open(turns_ap_out,'w')
+turns_ap_outf.write('# Position Absorptions Percentage\n')
+lossSum = 0
+for t in xrange(1,turns+1):
+    lossSum += turns_ap_losses[t]
+    turns_ap_outf.write("%i %i %f\n" %(t,lossSum, (float(lossSum)/simulated_particles) * 100 ) )
+turns_ap_outf.close()
