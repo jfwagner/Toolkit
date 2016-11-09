@@ -21,16 +21,17 @@ from matplotlib import rcParams
 from util import GetData
 
 beam = sys.argv[1]
+title = sys.argv[2]
 
-if len(sys.argv) == 4:
+if len(sys.argv) == 5:
     print ' '
     print '>> Working with core and tail'
-    dir_core = sys.argv[2]
-    dir_tail = sys.argv[3]
-elif len(sys.argv) == 3:
+    dir_core = sys.argv[3]
+    dir_tail = sys.argv[4]
+elif len(sys.argv) == 4:
     print ' '
     sys.exit('>> Tail directory missing. Aborting.')
-elif len(sys.argv) == 2:
+elif len(sys.argv) == 3:
     print ' '
     print '>> Working in current directory'
 
