@@ -17,6 +17,11 @@ import numpy as np
 
 from util import GetData
 
+if len(sys.argv) != 4:
+    print "Usage: get_losses.py jobs turns {B1|B2}"
+    print "Got: ", sys.argv
+    exit(1)
+    
 # ------------------------------------------------------------------------------
 # Specify how many runs of 19968 particles (current limit in SixTrack) are
 # contained in your "impacts_real.dat" (>1 if concatenated file)
@@ -51,6 +56,9 @@ if beam == 'B1':
     infile_3 = 'CollPositionsHL.b1.dat'
 elif beam == 'B2':
     infile_3 = 'CollPositions.b2.dat'
+else:
+    print "beam must be B1 or B2, got", beam
+    exit(1)
 
 get_3 = GetData(infile_3)
 data_3 = get_3.data_column(dtype='string')
