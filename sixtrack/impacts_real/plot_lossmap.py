@@ -20,20 +20,23 @@ from matplotlib import rcParams
 
 from util import GetData
 
-beam = sys.argv[1]
-
 if len(sys.argv) == 4:
     print ' '
     print '>> Working with core and tail'
     dir_core = sys.argv[2]
     dir_tail = sys.argv[3]
-elif len(sys.argv) == 3:
-    print ' '
-    sys.exit('>> Tail directory missing. Aborting.')
+#elif len(sys.argv) == 3:
+#    print ' '
+#    sys.exit('>> Tail directory missing. Aborting.')
 elif len(sys.argv) == 2:
     print ' '
     print '>> Working in current directory'
+else:
+    print "USAGE: plot_lossmap.py {B1|B2} (core_dir tail_dir)"
+    exit(1)
 
+beam = sys.argv[1]
+    
 # ------------------------------------------------------------------------------
 # Plot characteristics
 # ------------------------------------------------------------------------------
