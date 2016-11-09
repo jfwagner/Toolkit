@@ -260,7 +260,7 @@ elif len(sys.argv) == 3: #This folder
 # ------------------------------------------------------------------------------
 # Losses per turn
 # ------------------------------------------------------------------------------
-ax2 = fig.add_subplot(111)
+#ax2 = fig.add_subplot(111)
 
 
 def get_turns(infile):
@@ -274,6 +274,8 @@ def get_turns(infile):
         name = txt.replace('b2.txt', '').upper()
     elif infile == 'data_turn.txt':
         name = 'Collimation system'
+    elif 'aperture' in infile:
+        name = "Aperture"
     return x, y, name
 
 if len(sys.argv) == 5:
@@ -321,6 +323,11 @@ if len(sys.argv) == 5:
         for k, l in zip(d_tail.keys(), d_tail.values()):
             d[k] = np.asarray(l) * 0.05
 
+    #Aperture
+    xc,yc,namec = get_turns(dir_core + '/data_turn_aperture.txt')
+    xt,yt,namet = get_turns(dir_tail + '/data_turn_aperture.txt')
+    x_ap = xc
+    y_ap = np.asarray(yc)*0.95 + np.asarray(yt)*0.05
 
 elif len(sys.argv) == 3:
     files_coll = glob.glob('t*.txt')
@@ -328,6 +335,8 @@ elif len(sys.argv) == 3:
     for txt in files_coll:
         x, y, name = get_turns(txt)
         d[name] = y
+    #Aperture
+    x_ap,y_ap,name = get_turns('data_turn_aperture.txt')
 
 # After this part, a dictionary named "d" must contain the information of losses
 #  per turn for each collimator.
@@ -400,6 +409,29 @@ plot_coll('TCS', d, sorted_d, x_t, True)
 plot_coll('TCT', d, sorted_d, x_t)
 plot_coll('TCT', d, sorted_d, x_t, True)
 
+# --------------
+# Aperture losses
+# --------------
+if max(y_ap) > 0: #Skip if no data to plot
+    plt.bar(x_ap,y_ap, linewidth=0,width=1.0);
+    
+    plt.xlabel("Turns")
+    plt.ylabel("Percentage of bunch lost")
+    plt.xlim([0,max(x_ap)])
+    
+    basename="aperture"
+    plt.yscale('log')
+    # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+    # plt.savefig(coll_name + '.png', dpi=1000)
+    fig.savefig(basename + '_log.png', dpi=DPI, bbox_inches='tight')
+    plt.savefig(basename + '_log.eps', format='eps', dpi=DPI)
+    plt.yscale('linear')
+    fig.savefig(basename + '_lin.png', dpi=DPI, bbox_inches='tight')
+    plt.savefig(basename + '_lin.eps', format='eps', dpi=DPI)
+    plt.clf()
+else:
+    print ">> No aperture losses found."
 
 # ------------------------------------------------------------------------------
 # Losses per collimator group
@@ -429,6 +461,11 @@ for n in names:
     if sum(tc) != 0:
         ax.bar(x_t, tc, label=n.upper(),
                color=themap(float(number) / (1.5 * float(len(names)))), linewidth=0)
+if max(y_ap) > 0:
+    number +=1
+    ax.bar(x_ap,y_ap, label="Aperture",
+           color=themap(float(number) / (1.5 * float(len(names)))),
+           linewidth=0);
 
 lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                 prop={'size': 4}).get_frame().set_linewidth(0.5)
@@ -460,7 +497,11 @@ for n in names:
                color=themap(float(number) / (1.5 * float(len(names)))),
                linewidth=0, width=1.0)
         all_colls_cumulative += np.asarray(tc)
-        
+if max(y_ap) > 0:
+    number +=1
+    ax.bar(x_ap,y_ap, label="Aperture", bottom=all_colls_cumulative,
+           color=themap(float(number) / (1.5 * float(len(names)))),
+           linewidth=0, width=1.0);
 lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                 prop={'size': 4}).get_frame().set_linewidth(0.5)
 plt.xlabel('Turns')

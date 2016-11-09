@@ -218,7 +218,7 @@ print ' '
 infile_4 = 'LPI_test.s'
 outfile_ap = 'aperture.txt'
 if os.stat(infile_4).st_size == 0:
-    sys.exit('>> No losses in the aperture')
+    print '>> No losses in the aperture'
 else:
     ap_data = []
     start_line = get_lpi(infile_4)
@@ -230,8 +230,8 @@ else:
         for i, j in zip(lpi_dict.keys(), lpi_dict.values()):
             print >> g, i, j, (float(j) / simulated_particles) * 100
 
-num_lines_ap = sum(1 for line in open('LPI_test.s'))
-print '>> Number of losses in the aperture: ', num_lines_ap,  '(' + str(round((float(num_lines_ap - 1) / simulated_particles) * 100, rounding)) + ' %)'
+    num_lines_ap = sum(1 for line in open('LPI_test.s'))
+    print '>> Number of losses in the aperture: ', num_lines_ap,  '(' + str(round((float(num_lines_ap - 1) / simulated_particles) * 100, rounding)) + ' %)'
 
 ### Aperture losses as function of turn
 turns_ap_out = 'data_turn_aperture.txt'
