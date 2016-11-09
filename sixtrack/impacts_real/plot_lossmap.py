@@ -23,12 +23,14 @@ from util import GetData
 beam = sys.argv[1]
 title = sys.argv[2]
 
+print len(sys.argv)
+
 if len(sys.argv) == 5:
     print ' '
     print '>> Working with core and tail'
     dir_core = sys.argv[3]
     dir_tail = sys.argv[4]
-elif len(sys.argv) == 4:
+elif len(sys.argv) == 2:
     print ' '
     sys.exit('>> Tail directory missing. Aborting.')
 elif len(sys.argv) == 3:
@@ -156,10 +158,10 @@ if len(sys.argv) == 5:
     plt.bar(x_ap, y_ap, color="green",
                 align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
     plt.xlabel("Position (m)")
-    plt.ylabel(r'Percentage of bunch lost (\%)')
+    plt.ylabel(r'Percentage of bunch lost')
     plt.xlim([0, 26658.883])
     plt.title(title)
-    plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
+    plt.legend(loc='best', prop={'size': 5}).get_frame().set_linewidth(0.5)
     ax1.set_yscale('log')
     ax1.set_axisbelow(True)
     ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
@@ -179,7 +181,7 @@ if len(sys.argv) == 5:
     plt.clf()
 
 
-elif len(sys.argv) == 4:
+elif len(sys.argv) == 3:
     files = glob.glob('*.txt')
     for txt in files:
         if txt == 'loss_maps.txt':
@@ -206,9 +208,9 @@ elif len(sys.argv) == 4:
             plt.bar(x_coll, y_coll, align="center",
                     linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(np.sum(y_coll)))  + " \%")
             plt.xlabel("Position (m)")
-            plt.ylabel(r'Percentage of bunch lost (\%)')
+            plt.ylabel(r'Percentage of bunch lost')
             plt.xlim([0, 26658.883])
-            plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
+            plt.legend(loc='best', prop={'size': 5}).get_frame().set_linewidth(0.5)
             ax1.set_yscale('log')
             plt.title(title)
             ax1.set_axisbelow(True)
@@ -217,10 +219,10 @@ elif len(sys.argv) == 4:
             plt.bar(x_ap, y_ap, color="green",
                         align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
             plt.xlabel("Position (m)")
-            plt.ylabel(r'Percentage of bunch lost (\%)')
+            plt.ylabel(r'Percentage of bunch lost')
             plt.xlim([0, 26658.883])
             plt.title(title)
-            plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
+            plt.legend(loc='best', prop={'size': 5}).get_frame().set_linewidth(0.5)
             ax1.set_yscale('log')
             ax1.set_axisbelow(True)
             ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
@@ -230,10 +232,10 @@ elif len(sys.argv) == 4:
             plt.bar(x_ap, y_ap, color="green",
                         align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
             plt.xlabel("Position (m)")
-            plt.ylabel(r'Percentage of bunch lost (\%)')
+            plt.ylabel(r'Percentage of bunch lost')
             plt.xlim([0, 26658.883])
             plt.title(title)
-            plt.legend(loc='upper left', prop={'size': 5}).get_frame().set_linewidth(0.5)
+            plt.legend(loc='best', prop={'size': 5}).get_frame().set_linewidth(0.5)
             ax1.set_yscale('log')
             ax1.set_axisbelow(True)
             ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
@@ -318,7 +320,7 @@ if len(sys.argv) == 5:
             d[k] = np.asarray(l) * 0.05
 
 
-elif len(sys.argv) == 4:
+elif len(sys.argv) == 3:
     files_coll = glob.glob('t*.txt')
     d = {}
     for txt in files_coll:
@@ -356,7 +358,7 @@ def plot_coll(coll_name, d, sorted_d, x_t):
             plt.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                        prop={'size': 4}).get_frame().set_linewidth(0.5)
             plt.xlabel('Turns')
-            plt.ylabel(r'Percentage of bunch lost (\%)')
+            plt.ylabel(r'Percentage of bunch lost')
             plt.xlim([0, max(x_t)])
             plt.title(title)
             plt.yscale('log')
@@ -402,7 +404,7 @@ for n in names:
 lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                 prop={'size': 4}).get_frame().set_linewidth(0.5)
 plt.xlabel('Turns')
-plt.ylabel(r'Percentage of bunch lost (\%)')
+plt.ylabel(r'Percentage of bunch lost')
 plt.xlim([0, max(x_t)])
 plt.yscale('log')
 plt.title(title)
