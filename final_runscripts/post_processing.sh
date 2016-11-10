@@ -1,11 +1,20 @@
+#!/usr/bin/env bash
+
+#Stop on error
+set -e
+
 export beam=$1
 export turns=$2
 cd core
+
+set +e #it's OK to fail deleting files
 rm *.txt
 rm *.eps
 rm *.png
 rm *.dat
 rm *.s
+set -e
+
 find -maxdepth 2 -mindepth 1 -type d -empty -exec echo {} is empty. \;
 empty=$(find -maxdepth 2 -mindepth 1 -type d -empty| wc -l)
 total=$(find . -mindepth 1 -type d | wc -l)
@@ -24,11 +33,15 @@ cp ../../commons/CollPositions*.dat .
 get_losses.py $full $turns $beam
 plot_lossmap.py $beam 'ATLAS B1, Phase jump'
 cd ../tail
+
+set +e
 rm *.txt
 rm *.eps
 rm *.png
 rm *.dat
 rm *.s
+set -e
+
 find -maxdepth 2 -mindepth 1 -type d -empty -exec echo {} is empty. \;
 empty=$(find -maxdepth 2 -mindepth 1 -type d -empty| wc -l)
 total=$(find . -mindepth 1 -type d | wc -l)
