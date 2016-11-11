@@ -129,7 +129,6 @@ if failTurn !=0:
             if not name in baseLossPerColl.keys():
                 baseLossPerColl[name] = 0
             if int(ls[9]) <= failTurn:
-                print ls[9]
                 baseLossAllColl += 1
                 baseLossPerColl[name] +=1
     collFile.close()

@@ -74,4 +74,8 @@ plot_lossmap.py $beam 'ATLAS B1, Phase jump'
 
 #### OVERALL ####
 cd ..
+set +e #it's OK to fail deleting files
+rm *.eps
+rm *.png
+set -e
 plot_lossmap.py $beam 'ATLAS B1, Phase jump' core tail

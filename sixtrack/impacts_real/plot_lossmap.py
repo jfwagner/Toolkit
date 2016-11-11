@@ -24,8 +24,6 @@ from util import GetData
 DPI = 300
 #DPI = 1000
 
-print len(sys.argv)
-
 if len(sys.argv) == 5:
     print ' '
     print '>> Working with core and tail'
@@ -53,6 +51,7 @@ rcParams['legend.frameon'] = 'True'
 fig = plt.figure()
 
 ## Get the normalization
+failTurn = 0
 if len(sys.argv)==5:
     norm_core = {}
     norm_file = open(os.path.join(dir_core,"normalization.txt"),'r')
@@ -66,6 +65,9 @@ if len(sys.argv)==5:
         ls = line.split("=")
         norm_tail[ls[0]] = ls[1][:-1]
     norm_file.close()
+
+    assert norm_core["failTurn"]==norm_tail["failTurn"]
+    failTurn = int(norm_core["failTurn"])
 elif len(sys.argv)==3:
     norm = {}
     norm_file = open("normalization.txt",'r')
@@ -73,6 +75,8 @@ elif len(sys.argv)==3:
         ls = line.split("=")
         norm[ls[0]] = ls[1][:-1]
     norm_file.close()
+
+    failTurn = int(norm["failTurn"])
 
 # ------------------------------------------------------------------------------
 # Function to deal with core and tail data files
@@ -394,7 +398,7 @@ def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
             counter += 1
             cmap = my_map
 
-            plt.bar(x_t, sorted_d[i][1], bottom=loss_cumulative, label=str(sorted_d[i][0]),
+            plt.bar(x_t, sorted_d[i][1], bottom=loss_cumulative, label=str(sorted_d[i][0]),width=1.0,
                     color=cmap((float(counter)) / (1.7 * float(number))), linewidth=0)
 
             if doStack:
@@ -406,7 +410,7 @@ def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
                prop={'size': 4}).get_frame().set_linewidth(0.5)
     plt.xlabel('Turns')
     plt.ylabel(r'Percentage of bunch lost')
-    plt.xlim([0, max(x_t)])
+    plt.xlim([failTurn, max(x_t)])
     plt.title(title)
     
     basename = coll_name
@@ -420,26 +424,30 @@ def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
     fig.savefig(basename + '_log.png', dpi=DPI, bbox_inches='tight')
     plt.savefig(basename + '_log.eps', format='eps', dpi=DPI)
     plt.yscale('linear')
+    ymin,ymax=plt.ylim()
+    plt.ylim((0.0,ymax))
     fig.savefig(basename + '_lin.png', dpi=DPI, bbox_inches='tight')
     plt.savefig(basename + '_lin.eps', format='eps', dpi=DPI)
     plt.clf()
 
-plot_coll('TCP', d, sorted_d, x_t)
-plot_coll('TCP', d, sorted_d, x_t, True)
-plot_coll('TCS', d, sorted_d, x_t)
-plot_coll('TCS', d, sorted_d, x_t, True)
-plot_coll('TCT', d, sorted_d, x_t)
-plot_coll('TCT', d, sorted_d, x_t, True)
+#Plots that take a lot of time, but are not really all that usefull...
+#plot_coll('TCP', d, sorted_d, x_t)
+#plot_coll('TCP', d, sorted_d, x_t, True)
+#plot_coll('TCS', d, sorted_d, x_t)
+#plot_coll('TCS', d, sorted_d, x_t, True)
+#plot_coll('TCT', d, sorted_d, x_t)
+#plot_coll('TCT', d, sorted_d, x_t, True)
 
 # --------------
 # Aperture losses
 # --------------
 if max(y_ap) > 0: #Skip if no data to plot
     plt.bar(x_ap,y_ap, linewidth=0,width=1.0);
-    
+
+    plt.title(title)
     plt.xlabel("Turns")
     plt.ylabel("Percentage of bunch lost")
-    plt.xlim([0,max(x_ap)])
+    plt.xlim([failTurn,max(x_ap)])
     
     basename="aperture"
     plt.yscale('log')
@@ -449,6 +457,8 @@ if max(y_ap) > 0: #Skip if no data to plot
     fig.savefig(basename + '_log.png', dpi=DPI, bbox_inches='tight')
     plt.savefig(basename + '_log.eps', format='eps', dpi=DPI)
     plt.yscale('linear')
+    ymin,ymax=plt.ylim()
+    plt.ylim((0.0,ymax))
     fig.savefig(basename + '_lin.png', dpi=DPI, bbox_inches='tight')
     plt.savefig(basename + '_lin.eps', format='eps', dpi=DPI)
     plt.clf()
@@ -481,11 +491,11 @@ for n in names:
     number += 1
     tc = get_cumulative_loss(sorted_d, n.upper())
     if sum(tc) != 0:
-        ax.bar(x_t, tc, label=n.upper(),
+        ax.bar(x_t, tc, label=n.upper(),width=1.0,
                color=themap(float(number) / (1.5 * float(len(names)))), linewidth=0)
 if max(y_ap) > 0:
     number +=1
-    ax.bar(x_ap,y_ap, label="Aperture",
+    ax.bar(x_ap,y_ap, label="Aperture",width=1.0,
            color=themap(float(number) / (1.5 * float(len(names)))),
            linewidth=0);
 
@@ -493,13 +503,15 @@ lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                 prop={'size': 4}).get_frame().set_linewidth(0.5)
 plt.xlabel('Turns')
 plt.ylabel(r'Percentage of bunch lost')
-plt.xlim([0, max(x_t)])
+plt.xlim([failTurn, max(x_t)])
 plt.title(title)
 
 plt.yscale('log')
 fig.savefig('all_colls_log.png', dpi=DPI, bbox_inches='tight')
 plt.savefig('all_colls_log.eps', format='eps', dpi=DPI)
 plt.yscale('linear')
+ymin,ymax=plt.ylim()
+plt.ylim((0.0,ymax))
 fig.savefig('all_colls_lin.png', dpi=DPI, bbox_inches='tight')
 plt.savefig('all_colls_lin.eps', format='eps', dpi=DPI)
 plt.clf()
@@ -528,15 +540,15 @@ lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
                 prop={'size': 4}).get_frame().set_linewidth(0.5)
 plt.xlabel('Turns')
 plt.ylabel(r'Percentage of bunch lost')
-plt.xlim([0, max(x_t)])
+plt.xlim([failTurn, max(x_t)])
 plt.title(title)
 
 plt.yscale('log')
 fig.savefig('all_colls_cumulative_log.png', dpi=DPI, bbox_inches='tight')
 plt.savefig('all_colls_cumulative_log.eps', format='eps', dpi=DPI)
 plt.yscale('linear')
+ymin,ymax=plt.ylim()
+plt.ylim((0.0,ymax))
 fig.savefig('all_colls_cumulative_lin.png', dpi=DPI, bbox_inches='tight')
 plt.savefig('all_colls_cumulative_lin.eps', format='eps', dpi=DPI)
-fig.savefig('all_colls.png', dpi=1000, bbox_inches='tight')
-plt.savefig('all_colls.eps', format='eps', dpi=1000)
 plt.clf()
