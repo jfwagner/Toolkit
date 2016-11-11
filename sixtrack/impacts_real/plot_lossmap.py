@@ -24,20 +24,21 @@ from util import GetData
 DPI = 300
 #DPI = 1000
 
-if len(sys.argv) == 5:
+if len(sys.argv) == 6:
     print ' '
     print '>> Working with core and tail'
-    dir_core = sys.argv[3]
-    dir_tail = sys.argv[4]
-elif len(sys.argv) == 3:
+    dir_core = sys.argv[4]
+    dir_tail = sys.argv[5]
+elif len(sys.argv) == 4:
     print ' '
     print '>> Working in current directory'
 else:
-    print "USAGE: plot_lossmap.py {B1|B2} title (core_dir tail_dir)"
+    print "USAGE: plot_lossmap.py {B1|B2} title getLossTurn (core_dir tail_dir)"
     exit(1)
 
 beam  = sys.argv[1]
 title = sys.argv[2]
+getLossTurn=int(sys.argv[3])
 
 # ------------------------------------------------------------------------------
 # Plot characteristics
@@ -52,7 +53,7 @@ fig = plt.figure()
 
 ## Get the normalization
 failTurn = 0
-if len(sys.argv)==5:
+if len(sys.argv)==6:
     norm_core = {}
     norm_file = open(os.path.join(dir_core,"normalization.txt"),'r')
     for line in norm_file.xreadlines():
@@ -68,7 +69,7 @@ if len(sys.argv)==5:
 
     assert norm_core["failTurn"]==norm_tail["failTurn"]
     failTurn = int(norm_core["failTurn"])
-elif len(sys.argv)==3:
+elif len(sys.argv)==4:
     norm = {}
     norm_file = open("normalization.txt",'r')
     for line in norm_file.xreadlines():
@@ -178,7 +179,7 @@ def plot_ip_labels(thedict, height, size):
                      weight='bold', va='bottom', ha='center', size=size, color='red')
 
 
-if len(sys.argv) == 5: #core & tail
+if len(sys.argv) == 6: #core & tail
     x_coll, y_coll = get_dist('loss_maps.txt', dir_core, dir_tail, 0.95, 0.05)
     x_ap, y_ap = get_dist('aperture.txt', dir_core, dir_tail, 0.95, 0.05)
     plt.bar(x_coll, y_coll, align="center",
@@ -209,7 +210,7 @@ if len(sys.argv) == 5: #core & tail
     plt.clf()
 
 
-elif len(sys.argv) == 3: #This folder
+elif len(sys.argv) == 4: #This folder
     files = glob.glob('*.txt')
     for txt in files:
         if txt == 'loss_maps.txt':
@@ -230,7 +231,8 @@ elif len(sys.argv) == 3: #This folder
     # Plotting lossmaps
     # ------------------------------------------------------------------------------
     if os.path.exists('loss_maps.txt') == False and os.path.exists('aperture.txt') == False:
-        sys.exit('>> No losses')
+        print '>> No losses, plot_lossmap.py exiting.'
+        exit(0)
     else:
         if os.path.exists('loss_maps.txt') and os.path.exists('aperture.txt') == False:
             plt.bar(x_coll, y_coll, align="center",
@@ -304,7 +306,7 @@ def get_turns(infile):
         name = "Aperture"
     return x, y, name
 
-if len(sys.argv) == 5:
+if len(sys.argv) == 6:
     files_ccoll = glob.glob(dir_core + '/t*.txt')
     print ' '
     print '>>', len(files_ccoll), 'collimator files have been found in ' + dir_core
@@ -313,7 +315,6 @@ if len(sys.argv) == 5:
         for txt in files_ccoll:
             xc, yc, namec = get_turns(txt)
             d_core[namec.replace(dir_core.upper() + '/', '')] = yc
-
     files_tcoll = glob.glob(dir_tail + '/t*.txt')
     print ' '
     print '>>', len(files_tcoll), 'collimator files have been found in ' + dir_tail
@@ -330,17 +331,14 @@ if len(sys.argv) == 5:
             for k, l in zip(d_tail.keys(), d_tail.values()):
                 if i == k:
                     d[i] = np.asarray(j) * 0.95 + np.asarray(l) * 0.05
-
-        for i, j in zip(d.keys(), d.values()):
-            for k, l in zip(d_core.keys(), d_core.values()):
-                if i != k:
-                    d[k] = np.asarray(l) * 0.95
-
-        for i, j in zip(d.keys(), d.values()):
-            for k, l in zip(d_tail.keys(), d_tail.values()):
-                if i != k:
-                    d[k] = np.asarray(l) * 0.05
-
+                    
+        for k, l in zip(d_core.keys(), d_core.values()):
+            if not k in d.keys():
+                d[k] = np.asarray(l) * 0.95
+        for k, l in zip(d_tail.keys(), d_tail.values()):
+            if not k in d.keys():
+                d[k] = np.asarray(l) * 0.05
+                
     elif len(files_ccoll) != 0 and len(files_tcoll) == 0:
         for k, l in zip(d_core.keys(), d_core.values()):
             d[k] = np.asarray(l) * 0.95
@@ -354,8 +352,14 @@ if len(sys.argv) == 5:
     xt,yt,namet = get_turns(dir_tail + '/data_turn_aperture.txt')
     x_ap = xc
     y_ap = np.asarray(yc)*0.95 + np.asarray(yt)*0.05
-
-elif len(sys.argv) == 3:
+    
+    # ap_outfile = open("data_turn_aperture_weighted.txt",'w')
+    # ap_outfile.write("# Turn lossfraction[\%]\n")
+    # for (i_x_ap,i_y_ap) in zip(x_ap,y_ap):
+    #     ap_outfile.write(str(i_x_ap)+ " " + str(i_x_ap)+"\n")
+    # ap_outfile.close()
+    
+elif len(sys.argv) == 4:
     files_coll = glob.glob('t*.txt')
     d = {}
     for txt in files_coll:
@@ -431,12 +435,12 @@ def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
     plt.clf()
 
 #Plots that take a lot of time, but are not really all that usefull...
-#plot_coll('TCP', d, sorted_d, x_t)
-#plot_coll('TCP', d, sorted_d, x_t, True)
-#plot_coll('TCS', d, sorted_d, x_t)
-#plot_coll('TCS', d, sorted_d, x_t, True)
-#plot_coll('TCT', d, sorted_d, x_t)
-#plot_coll('TCT', d, sorted_d, x_t, True)
+plot_coll('TCP', d, sorted_d, x_t)
+plot_coll('TCP', d, sorted_d, x_t, True)
+plot_coll('TCS', d, sorted_d, x_t)
+plot_coll('TCS', d, sorted_d, x_t, True)
+plot_coll('TCT', d, sorted_d, x_t)
+plot_coll('TCT', d, sorted_d, x_t, True)
 
 # --------------
 # Aperture losses
@@ -517,7 +521,7 @@ plt.savefig('all_colls_lin.eps', format='eps', dpi=DPI)
 plt.clf()
 
 ## all_colls (STACKED)
-names = ['tcl', 'tct', 'tcs', 'tcp']
+names = ['tct', 'tcl', 'tcs', 'tcp']
 ax = fig.add_subplot(111)
 themap = matplotlib.cm.terrain
 
@@ -552,3 +556,9 @@ plt.ylim((0.0,ymax))
 fig.savefig('all_colls_cumulative_lin.png', dpi=DPI, bbox_inches='tight')
 plt.savefig('all_colls_cumulative_lin.eps', format='eps', dpi=DPI)
 plt.clf()
+
+print
+print "Total cumulative loss = ", all_colls_cumulative[-1]+y_ap[-1],"%"
+assert int(x_ap[getLossTurn-1]) == getLossTurn
+print "Total cumulative loss (turn=",getLossTurn,") = ", all_colls_cumulative[getLossTurn-1]+y_ap[getLossTurn-1],"%"
+print 

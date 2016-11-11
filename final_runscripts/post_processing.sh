@@ -3,17 +3,20 @@
 #Stop on error
 set -e
 
-if [ $# -ne 3 ]; then
-    echo "Usage: post_processing.sh {B1|B2} turns failTurn"
+if [ $# -ne 5 ]; then
+    echo "Usage: post_processing.sh {B1|B2} turns failTurn getLossTurn 'title'"
     exit
 fi
 
 export beam=$1
 export turns=$2
 export failTurn=$3
+export getLossTurn=$4
+export title=$5
 
 #### CORE ####
 cd core
+echo "********* CORE *********"
 
 set +e #it's OK to fail deleting files
 rm *.txt
@@ -36,14 +39,17 @@ mv imp_real.dat impacts_real.dat
 find results -name "LPI_test.s" | xargs cat > LPI.s
 mv LPI.s LPI_test.s
 cp results/job_1/coll_summary.dat .
-cp ../../commons/CollPositions*.dat .
-# python ../postScripts/get_losses.py $full
-# python ../postScripts/plot_lossmap.py
+if [ -d ../../commons_$beam ]; then
+    cp ../../commons_$beam/CollPositions*.dat .
+else
+    cp ../../commons/CollPositions*.dat .
+fi
 get_losses.py $full $turns $beam $failTurn
-plot_lossmap.py $beam 'ATLAS B1, Phase jump'
+plot_lossmap.py $beam "$title" $getLossTurn
 
 #### TAIL ####
 cd ../tail
+echo "********* TAIL *********"
 
 set +e
 rm *.txt
@@ -66,16 +72,21 @@ mv imp_real.dat impacts_real.dat
 find results -name "LPI_test.s" | xargs cat > LPI.s
 mv LPI.s LPI_test.s
 cp results/job_1/coll_summary.dat .
-cp ../../commons/CollPositions*.dat .
+if [ -d ../../commons_$beam ]; then
+    cp ../../commons_$beam/CollPositions*.dat .
+else
+    cp ../../commons/CollPositions*.dat .
+fi
 # python ../postScripts/get_losses.py $full
 # python ../postScripts/plot_lossmap.py
 get_losses.py $full $turns $beam $failTurn
-plot_lossmap.py $beam 'ATLAS B1, Phase jump'
+plot_lossmap.py $beam "$title" $getLossTurn
 
 #### OVERALL ####
 cd ..
+echo "********* OVERALL *********"
 set +e #it's OK to fail deleting files
 rm *.eps
 rm *.png
 set -e
-plot_lossmap.py $beam 'ATLAS B1, Phase jump' core tail
+plot_lossmap.py $beam "$title" $getLossTurn core tail
