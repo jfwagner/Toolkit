@@ -5,6 +5,8 @@ set -e
 
 export beam=$1
 export turns=$2
+
+#### CORE ####
 cd core
 
 set +e #it's OK to fail deleting files
@@ -18,6 +20,7 @@ set -e
 find -maxdepth 2 -mindepth 1 -type d -empty -exec echo {} is empty. \;
 empty=$(find -maxdepth 2 -mindepth 1 -type d -empty| wc -l)
 total=$(find . -mindepth 1 -type d | wc -l)
+let total=total-1 # Don't count the "results" folder itself
 full=$((total-empty))
 echo "total="$total
 echo "full="$full
@@ -32,6 +35,8 @@ cp ../../commons/CollPositions*.dat .
 # python ../postScripts/plot_lossmap.py
 get_losses.py $full $turns $beam
 plot_lossmap.py $beam 'ATLAS B1, Phase jump'
+
+#### TAIL ####
 cd ../tail
 
 set +e
@@ -45,6 +50,7 @@ set -e
 find -maxdepth 2 -mindepth 1 -type d -empty -exec echo {} is empty. \;
 empty=$(find -maxdepth 2 -mindepth 1 -type d -empty| wc -l)
 total=$(find . -mindepth 1 -type d | wc -l)
+let total=total-1 # Don't count the "results" folder itself
 full=$((total-empty))
 echo "total="$total
 echo "full="$full
@@ -59,5 +65,7 @@ cp ../../commons/CollPositions*.dat .
 # python ../postScripts/plot_lossmap.py
 get_losses.py $full $turns $beam
 plot_lossmap.py $beam 'ATLAS B1, Phase jump'
+
+#### OVERALL ####
 cd ..
 plot_lossmap.py $beam 'ATLAS B1, Phase jump' core tail
