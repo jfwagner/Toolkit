@@ -147,6 +147,17 @@ print "baseLossAperture =",baseLossAperture,"/",totalLossAperture, "/", simulate
 simulated_particles_afterFail = simulated_particles - baseLossAllColl - baseLossAperture
 print "simulated_particles_afterFail =",simulated_particles_afterFail
 
+normFile = open("normalization.txt",'w')
+normFile.write("beam="+beam+"\n")
+normFile.write("sixtrack_particle_limit="+str(sixtrack_particle_limit)+"\n")
+normFile.write("jobs="+jobs_str+"\n")
+normFile.write("simulated_particles="+str(simulated_particles)+"\n")
+normFile.write("failTurn="+str(failTurn)+"\n")
+normFile.write("baseLossAllColl="+str(baseLossAllColl)+"\n")
+normFile.write("baseLossAperture="+str(baseLossAperture)+"\n")
+normFile.write("simulated_particles_afterFail="+str(simulated_particles_afterFail)+"\n")
+normFile.close()
+
 def get_impacts(infile, column):
     elas = 0
     inelas = 0
