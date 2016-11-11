@@ -3,8 +3,14 @@
 #Stop on error
 set -e
 
+if [ $# -ne 3 ]; then
+    echo "Usage: post_processing.sh {B1|B2} turns failTurn"
+    exit
+fi
+
 export beam=$1
 export turns=$2
+export failTurn=$3
 
 #### CORE ####
 cd core
