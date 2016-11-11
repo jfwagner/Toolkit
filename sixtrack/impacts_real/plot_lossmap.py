@@ -52,6 +52,28 @@ plt.rcParams.update(params)
 rcParams['legend.frameon'] = 'True'
 fig = plt.figure()
 
+## Get the normalization
+if len(sys.argv)==5:
+    norm_core = {}
+    norm_file = open(os.path.join(dir_core,"normalization.txt"),'r')
+    for line in norm_file.xreadlines():
+        ls = line.split("=")
+        norm_core[ls[0]] = ls[1][:-1]
+    norm_file.close()
+    norm_tail = {}
+    norm_file = open(os.path.join(dir_tail,"normalization.txt"),'r')
+    for line in norm_file.xreadlines():
+        ls = line.split("=")
+        norm_tail[ls[0]] = ls[1][:-1]
+    norm_file.close()
+elif len(sys.argv)==3:
+    norm = {}
+    norm_file = open("normalization.txt",'r')
+    for line in norm_file.xreadlines():
+        ls = line.split("=")
+        norm[ls[0]] = ls[1][:-1]
+    norm_file.close()
+
 # ------------------------------------------------------------------------------
 # Function to deal with core and tail data files
 # ------------------------------------------------------------------------------
