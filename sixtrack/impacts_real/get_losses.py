@@ -125,14 +125,14 @@ if failTurn !=0:
         ls = line.strip('\n').split()
         if int(ls[7]) != 4: # Skip scatterings
             totalLossAllColl +=1
+            name = numbers_dict[float(ls[0])]
+            if not name in baseLossPerColl.keys():
+                baseLossPerColl[name] = 0
             if int(ls[9]) <= failTurn:
+                print ls[9]
                 baseLossAllColl += 1
-                name = numbers_dict[float(ls[0])]
-                if not name in baseLossPerColl.keys():
-                    baseLossPerColl[name] = 0
                 baseLossPerColl[name] +=1
     collFile.close()
-    print baseLossPerColl
 else:
     baseLossAperture = 0
     totalLossAperture = 0
@@ -141,7 +141,7 @@ else:
     totalLossAllColl = 0
 
     baseLossPerColl = {}
-    
+
 print "baseLossAllColl =",baseLossAllColl,"/",totalLossAllColl, "/", simulated_particles
 print "baseLossAperture =",baseLossAperture,"/",totalLossAperture, "/", simulated_particles
 simulated_particles_afterFail = simulated_particles - baseLossAllColl - baseLossAperture
@@ -193,7 +193,7 @@ if num_lines - int(jobs_str) != 0.0:
         coll_out = 'loss_maps.txt'
         with open(coll_out, 'w') as g:
             print >> g, '# Name Position Absorptions Percentage'
-            print >> g, '# InitialParticles='+str(simulated_particles)+' BaseLoss='+str(baseLossAllColl+baseLossAperture)
+#            print >> g, '# InitialParticles='+str(simulated_particles)+' BaseLoss='+str(baseLossAllColl+baseLossAperture)
             for i, j in zip(coll_dict.keys(), coll_dict.values()):
                 print 'Absorptions in collimator ' + str(i) + ': ', j,  '(' + str(round((float(j) / simulated_particles_afterFail) * 100, rounding)) + ' %)'
                 print >> g, i, translator_dict[

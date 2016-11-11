@@ -39,7 +39,7 @@ cp results/job_1/coll_summary.dat .
 cp ../../commons/CollPositions*.dat .
 # python ../postScripts/get_losses.py $full
 # python ../postScripts/plot_lossmap.py
-get_losses.py $full $turns $beam
+get_losses.py $full $turns $beam $failTurn
 plot_lossmap.py $beam 'ATLAS B1, Phase jump'
 
 #### TAIL ####
@@ -69,7 +69,7 @@ cp results/job_1/coll_summary.dat .
 cp ../../commons/CollPositions*.dat .
 # python ../postScripts/get_losses.py $full
 # python ../postScripts/plot_lossmap.py
-get_losses.py $full $turns $beam
+get_losses.py $full $turns $beam $failTurn
 plot_lossmap.py $beam 'ATLAS B1, Phase jump'
 
 #### OVERALL ####
