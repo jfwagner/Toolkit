@@ -40,8 +40,14 @@ find results -name "LPI_test.s" | xargs cat > LPI.s
 mv LPI.s LPI_test.s
 if [ -s results/job_1/coll_summary.dat ]; then
     cp results/job_1/coll_summary.dat .
+    if ! [ -s fort.3 ]; then
+	ln -s results/job_1/fort.3 .
+    fi
 elif [ -s results/job_2/coll_summary.dat ]; then
-     cp results/job_2/coll_summary.dat .
+    cp results/job_2/coll_summary.dat .
+    if ! [ -s fort.3 ]; then
+	ln -s results/job_1/fort.3 .
+    fi
 else
     echo "Didn't find coll_summary.dat in job_1 or job_2..."
     exit
@@ -80,10 +86,19 @@ find results -name "LPI_test.s" | xargs cat > LPI.s
 mv LPI.s LPI_test.s
 if [ -s results/job_1/coll_summary.dat ]; then
     cp results/job_1/coll_summary.dat .
+    if ! [ -s fort.3 ]; then
+	ln -s results/job_1/fort.3 .
+    fi
 elif [ -s results/job_2/coll_summary.dat ]; then
     cp results/job_2/coll_summary.dat .
+    if ! [ -s fort.3 ]; then
+	ln -s results/job_1/fort.3 .
+    fi
 elif [ -s results/job_3/coll_summary.dat ]; then
     cp results/job_3/coll_summary.dat .
+    if ! [ -s fort.3 ]; then
+	ln -s results/job_1/fort.3 .
+    fi
 else
     echo "Didn't find coll_summary.dat in job_1 or job_2 or job_3..."
     exit

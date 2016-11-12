@@ -18,7 +18,7 @@ import numpy as np
 from util import GetData
 
 if len(sys.argv) != 4 and len(sys.argv) != 5:
-    print "Usage: get_losses.py jobs turns {B1|B2} (failTurn)"
+    print "Usage: get_losses.py jobs turns(0=auto) {B1|B2} (failTurn)"
     print "jobs is the number of job folders, used for normalization with total number of particles simulated."
     print "turns is the number of turns the tracking has been ran for"
     print "failTurn is the last good turn before the failure, which by definition has 0 losses."
@@ -29,9 +29,45 @@ if len(sys.argv) != 4 and len(sys.argv) != 5:
 # Specify how many runs of 19968 particles (current limit in SixTrack) are
 # contained in your "impacts_real.dat" (>1 if concatenated file)
 # ------------------------------------------------------------------------------
-sixtrack_particle_limit = 19968
-turns = int(sys.argv[2])
+fort3 = open("fort.3",'r')
+fort3_currBlock = None
+fort3_blockLine = None
+for line in fort3.xreadlines():
+    if line.startswith("TRACKING"):
+        assert fort3_currBlock==None
+        fort3_currBlock="TRACK"
+        continue
+    elif line.startswith("COLLIMATION"):
+        assert fort3_currBlock==None
+        fort3_currBlock="COLL"
+        fort3_blockLine=0
+        continue
+
+    if fort3_currBlock=="TRACK":
+        ls = line.split()
+        fort3_turns = int(ls[0])
+        fort3_pairs = int(ls[2])*2
+        fort3_currBlock = None #Done parsing TRACK block
+    elif fort3_currBlock=="COLL":
+        fort3_blockLine += 1
+        if fort3_blockLine == 2:
+            ls = line.split()
+            fort3_packs=int(ls[0])
+            fort3_currBlock = None #Done parsing COLL block
+            
 jobs_str = sys.argv[1]
+turns = int(sys.argv[2])
+if turns==0:
+    turns = fort3_turns
+    sixtrack_particle_limit = fort3_packs*fort3_pairs
+    print "AutoSetup from fort.3..."
+    print "fort3_packs=",fort3_packs
+    print "fort3_pairs=",fort3_pairs
+else:
+    sixtrack_particle_limit = 19968
+print "turns=", turns
+print "sixtrack_particle_limit=",sixtrack_particle_limit
+
 simulated_particles = int(jobs_str) * sixtrack_particle_limit
 beam = sys.argv[3]
 if len(sys.argv) == 5:
