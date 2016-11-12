@@ -116,7 +116,6 @@ position = data_3[2]
 translator_dict = {} # Position from collimator name
 for i in range(len(names)):
     translator_dict[names[i]] = float(position[i])
-
 # Usage: translator_dict[numbers_dict[29]]
 
 # ------------------------------------------------------------------------------
@@ -231,8 +230,7 @@ if num_lines - int(jobs_str) != 0.0:
 #            print >> g, '# InitialParticles='+str(simulated_particles)+' BaseLoss='+str(baseLossAllColl+baseLossAperture)
             for i, j in zip(coll_dict.keys(), coll_dict.values()):
                 print 'Absorptions in collimator ' + str(i) + ': ', j,  '(' + str(round((float(j) / simulated_particles_afterFail) * 100, rounding)) + ' %)'
-                print >> g, i, translator_dict[
-                    str(i)], j, (float(j) / simulated_particles_afterFail) * 100
+                print >> g, i, translator_dict[str(i)], j, (float(j) / simulated_particles_afterFail) * 100
 
 
     # ------------------------------------------------------------------------------
