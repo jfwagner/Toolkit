@@ -38,7 +38,14 @@ find results -name "impacts_real.dat" | xargs cat > imp_real.dat
 mv imp_real.dat impacts_real.dat
 find results -name "LPI_test.s" | xargs cat > LPI.s
 mv LPI.s LPI_test.s
-cp results/job_1/coll_summary.dat .
+if [ -s results/job_1/coll_summary.dat ]; then
+    cp results/job_1/coll_summary.dat .
+elif [ -s results/job_2/coll_summary.dat ]; then
+     cp results/job_2/coll_summary.dat .
+else
+    echo "Didn't find coll_summary.dat in job_1 or job_2..."
+    exit
+fi
 if [ -d ../../commons_$beam ]; then
     cp ../../commons_$beam/CollPositions*.dat .
 else
@@ -71,7 +78,16 @@ find results -name "impacts_real.dat" | xargs cat > imp_real.dat
 mv imp_real.dat impacts_real.dat
 find results -name "LPI_test.s" | xargs cat > LPI.s
 mv LPI.s LPI_test.s
-cp results/job_1/coll_summary.dat .
+if [ -s results/job_1/coll_summary.dat ]; then
+    cp results/job_1/coll_summary.dat .
+elif [ -s results/job_2/coll_summary.dat ]; then
+    cp results/job_2/coll_summary.dat .
+elif [ -s results/job_3/coll_summary.dat ]; then
+    cp results/job_3/coll_summary.dat .
+else
+    echo "Didn't find coll_summary.dat in job_1 or job_2 or job_3..."
+    exit
+fi
 if [ -d ../../commons_$beam ]; then
     cp ../../commons_$beam/CollPositions*.dat .
 else
