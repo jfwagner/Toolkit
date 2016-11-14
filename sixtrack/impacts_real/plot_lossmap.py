@@ -206,7 +206,7 @@ if len(sys.argv) == 6: #core & tail
 
     plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
     plt.savefig('loss_map.png', dpi=DPI)
-    plt.savefig('loss_map.eps', format='eps', dpi=DPI)
+    # plt.savefig('loss_map.eps', format='eps', dpi=DPI)
     plt.clf()
 
 
@@ -281,7 +281,7 @@ elif len(sys.argv) == 4: #This folder
 
             plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
             plt.savefig('loss_map.png', dpi=DPI)
-            plt.savefig('loss_map.eps', format='eps', dpi=DPI)
+            # plt.savefig('loss_map.eps', format='eps', dpi=DPI)
             plt.clf()
     
 
@@ -426,12 +426,12 @@ def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
     plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
     # plt.savefig(coll_name + '.png', dpi=1000)
     fig.savefig(basename + '_log.png', dpi=DPI, bbox_inches='tight')
-    plt.savefig(basename + '_log.eps', format='eps', dpi=DPI)
+    # plt.savefig(basename + '_log.eps', format='eps', dpi=DPI)
     plt.yscale('linear')
     ymin,ymax=plt.ylim()
     plt.ylim((0.0,ymax))
     fig.savefig(basename + '_lin.png', dpi=DPI, bbox_inches='tight')
-    plt.savefig(basename + '_lin.eps', format='eps', dpi=DPI)
+    # plt.savefig(basename + '_lin.eps', format='eps', dpi=DPI)
     plt.clf()
 
 #Plots that take a lot of time, but are not really all that usefull...
@@ -459,12 +459,12 @@ if max(y_ap) > 0: #Skip if no data to plot
     plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
     # plt.savefig(coll_name + '.png', dpi=1000)
     fig.savefig(basename + '_log.png', dpi=DPI, bbox_inches='tight')
-    plt.savefig(basename + '_log.eps', format='eps', dpi=DPI)
+    # plt.savefig(basename + '_log.eps', format='eps', dpi=DPI)
     plt.yscale('linear')
     ymin,ymax=plt.ylim()
     plt.ylim((0.0,ymax))
     fig.savefig(basename + '_lin.png', dpi=DPI, bbox_inches='tight')
-    plt.savefig(basename + '_lin.eps', format='eps', dpi=DPI)
+    # plt.savefig(basename + '_lin.eps', format='eps', dpi=DPI)
     plt.clf()
 else:
     print ">> No aperture losses found."
@@ -512,12 +512,12 @@ plt.title(title)
 
 plt.yscale('log')
 fig.savefig('all_colls_log.png', dpi=DPI, bbox_inches='tight')
-plt.savefig('all_colls_log.eps', format='eps', dpi=DPI)
+# plt.savefig('all_colls_log.eps', format='eps', dpi=DPI)
 plt.yscale('linear')
 ymin,ymax=plt.ylim()
 plt.ylim((0.0,ymax))
 fig.savefig('all_colls_lin.png', dpi=DPI, bbox_inches='tight')
-plt.savefig('all_colls_lin.eps', format='eps', dpi=DPI)
+# plt.savefig('all_colls_lin.eps', format='eps', dpi=DPI)
 plt.clf()
 
 ## all_colls (STACKED)
@@ -549,12 +549,12 @@ plt.title(title)
 
 plt.yscale('log')
 fig.savefig('all_colls_cumulative_log.png', dpi=DPI, bbox_inches='tight')
-plt.savefig('all_colls_cumulative_log.eps', format='eps', dpi=DPI)
+# plt.savefig('all_colls_cumulative_log.eps', format='eps', dpi=DPI)
 plt.yscale('linear')
 ymin,ymax=plt.ylim()
 plt.ylim((0.0,ymax))
 fig.savefig('all_colls_cumulative_lin.png', dpi=DPI, bbox_inches='tight')
-plt.savefig('all_colls_cumulative_lin.eps', format='eps', dpi=DPI)
+# plt.savefig('all_colls_cumulative_lin.eps', format='eps', dpi=DPI)
 plt.clf()
 
 print
