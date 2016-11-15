@@ -84,17 +84,24 @@ print 'Number of simulated particles: ', simulated_particles, '(100 %)'
 # ------------------------------------------------------------------------------
 # Associating name with collimator ID
 # ------------------------------------------------------------------------------
-infile_2 = 'coll_summary.dat'
-get_2 = GetData(infile_2)
-get_2 = GetData(infile_2)
-data_2 = get_2.data_column(dtype='string')
+infile_collsum = 'coll_summary.dat'
+get_collsum = GetData(infile_collsum)
+#get_collsum = GetData(infile_collsum)
+data_collsum = get_collsum.data_column(dtype='string')
 
-names_2 = data_2[1]
-numbers = data_2[0]
+names_collsum = data_collsum[1]
+numbers_collsum = data_collsum[0]
+length_collsum = map(float,data_collsum[6])
 
 numbers_dict = {} # Collimator name from ID
-for i in range(len(names_2)):
-    numbers_dict[float(numbers[i])] = names_2[i]
+names_dict = {}   # Collimator ID from name
+length_dict = {}  # Collimator length from ID
+for i in range(len(names_collsum)):
+    numbers_dict[int(numbers_collsum[i])] = names_collsum[i]
+    names_dict[names_collsum[i]] = int(numbers_collsum[i])
+    length_dict[int(numbers_collsum[i])] = length_collsum[i]
+    
+    
 
 # ------------------------------------------------------------------------------
 # Associating name with position
@@ -158,14 +165,15 @@ if failTurn !=0:
         if is_header(line):
             continue
         ls = line.strip('\n').split()
-        if int(ls[7]) != 4: # Skip scatterings
-            totalLossAllColl +=1
-            name = numbers_dict[float(ls[0])]
-            if not name in baseLossPerColl.keys():
-                baseLossPerColl[name] = 0
-            if int(ls[9]) <= failTurn:
-                baseLossAllColl += 1
-                baseLossPerColl[name] +=1
+        if int(ls[7]) == 4: # Skip scatterings
+            continue
+        totalLossAllColl +=1
+        name = numbers_dict[int(ls[0])]
+        if not name in baseLossPerColl.keys():
+            baseLossPerColl[name] = 0
+        if int(ls[9]) <= failTurn:
+            baseLossAllColl += 1
+            baseLossPerColl[name] +=1
     collFile.close()
 else:
     baseLossAperture = 0
@@ -192,7 +200,7 @@ normFile.write("baseLossAperture="+str(baseLossAperture)+"\n")
 normFile.write("simulated_particles_afterFail="+str(simulated_particles_afterFail)+"\n")
 normFile.close()
 
-def get_impacts(infile, column):
+def get_impacts(infile, column, skipPreFail=False):
     elas = 0
     inelas = 0
     with open(infile, 'r') as data:
@@ -200,12 +208,15 @@ def get_impacts(infile, column):
             if is_header(line):
                 continue
             line_list = line.strip('\n').split()
+            if skipPreFail==True and int(line_list[9])<=failTurn:
+                continue
             if line_list[7] != '4':
                 inelas += 1
                 yield line_list[column]
             else:
                 elas += 1
     print ' '
+    print "skipPreFail:",skipPreFail
     print 'Total number of scattered protons: ', elas, '(' + str(round((float(elas) / simulated_particles) * 100, rounding)) + ' %)'
     print 'Total number of absorbed protons: ', inelas, '(' + str(round((float(inelas) / simulated_particles) * 100, rounding)) + ' %)'
 
@@ -216,28 +227,32 @@ if num_lines - int(jobs_str) != 0.0:
     # Impacts per collimator
     # ------------------------------------------------------------------------------
     coll_data = []
-    start_line = get_impacts(infile, 0)
+    start_line = get_impacts(infile, 0,True)
     for line in start_line:
-        coll_data.append(numbers_dict[float(line)])
+        coll_data.append(numbers_dict[int(line)])
 
+    coll_data_all = []
+    start_line = get_impacts(infile, 0, False)
+    for line in start_line:
+        coll_data_all.append(numbers_dict[int(line)])
+        
     coll_dict = Counter(coll_data)
     print ' '
 
     if len(coll_dict) != 0:
         coll_out = 'loss_maps.txt'
         with open(coll_out, 'w') as g:
-            print >> g, '# Name Position Absorptions Percentage'
-#            print >> g, '# InitialParticles='+str(simulated_particles)+' BaseLoss='+str(baseLossAllColl+baseLossAperture)
+            print >> g, '# Name Position Absorptions Percentage Fraction/meter Length[meter]'
             for i, j in zip(coll_dict.keys(), coll_dict.values()):
                 print 'Absorptions in collimator ' + str(i) + ': ', j,  '(' + str(round((float(j) / simulated_particles_afterFail) * 100, rounding)) + ' %)'
-                print >> g, i, translator_dict[str(i)], j, (float(j) / simulated_particles_afterFail) * 100
+                print >> g, i, translator_dict[str(i)], j, (float(j) / simulated_particles_afterFail) * 100, float(j) / simulated_particles_afterFail / length_dict[names_dict[i]], length_dict[names_dict[i]]
 
 
     # ------------------------------------------------------------------------------
     # Losses per turn
     # ------------------------------------------------------------------------------
     turn_data = []
-    start_line_t = get_impacts(infile, 9)
+    start_line_t = get_impacts(infile, 9,False)
     for line in start_line_t:
         turn_data.append(line)
     turns_dict = Counter(turn_data)
@@ -254,6 +269,7 @@ if num_lines - int(jobs_str) != 0.0:
             except KeyError:
                 tt.append(t)
                 vv.append(0)
+        assert len(tt)==len(vv)
         cumLoss =  np.cumsum(vv[:0] + vv[:-1])
         if failTurn != 0:
             #baseLossAllColl = cumLoss[failTurn-1]
@@ -269,27 +285,28 @@ if num_lines - int(jobs_str) != 0.0:
     # collimator. Dict contains name of coll, turn number and losses in that turn.
     # -----------------------------------------------------------------------------
     d = {}
-    for name in translator_dict.keys():
-        coll_name = []
-        for i, j in zip(coll_data, turn_data):
-            if i == name:
-                coll_name.append(j)
-        if len(coll_name) > 0:
-            c = Counter(coll_name)
-            d[name] = dict(c)
+    assert len(coll_data_all) == len(turn_data)
+    for name in translator_dict.keys():        
+       coll_name = []
+       for i, j in zip(coll_data_all, turn_data):
+           if i == name:
+               coll_name.append(j)
+       if len(coll_name) > 0:
+           c = Counter(coll_name)
+           d[name] = dict(c)
 
     print ' '
     print '>> Getting losses per turn for each collimator:'
 
 
-    def get_coll(name, turn_data):
+    def get_coll(name):
         turn = []
         value = []
         try:
             d[name]
             outfile = name.translate(None, '.').lower() + '.txt'
             with open(outfile, 'w') as g:
-                print >> g, '# Position Absorptions Percentage'
+                print >> g, '# Position Absorptions Percentage Fraction/meter'
                 for t in range(1, turns + 2):
                     try:
                         d[name][str(t)]
@@ -298,22 +315,25 @@ if num_lines - int(jobs_str) != 0.0:
                     except KeyError:
                         turn.append(t)
                         value.append(0)
+                assert len(turn) == len(value)
                 cumLoss =  np.cumsum(value[:0] + value[:-1])
                 if failTurn != 0:
                     baseLossColl = cumLoss[failTurn-1]
                     cumLoss -= baseLossColl
-                    assert baseLossColl == baseLossPerColl[name]
+                    if not baseLossColl == baseLossPerColl[name]:
+                        print "WARNING!!!", baseLossColl, baseLossPerColl[name], name
+                        print "probably a bug..."
                 else:
                     baseLossColl = 0
                 
                 for i, j in zip(turn, cumLoss):
-                    print >> g, i, j, (float(j) / simulated_particles_afterFail) * 100
+                    print >> g, i, j, (float(j) / simulated_particles_afterFail) * 100, float(j) / simulated_particles_afterFail / length_dict[names_dict[name]]
                 print 'File', outfile, 'created; baseLossColl=',baseLossColl, "endLoss=",cumLoss[-1]
         except KeyError:
             print '(Collimator', name,  'not found or without losses)'
 
     for col in translator_dict.keys():
-        get_coll(col, turn_data)
+        get_coll(col)
 
 else:
     print ' '
@@ -325,12 +345,14 @@ else:
 # ------------------------------------------------------------------------------
 
 
-def get_lpi(infile):
+def get_lpi(infile,skipPreFail=False):
     with open(infile, 'r') as data:
         for line in data:
             if is_header(line):
                 continue
             line_list = line.strip('\n').split()
+            if skipPreFail and int(line_list[1]) <= failTurn:
+                continue
             yield line_list[2]
 
 print ' '
@@ -340,14 +362,14 @@ if os.stat(infile_4).st_size == 0:
     print '>> No losses in the aperture'
 else:
     ap_data = []
-    start_line = get_lpi(infile_4)
+    start_line = get_lpi(infile_4,True)
     for line in start_line:
         ap_data.append(float(line))
     lpi_dict = Counter(ap_data)
     with open(outfile_ap, 'w') as g:
-        print >> g, '# Position Absorptions Percentage'
+        print >> g, '# Position Absorptions Percentage Fraction/meter'
         for i, j in zip(lpi_dict.keys(), lpi_dict.values()):
-            print >> g, i, j, (float(j) / simulated_particles_afterFail) * 100
+            print >> g, i, j, (float(j) / simulated_particles_afterFail) * 100, float(j)/simulated_particles_afterFail/10e-2
 
     num_lines_ap = sum(1 for line in open('LPI_test.s'))
     print '>> Number of losses in the aperture: ', num_lines_ap,  '(' + str(round((float(num_lines_ap - 1) / simulated_particles_afterFail) * 100, rounding)) + ' %) baseloss=',baseLossAperture

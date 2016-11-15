@@ -23,6 +23,8 @@ from util import GetData
 
 DPI = 300
 #DPI = 1000
+normalize_lossmap = True # normalize lossmap as fraction / meter
+#normalize_lossmap = False # normalize lossmap as fraction / meter
 
 if len(sys.argv) == 6:
     print ' '
@@ -32,6 +34,7 @@ if len(sys.argv) == 6:
 elif len(sys.argv) == 4:
     print ' '
     print '>> Working in current directory'
+    normalize_lossmap=False # not yet implemented here...
 else:
     print "USAGE: plot_lossmap.py {B1|B2} title getLossTurn (core_dir tail_dir)"
     exit(1)
@@ -85,14 +88,28 @@ elif len(sys.argv)==4:
 def get_dist(data_file, dir_core, dir_tail, core_weight, tail_weight):
 
     if data_file == 'loss_maps.txt':
-        col_1 = 1
-        col_2 = 3
+        col_1 = 1 #position
+        if normalize_lossmap:
+            col_2 = 4 # losses in fraction / meter
+            col_3 = 3 # losses in percent absolute
+        else:
+            col_2 = 3 
+            col_3 = 3
     elif data_file == 'aperture.txt':
-        col_1 = 0
-        col_2 = 2
-
-    x = []
-    y = []
+        col_1 = 0 #position
+        if normalize_lossmap:
+            col_2 = 3 # losses in fraction / meter
+            col_3 = 2 # losses in percent absolute
+        else:
+            col_2 = 2
+            col_3 = 2
+    else:
+        print "Unexpected data file"
+        exit(1)
+            
+    x = [] #Loss position
+    y = [] #Ammount of losses
+    y_percent = [] #Ammount of losses (percent absolute)
     if os.path.isfile(dir_core + '/' + data_file) and os.path.isfile(dir_tail + '/' + data_file):
         print ' '
         print '>> File ' + data_file + ' present for core and tail'
@@ -101,30 +118,33 @@ def get_dist(data_file, dir_core, dir_tail, core_weight, tail_weight):
         data_core = get_core.data_column(dtype='string')
         xc_coll = data_core[col_1]
         yc_coll = data_core[col_2]
+        yc_percent_coll = data_core[col_3]
 
         get_tail = GetData(dir_tail + '/' + data_file)
         data_tail = get_tail.data_column(dtype='string')
         xt_coll = data_tail[col_1]
         yt_coll = data_tail[col_2]
+        yt_percent_coll = data_tail[col_3]
 
-        for i, k in zip(xc_coll, yc_coll):
-            for j, l in zip(xt_coll, yt_coll):
-                if i == j:
-
-                    x.append(float(i))
-                    y.append(core_weight * float(k) + tail_weight * float(l))
-                    xc_coll.remove(i)
-                    yc_coll.remove(k)
-                    xt_coll.remove(j)
-                    yt_coll.remove(l)
-
-        for i, k in zip(xc_coll, yc_coll):
+        for i,k,q in zip(xc_coll, yc_coll,yc_percent_coll):
             x.append(float(i))
-            y.append(core_weight * float(k))
-        for j, l in zip(xt_coll, yt_coll):
-            x.append(float(j))
-            y.append(tail_weight * float(l))
-
+            y.append(core_weight*float(k))
+            y_percent.append(core_weight*float(q))
+            
+        for j,l,q in zip(xt_coll,yt_coll,yt_percent_coll):
+            xt_float = float(j)
+            found = False
+            for idx in xrange(len(x)):
+                #comparing floating points should be OK in this case...
+                if x[idx] == xt_float:
+                    found = True
+                    y[idx] += tail_weight*float(l)
+                    y_percent[idx] +=tail_weight*float(q)
+            if found==False:
+                x.append(xt_float)
+                y.append(tail_weight*float(l))
+                y_percent.append(tail_weight*float(q))
+            
     elif os.path.isfile(dir_core + '/' + data_file) == False:
         print ' '
         print '>> File ' + data_file + ' present only for tail'
@@ -133,9 +153,12 @@ def get_dist(data_file, dir_core, dir_tail, core_weight, tail_weight):
         data_tail = get_tail.data_column(dtype='string')
         xt_coll = data_tail[col_1]
         yt_coll = data_tail[col_2]
-        for j, l in zip(xt_coll, yt_coll):
+        yt_percent_coll = data_tail[col_3]
+        for j, l, q in zip(xt_coll, yt_coll,yt_percent_coll):
             x.append(float(j))
             y.append(tail_weight * float(l))
+            y_percent.append(tail_weight * float(q))
+            
 
     elif os.path.isfile(dir_tail + '/' + data_file) == False:
         print ' '
@@ -145,10 +168,13 @@ def get_dist(data_file, dir_core, dir_tail, core_weight, tail_weight):
         data_core = get_core.data_column(dtype='string')
         xc_coll = data_core[col_1]
         yc_coll = data_core[col_2]
-        for j, l in zip(xc_coll, yc_coll):
+        yc_percent_coll = data_core[coll_3]
+        for j, l,q in zip(xc_coll, yc_coll, yc_percent_coll):
             x.append(float(j))
             y.append(core_weight * float(l))
-    return x, y
+            y_percent.append(core_weight * float(q))
+            
+    return x, y, np.sum(y_percent)
 
 # ------------------------------------------------------------------------------
 # Different options if core and tail directories are present or not
@@ -180,14 +206,19 @@ def plot_ip_labels(thedict, height, size):
 
 
 if len(sys.argv) == 6: #core & tail
-    x_coll, y_coll = get_dist('loss_maps.txt', dir_core, dir_tail, 0.95, 0.05)
-    x_ap, y_ap = get_dist('aperture.txt', dir_core, dir_tail, 0.95, 0.05)
+    x_coll, y_coll, sumCollPercent = get_dist('loss_maps.txt', dir_core, dir_tail, 0.95, 0.05)
+    x_ap, y_ap, sumApPercent = get_dist('aperture.txt', dir_core, dir_tail, 0.95, 0.05)
+    print "sumCollPercent=",sumCollPercent
+    print "sumApPercent=",sumApPercent
     plt.bar(x_coll, y_coll, align="center",
-            linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(np.sum(y_coll))) + " \%")
+            linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(sumCollPercent)) + " \%")
     plt.bar(x_ap, y_ap, color="green",
-                align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
+                align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(sumApPercent)) + " \%")
     plt.xlabel("Position (m)")
-    plt.ylabel(r'Percentage of bunch lost')
+    if normalize_lossmap:
+        plt.ylabel(r'Beam fraction lost / meter')
+    else:
+        plt.ylabel(r'Percentage of bunch lost')
     plt.xlim([0, 26658.883])
     plt.title(title)
     plt.legend(loc='best', prop={'size': 5}).get_frame().set_linewidth(0.5)
@@ -435,11 +466,11 @@ def plot_coll(coll_name, d, sorted_d, x_t, doStack=False):
     plt.clf()
 
 #Plots that take a lot of time, but are not really all that usefull...
-plot_coll('TCP', d, sorted_d, x_t)
+#plot_coll('TCP', d, sorted_d, x_t)
 plot_coll('TCP', d, sorted_d, x_t, True)
-plot_coll('TCS', d, sorted_d, x_t)
+#plot_coll('TCS', d, sorted_d, x_t)
 plot_coll('TCS', d, sorted_d, x_t, True)
-plot_coll('TCT', d, sorted_d, x_t)
+#plot_coll('TCT', d, sorted_d, x_t)
 plot_coll('TCT', d, sorted_d, x_t, True)
 
 # --------------
@@ -523,27 +554,33 @@ plt.clf()
 ## all_colls (STACKED)
 names = ['tct', 'tcl', 'tcs', 'tcp']
 ax = fig.add_subplot(111)
-themap = matplotlib.cm.terrain
+#themap = matplotlib.cm.terrain
+themap = matplotlib.cm.Paired
 
 number = 0
 all_colls_cumulative = np.zeros_like(x_t)
+if max(y_ap) > 0:
+    number +=1
+    ax.bar(x_ap,y_ap*1e-2, label="Aperture", bottom=all_colls_cumulative*1e-2,
+           color=themap(float(number) / (1.5 * float(len(names)))),
+           linewidth=0, width=1.0);
+    all_colls_cumulative += np.asarray(y_ap)
 for n in names:
     number += 1
     tc = np.asarray(get_cumulative_loss(sorted_d, n.upper()))
     if sum(tc) != 0:
-        ax.bar(x_t, tc, bottom=all_colls_cumulative, label=n.upper(),
+        ax.bar(x_t, tc*1e-2, bottom=all_colls_cumulative*1e-2, label=n.upper(),
                color=themap(float(number) / (1.5 * float(len(names)))),
                linewidth=0, width=1.0)
         all_colls_cumulative += np.asarray(tc)
-if max(y_ap) > 0:
-    number +=1
-    ax.bar(x_ap,y_ap, label="Aperture", bottom=all_colls_cumulative,
-           color=themap(float(number) / (1.5 * float(len(names)))),
-           linewidth=0, width=1.0);
-lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
-                prop={'size': 4}).get_frame().set_linewidth(0.5)
+handles, labels = ax.get_legend_handles_labels()
+# reverse the order
+lgd = ax.legend(handles[::-1], labels[::-1], bbox_to_anchor=(1, 0.5), loc='center left',prop={'size': 4}).get_frame().set_linewidth(0.5)
+#lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left',
+#                prop={'size': 4}).get_frame().set_linewidth(0.5)
 plt.xlabel('Turns')
-plt.ylabel(r'Percentage of bunch lost')
+#plt.ylabel(r'Percentage of bunch lost')
+plt.ylabel(r'Fraction of bunch lost')
 plt.xlim([failTurn, max(x_t)])
 plt.title(title)
 
@@ -558,7 +595,7 @@ fig.savefig('all_colls_cumulative_lin.png', dpi=DPI, bbox_inches='tight')
 plt.clf()
 
 print
-print "Total cumulative loss = ", all_colls_cumulative[-1]+y_ap[-1],"%"
+print "Total cumulative loss = ", all_colls_cumulative[-1],"%"
 assert int(x_ap[getLossTurn-1]) == getLossTurn
 print "Total cumulative loss (turn=",getLossTurn,") = ", all_colls_cumulative[getLossTurn-1]+y_ap[getLossTurn-1],"%"
 print 
