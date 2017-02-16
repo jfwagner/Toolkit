@@ -552,6 +552,22 @@ fig.savefig('all_colls_lin.png', dpi=DPI, bbox_inches='tight')
 # plt.savefig('all_colls_lin.eps', format='eps', dpi=DPI)
 plt.clf()
 
+print "Writing all_colls.txt..."
+lossFile = open("all_colls.txt",'w')
+lossFile.write("# TITLE=%s\n" %(title,))
+lossFile.write("# turn aperture")
+for n in names:
+    lossFile.write(" "+n)
+lossFile.write("\n")
+for i in xrange(len(x_t)):
+    lossFile.write("%i %f" %(x_t[i],y_ap[i]))
+    for n in names:
+        tc = get_cumulative_loss(sorted_d, n.upper())
+        lossFile.write(" %f" %( tc[i], ) )
+    lossFile.write("\n")
+lossFile.close()
+print "Done."
+
 ## all_colls (STACKED)
 names = ['tct', 'tcl', 'tcs', 'tcp']
 ax = fig.add_subplot(111)
