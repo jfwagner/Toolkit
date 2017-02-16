@@ -52,7 +52,7 @@ rcParams['figure.figsize'] = 4, 2
 params = {'text.latex.preamble': [r'\usepackage{siunitx}', r'\usepackage{mathrsfs}']}
 plt.rcParams.update(params)
 rcParams['legend.frameon'] = 'True'
-fig = plt.figure()
+fig = plt.figure(dpi=DPI)
 
 ## Get the normalization
 failTurn = 0
@@ -211,12 +211,12 @@ if len(sys.argv) == 6: #core & tail
     print "sumCollPercent=",sumCollPercent
     print "sumApPercent=",sumApPercent
     plt.bar(x_coll, y_coll, align="center",
-            linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(sumCollPercent)) + " \%")
+            linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(sumCollPercent)) + "%")
     plt.bar(x_ap, y_ap, color="green",
-                align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(sumApPercent)) + " \%")
+                align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(sumApPercent)) + "%")
     plt.xlabel("Position (m)")
     if normalize_lossmap:
-        plt.ylabel(r'Beam fraction lost / meter')
+        plt.ylabel(r'Fraction lost / meter')
     else:
         plt.ylabel(r'Percentage of bunch lost')
     plt.xlim([0, 26658.883])
@@ -235,9 +235,10 @@ if len(sys.argv) == 6: #core & tail
     else:
         print '>> Please input B1 or B2 as first argument'
 
-    plt.subplots_adjust(left=0.16, bottom=0.19, right=0.94, top=0.88)
+    plt.subplots_adjust(left=0.165, bottom=0.23, right=0.97, top=0.87)
+    #plt.show()
     plt.savefig('loss_map.png', dpi=DPI)
-    # plt.savefig('loss_map.eps', format='eps', dpi=DPI)
+    plt.savefig('loss_map.eps', format='eps', dpi=DPI)
     plt.clf()
 
 
@@ -289,9 +290,9 @@ elif len(sys.argv) == 4: #This folder
             ax1.yaxis.grid(color='gray', linestyle='-', which="minor", linewidth=0.1)
         elif os.path.exists('aperture.txt') and os.path.exists('loss_maps.txt'):
             plt.bar(x_coll, y_coll, align="center",
-                    linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(np.sum(y_coll)))  + " \%")
+                    linewidth=0, width=60, color="black", label="Collimation: " + "{:.2E}".format(Decimal(np.sum(y_coll)))  + " %")
             plt.bar(x_ap, y_ap, color="green",
-                        align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " \%")
+                        align="center", linewidth=0, width=60, label="Aperture: " + "{:.2E}".format(Decimal(np.sum(y_ap))) + " %")
             plt.xlabel("Position (m)")
             plt.ylabel(r'Percentage of bunch lost')
             plt.xlim([0, 26658.883])
@@ -594,8 +595,16 @@ fig.savefig('all_colls_cumulative_lin.png', dpi=DPI, bbox_inches='tight')
 # plt.savefig('all_colls_cumulative_lin.eps', format='eps', dpi=DPI)
 plt.clf()
 
+lossFile = open("all_colls_cumulative.txt",'w')
+lossFile.write("# TITLE=%s\n"  %(title,))
+lossFile.write("# Turn loss[%]\n")
+for i in xrange(len(x_t)):
+    lossFile.write("%i %f\n" %(x_t[i], all_colls_cumulative[i]))
+lossFile.close()
+
 print
 print "Total cumulative loss = ", all_colls_cumulative[-1],"%"
 assert int(x_ap[getLossTurn-1]) == getLossTurn
 print "Total cumulative loss (turn=",getLossTurn,") = ", all_colls_cumulative[getLossTurn-1]+y_ap[getLossTurn-1],"%"
 print 
+
