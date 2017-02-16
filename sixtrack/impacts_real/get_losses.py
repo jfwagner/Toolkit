@@ -385,10 +385,14 @@ for line in turns_ap_inf.xreadlines():
     turns_ap_losses[int(ls[1])]+=1
 turns_ap_inf.close()
 
+#turns_ap_cumloss = np.cumsum(turns_ap_losses)
+
 turns_ap_outf = open(turns_ap_out,'w')
 turns_ap_outf.write('# Position Absorptions Percentage\n')
 lossSum = 0
 for t in xrange(1,turns+1):
     lossSum += turns_ap_losses[t]
-    turns_ap_outf.write("%i %i %f\n" %(t,lossSum, (float(lossSum)/simulated_particles_afterFail) * 100 ) )
+    #print t, lossSum, turns_ap_cumloss[t]
+    #assert lossSum == turns_ap_cumloss[t]
+    turns_ap_outf.write("%i %i %f\n" %(t,lossSum-baseLossAperture, (float(lossSum-baseLossAperture)/simulated_particles_afterFail) * 100 ) )
 turns_ap_outf.close()
